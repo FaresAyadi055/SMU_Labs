@@ -79,7 +79,6 @@ export default defineEventHandler(async (event) => {
       })
       console.log(`New user created: ${email}`)
     } else {
-      console.log(`Existing user logged in: ${email}`)
     }
 
     // Generate JWT token for your app
