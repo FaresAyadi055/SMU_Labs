@@ -19,7 +19,6 @@ export default defineEventHandler(async (event) => {
   const publicApiPaths = [
     '/api/auth/login',
     '/api/auth/magic/verify',
-    '/api/health',
   ]
 
   // Check if this is an API route

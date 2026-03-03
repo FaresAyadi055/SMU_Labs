@@ -1,11 +1,8 @@
-//api/auth/magic/verify.ts
+// api/auth/magic/verify.ts
 import { defineEventHandler, readBody, createError } from 'h3'
 import jwt from 'jsonwebtoken'
 import User from '~/server/models/Users'
 import connectDB from '~/server/utils/db'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-const { Magic } = require('@magic-sdk/admin')
 
 const config = useRuntimeConfig()
 
@@ -31,10 +28,15 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Validate the DID token with Magic
+    // DYNAMIC IMPORT: Load Magic Admin only when needed
+    const { Magic } = await import('@magic-sdk/admin')
+    
+    // Initialize Magic with your secret key
     const magic = new Magic(process.env.MAGIC_SECRET_KEY || config.MAGIC_SECRET_KEY)
+    
     let magicUserMetadata
     try {
+      // Validate the token and get user metadata
       magic.token.validate(didToken)
       magicUserMetadata = await magic.users.getMetadataByToken(didToken)
     } catch (magicError) {
@@ -45,7 +47,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const { email } = magicUserMetadata
+    const { email, issuer } = magicUserMetadata
 
     // Validate email exists
     if (!email) {
@@ -71,14 +73,19 @@ export default defineEventHandler(async (event) => {
     let user = await User.findOne({ email })
     if (!user) {
       // Create new user with student role by default
-      // Removed magicIssuer completely
       console.log(`User not found: ${email}`)
       user = await User.create({
         email,
-        role: 'student'
+        role: 'student',
+        magicIssuer: issuer // Store the Magic issuer for future reference
       })
       console.log(`New user created: ${email}`)
     } else {
+      // Update the Magic issuer if it's not set
+      if (!user.magicIssuer && issuer) {
+        user.magicIssuer = issuer
+        await user.save()
+      }
     }
 
     // Generate JWT token for your app
@@ -91,7 +98,6 @@ export default defineEventHandler(async (event) => {
       process.env.JWT_SECRET || config.JWT_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
     )
-    
     
     // Return user data and token
     return {
