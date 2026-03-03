@@ -1,0 +1,42 @@
+{
+  "name": "fablab-inventory-manager",
+  "version": "1.0.0",
+  "description": "Inventory management system for maker spaces",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "set HOST=0.0.0.0 && nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@magic-sdk/admin": "^2.8.2",
+    "@pinia/nuxt": "^0.5.1",
+    "@primeuix/themes": "^2.0.2",
+    "@primevue/nuxt-module": "^4.5.4",
+    "@primevue/themes": "^4.5.4",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "magic-sdk": "^33.4.1",
+    "mongoose": "^9.2.3",
+    "mysql2": "^3.16.0",
+    "nuxt": "^3.13.0",
+    "pinia": "^3.0.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.4",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@magic-sdk/types": "^27.5.0",
+    "@nuxt/devtools": "latest",
+    "@types/jsonwebtoken": "^9.0.10"
+  },
+  "packageManager": "pnpm@10.30.2+sha512.36cdc707e7b7940a988c9c1ecf88d084f8514b5c3f085f53a2e244c2921d3b2545bc20dd4ebe1fc245feec463bb298aecea7a63ed1f7680b877dc6379d8d0cb4"
+}
