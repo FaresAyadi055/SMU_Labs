@@ -16,7 +16,7 @@ if (!cached) {
 
 export default async function connectDB() {
   const config = useRuntimeConfig();
-  const uri = config.MONGO_URI || process.env.MONGO_URI || process.env.MONGODB_URI || "";
+  const uri = config.MONGO_URI || "";
 
   if (!uri) {
     throw new Error("MONGO_URI not set – configure it in your environment");
