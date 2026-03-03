@@ -4,12 +4,10 @@ import jwt from 'jsonwebtoken'
 import User from '~/server/models/Users'
 import connectDB from '~/server/utils/db'
 import { createRequire } from 'module'
-
 const require = createRequire(import.meta.url)
 const { Magic } = require('@magic-sdk/admin')
 
 const config = useRuntimeConfig()
-const magic = new Magic(process.env.MAGIC_SECRET_KEY || config.MAGIC_SECRET_KEY)
 
 export default defineEventHandler(async (event) => {
   try {
@@ -34,6 +32,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Validate the DID token with Magic
+    const magic = new Magic(process.env.MAGIC_SECRET_KEY || config.MAGIC_SECRET_KEY)
     let magicUserMetadata
     try {
       magic.token.validate(didToken)

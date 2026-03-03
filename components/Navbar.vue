@@ -250,6 +250,15 @@ const logout = async () => {
     const token = localStorage.getItem('token')
     const apiUrl = config.public.API_URL || 'http://localhost:4000/api'
     
+    // Call Magic client logout if available
+    if (typeof window !== 'undefined' && window.magic?.user?.logout) {
+      try {
+        await window.magic.user.logout()
+      } catch (e) {
+        console.error('Magic client logout failed:', e)
+      }
+    }
+
     // Call backend logout (optional)
     if (token) {
       try {
