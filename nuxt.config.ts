@@ -54,7 +54,7 @@ export default defineNuxtConfig({
   },
   
   build: {
-    transpile: ['primevue'],
+    transpile: ['primevue','@magic-sdk/admin'],
   },
 
 nitro: {
@@ -62,7 +62,10 @@ nitro: {
   plugins: ['@/server/index'],
   experimental: {
     wasm: true
-  }
+  },
+      externals: {
+      inline: ['@magic-sdk/admin'] // Force include in bundle
+    }
 },
   
   compatibilityDate: '2024-04-03',

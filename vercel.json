@@ -1,0 +1,13 @@
+{
+  "builds": [
+    {
+      "src": "nuxt.config.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 10
+    }
+  }
+}
