@@ -38,7 +38,6 @@ export default defineNuxtConfig({
 
     public: {
       API_URL: process.env.VITE_API_URL || 'http://localhost:4000/api',
-      STATUS_CHECK_URL: process.env.STATUS_CHECK_URL || 'http://localhost:4000/',
       MAGIC_ENABLED: process.env.VITE_MAGIC_ENABLED || 'true',
       MAGIC_PUBLISHABLE_KEY: process.env.MAGIC_PUBLISHABLE_KEY || ''
     }

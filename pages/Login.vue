@@ -62,7 +62,6 @@ import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
 const config = useRuntimeConfig()
-const apiUrl = config.public.API_URL || 'http://localhost:4000/api'
 
 // Magic SDK instance
 let magic = null
@@ -121,7 +120,7 @@ const loginWithMagic = async () => {
   
   try {
     // First, check if user exists
-    const userCheck = await $fetch(`${apiUrl}/auth/login`, {
+    const userCheck = await $fetch(`api/auth/login`, {
       method: 'POST',
       body: { email: email.value }
     }).catch(err => {
@@ -139,7 +138,7 @@ const loginWithMagic = async () => {
     })
     
     // Verify with backend
-    const verifyData = await $fetch(`${apiUrl}/auth/magic/verify`, {
+    const verifyData = await $fetch(`api/auth/magic/verify`, {
       method: 'POST',
       body: { didToken }
     })

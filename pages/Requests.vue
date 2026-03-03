@@ -223,16 +223,13 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useTechnicianCartStore } from '~/stores/technicianCart'
 
-definePageMeta({ middleware: 'auth', requiresAuth: true })
+definePageMeta({ 
+  middleware: 'auth', 
+  requiresAuth: true 
+})
 
 const toast = useToast()
 const router = useRouter()
-const config = useRuntimeConfig()
-const apiBase = computed(() => (config.public?.API_URL as string) || '')
-
-function apiUrl (path: string) {
-  return apiBase.value ? `${apiBase.value.replace(/\/$/, '')}/${path}` : `/api/${path}`
-}
 
 // Initialize all refs with default values
 const pendingUsers = ref<any[]>([])
@@ -244,54 +241,86 @@ const draftQuantities = ref<Record<string, number>>({})
 const cartStore = useTechnicianCartStore()
 
 const token = ref('')
+const user = ref<any>(null)
 
 onMounted(() => {
-  token.value = typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : ''
-  const user = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {}
-  
-  if (user?.role !== 'admin' && user?.role !== 'superadmin' && user?.role !== 'instructor') {
-    toast.add({ severity: 'error', summary: 'Access denied', detail: 'Technician or admin only', life: 3000 })
-    router.push('/home')
-    return
+  // Get auth data from localStorage
+  if (typeof localStorage !== 'undefined') {
+    token.value = localStorage.getItem('token') || ''
+    try {
+      user.value = JSON.parse(localStorage.getItem('user') || '{}')
+    } catch {
+      user.value = {}
+    }
+    
+    // Check authorization
+    if (!['admin', 'superadmin', 'instructor'].includes(user.value?.role)) {
+      toast.add({ 
+        severity: 'error', 
+        summary: 'Access denied', 
+        detail: 'Technician or admin only', 
+        life: 3000 
+      })
+      router.push('/home')
+      return
+    }
+    
+    loadPendingUsers()
   }
-  
-  loadPendingUsers()
 })
 
-function getHeaders () {
-  return token.value ? { Authorization: `Bearer ${token.value}` } : {}
-}
-
-async function loadPendingUsers () {
+// For Nuxt server routes, use relative paths
+async function loadPendingUsers() {
   loading.value = true
   try {
-    const res = await $fetch<{ success: boolean; data: any[] }>(apiUrl('admin/pending-users'), {
-      headers: getHeaders() as Record<string, string>,
+    // Use relative path for Nuxt server API
+    // This will hit: /api/admin/pending-users
+    const response = await $fetch('/api/admin/pending-users', {
+      method: 'GET',
+      headers: token.value ? {
+        Authorization: `Bearer ${token.value}`
+      } : {}
     })
     
-    if (res?.success && Array.isArray(res.data)) {
-      pendingUsers.value = res.data
+    // Handle the response
+    const result = response as { 
+      success: boolean; 
+      data: any[] 
+    }
+    
+    if (result?.success && Array.isArray(result.data)) {
+      pendingUsers.value = result.data
       
       if (selectedUser.value) {
-        const found = res.data.find((u: any) => u.id === selectedUser.value.id)
+        const found = result.data.find((u: any) => u.id === selectedUser.value.id)
         selectedUser.value = found || null
       }
     } else {
       pendingUsers.value = []
     }
-  } catch (e: any) {
-    if (e?.statusCode === 401) {
+  } catch (error: any) {
+    console.error('Error loading pending users:', error)
+    
+    // Handle unauthorized
+    if (error?.status === 401 || error?.statusCode === 401) {
       router.push('/login')
       return
     }
-    toast.add({ severity: 'error', summary: 'Error', detail: e?.data?.message || 'Failed to load pending users', life: 5000 })
+    
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: error?.data?.message || error?.message || 'Failed to load pending users', 
+      life: 5000 
+    })
+    
     pendingUsers.value = []
   } finally {
     loading.value = false
   }
 }
 
-function selectUser (u: any) {
+function selectUser(u: any) {
   selectedUser.value = u
 }
 
@@ -312,11 +341,11 @@ watch(selectedUser, (u) => {
   }
 }, { immediate: true })
 
-function draftQty (requestId: string) {
+function draftQty(requestId: string) {
   return draftQuantities.value[requestId] ?? 0
 }
 
-function setDraftQty (requestId: string, value: number) {
+function setDraftQty(requestId: string, value: number) {
   draftQuantities.value[requestId] = value
   cartStore.setDraft(requestId, {
     requestId,
@@ -325,7 +354,7 @@ function setDraftQty (requestId: string, value: number) {
   })
 }
 
-function setApprove (data: any) {
+function setApprove(data: any) {
   const qty = Math.min(
     data.quantityRequested,
     data.component?.quantityInStock ?? 0,
@@ -338,7 +367,7 @@ function setApprove (data: any) {
   })
 }
 
-function setDecline (data: any) {
+function setDecline(data: any) {
   draftQuantities.value[data.id] = 0
   cartStore.setDraft(data.id, {
     requestId: data.id,
@@ -356,7 +385,7 @@ const hasDraftChanges = computed(() => {
   })
 })
 
-async function confirmCart () {
+async function confirmCart() {
   if (!selectedUser.value?.requests?.length) return
   
   const items: { requestId: string; approvedQuantity: number; decision: 'approve' | 'decline' }[] = []
@@ -371,28 +400,46 @@ async function confirmCart () {
   }
   
   if (items.length === 0) {
-    toast.add({ severity: 'warn', summary: 'No actions', detail: 'Set Approve or Decline for at least one item', life: 3000 })
+    toast.add({ 
+      severity: 'warn', 
+      summary: 'No actions', 
+      detail: 'Set Approve or Decline for at least one item', 
+      life: 3000 
+    })
     return
   }
   
   submitting.value = true
   
   try {
-    await $fetch(apiUrl('admin/process-cart'), {
+    // Use relative path for Nuxt server API
+    // This will hit: /api/admin/process-cart
+    await $fetch('/api/admin/process-cart', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...getHeaders() } as Record<string, string>,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token.value ? { Authorization: `Bearer ${token.value}` } : {})
+      },
       body: { items },
     })
     
-    toast.add({ severity: 'success', summary: 'Cart processed', detail: `${items.length} item(s) updated`, life: 3000 })
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Cart processed', 
+      detail: `${items.length} item(s) updated`, 
+      life: 3000 
+    })
+    
     cartStore.clearDraftsForUser(selectedUser.value.requests.map((r: any) => r.id))
     await loadPendingUsers()
     selectedUser.value = pendingUsers.value.find((u: any) => u.id === selectedUser.value?.id) || null
-  } catch (e: any) {
+  } catch (error: any) {
+    console.error('Error processing cart:', error)
+    
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: e?.data?.message || 'Failed to process cart',
+      detail: error?.data?.message || error?.message || 'Failed to process cart',
       life: 5000,
     })
   } finally {

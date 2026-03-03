@@ -376,13 +376,10 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
-definePageMeta({ middleware: 'auth', requiresAuth: true })
-
-const config = useRuntimeConfig()
-const apiBase = computed(() => (config.public?.API_URL as string) || '')
-function apiUrl (path: string) {
-  return apiBase.value ? `${String(apiBase.value).replace(/\/$/, '')}/${path}` : `/api/${path}`
-}
+definePageMeta({ 
+  middleware: 'auth', 
+  requiresAuth: true 
+})
 
 const toast = useToast()
 const router = useRouter()
@@ -421,57 +418,114 @@ const actionOptions = [
   { label: 'User delete', value: 'USER_DELETE' },
 ]
 
+// Get auth token and user
 const token = ref('')
+const user = ref<any>(null)
+
 onMounted(() => {
-  token.value = typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : ''
-  const user = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {}
-  if (user?.role !== 'admin' && user?.role !== 'superadmin' && user?.role !== 'instructor') {
-    toast.add({ severity: 'error', summary: 'Access denied', detail: 'Technician or admin only', life: 3000 })
-    router.push('/home')
-    return
+  // Get token and user from localStorage
+  if (typeof localStorage !== 'undefined') {
+    token.value = localStorage.getItem('token') || ''
+    try {
+      user.value = JSON.parse(localStorage.getItem('user') || '{}')
+    } catch {
+      user.value = {}
+    }
+    
+    // Check authorization
+    if (!['admin', 'superadmin', 'instructor'].includes(user.value?.role)) {
+      toast.add({ 
+        severity: 'error', 
+        summary: 'Access denied', 
+        detail: 'Technician or admin only', 
+        life: 3000 
+      })
+      router.push('/home')
+      return
+    }
+    
+    loadLogs(1)
   }
-  loadLogs(1)
 })
 
-function getHeaders () {
-  return token.value ? { Authorization: `Bearer ${token.value}` } : {}
-}
-
-async function loadLogs (pageNum: number) {
+// For Nuxt server routes, we don't need to construct full URLs
+// Just use relative paths that match your server/api structure
+async function loadLogs(pageNum: number) {
   page.value = pageNum
   loading.value = true
+  
   try {
-    const query: Record<string, string> = {
+    // Build query parameters
+    const queryParams = new URLSearchParams({
       page: String(pageNum),
       limit: String(pagination.limit),
-    }
-    if (filterUserEmail.value?.trim()) query.userEmail = filterUserEmail.value.trim()
-    if (filterAction.value) query.action = filterAction.value
-    const res = await $fetch<{ success: boolean; data: any[]; pagination: any }>(apiUrl('admin/logs'), {
-      query,
-      headers: getHeaders() as Record<string, string>,
     })
-    if (res?.success && Array.isArray(res.data)) {
-      logs.value = res.data
-      if (res.pagination) {
-        pagination.page = res.pagination.page
-        pagination.limit = res.pagination.limit
-        pagination.total = res.pagination.total
-        pagination.pages = res.pagination.pages
-      }
+    
+    if (filterUserEmail.value?.trim()) {
+      queryParams.append('userEmail', filterUserEmail.value.trim())
     }
-  } catch (e: any) {
-    if (e?.statusCode === 401) {
+    
+    if (filterAction.value) {
+      queryParams.append('action', filterAction.value)
+    }
+    
+    // For Nuxt server routes, use the correct path based on your file structure
+    // If your file is at: server/api/admin/logs/index.get.ts
+    // Then the endpoint is: /api/admin/logs
+    const response = await $fetch(`/api/admin/logs?${queryParams.toString()}`, {
+      method: 'GET',
+      headers: token.value ? {
+        Authorization: `Bearer ${token.value}`
+      } : {}
+    })
+    
+    // Handle the response
+    const result = response as { 
+      success: boolean; 
+      data: any[]; 
+      pagination: { 
+        page: number; 
+        limit: number; 
+        total: number; 
+        pages: number 
+      } 
+    }
+    
+    if (result?.success && Array.isArray(result.data)) {
+      logs.value = result.data
+      if (result.pagination) {
+        pagination.page = result.pagination.page
+        pagination.limit = result.pagination.limit
+        pagination.total = result.pagination.total
+        pagination.pages = result.pagination.pages
+      }
+    } else {
+      logs.value = []
+    }
+  } catch (error: any) {
+    console.error('Error loading logs:', error)
+    
+    // Handle unauthorized
+    if (error?.status === 401 || error?.statusCode === 401) {
       router.push('/login')
       return
     }
-    toast.add({ severity: 'error', summary: 'Error', detail: e?.data?.message || 'Failed to load logs', life: 5000 })
+    
+    // Show error toast
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: error?.data?.message || error?.message || 'Failed to load logs', 
+      life: 5000 
+    })
+    
+    logs.value = []
   } finally {
     loading.value = false
   }
 }
 
-function onPage (event: any) {
+function onPage(event: any) {
   if (event.rows != null && event.rows !== pagination.limit) {
     pagination.limit = event.rows
     page.value = 1
@@ -481,17 +535,17 @@ function onPage (event: any) {
   loadLogs(page.value)
 }
 
-function formatDate (d: string | Date | null) {
+function formatDate(d: string | Date | null) {
   if (!d) return '—'
   const date = new Date(d)
   return date.toLocaleString()
 }
 
-function formatAction (action: string) {
+function formatAction(action: string) {
   return action.replace(/_/g, ' ')
 }
 
-function actionSeverity (action: string) {
+function actionSeverity(action: string) {
   if (action?.includes('APPROVE') || action?.includes('RETURN')) return 'success'
   if (action?.includes('DECLINE') || action?.includes('DELETE')) return 'danger'
   if (action?.includes('CREATE')) return 'info'
@@ -500,40 +554,40 @@ function actionSeverity (action: string) {
 }
 
 // Action type checkers
-function isUpdateAction (action: string) {
+function isUpdateAction(action: string) {
   return action?.includes('UPDATE')
 }
 
-function isCreateAction (action: string) {
+function isCreateAction(action: string) {
   return action?.includes('CREATE')
 }
 
-function isDeleteAction (action: string) {
+function isDeleteAction(action: string) {
   return action?.includes('DELETE')
 }
 
-function isRequestAction (action: string) {
+function isRequestAction(action: string) {
   return action?.includes('REQUEST')
 }
 
-function getRequestAction (action: string) {
+function getRequestAction(action: string) {
   return action.replace('REQUEST_', '').toLowerCase()
 }
 
-function formatObjectId (objId: any) {
+function formatObjectId(objId: any) {
   if (!objId) return 'N/A'
   if (typeof objId === 'string') return objId
   if (objId.$oid) return objId.$oid
   return String(objId)
 }
 
-function formatValue (value: any) {
+function formatValue(value: any) {
   if (value === null || value === undefined) return '—'
   if (typeof value === 'object') return JSON.stringify(value)
   return String(value)
 }
 
-function metadataSummary (log: any) {
+function metadataSummary(log: any) {
   if (!log?.metadata) return '—'
   const meta = log.metadata
   const parts = []
@@ -562,16 +616,16 @@ function metadataSummary (log: any) {
   return parts.length ? parts.join(' · ') : 'View details'
 }
 
-function hasDetails (log: any) {
+function hasDetails(log: any) {
   return log?.metadata && Object.keys(log.metadata).length > 0
 }
 
-function showDetails (log: any) {
+function showDetails(log: any) {
   selectedLog.value = log
   detailsDialogVisible.value = true
 }
 
-function formatJSON (obj: any) {
+function formatJSON(obj: any) {
   if (!obj) return '{}'
   try {
     return JSON.stringify(obj, null, 2)

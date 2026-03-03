@@ -223,16 +223,16 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
-definePageMeta({ middleware: 'auth', requiresAuth: true })
+definePageMeta({ 
+  middleware: 'auth', 
+  requiresAuth: true 
+})
 
 const router = useRouter()
 const toast = useToast()
-const config = useRuntimeConfig()
-const apiBase = computed(() => (config.public?.API_URL as string) || '')
-const apiUrl = (path: string) =>
-  apiBase.value ? `${String(apiBase.value).replace(/\/$/, '')}/${path}` : `/api/${path}`
 
-const user = ref<any>(JSON.parse(localStorage.getItem('user') || '{}'))
+// State
+const user = ref<any>(null)
 const users = ref<any[]>([])
 const loading = ref(false)
 const selectedUser = ref<any | null>(null)
@@ -247,6 +247,8 @@ const editForm = ref<{ id: string | null; email: string; role: string | null }>(
   role: null,
 })
 
+const token = ref('')
+
 const roleOptions = [
   { label: 'All roles', value: null },
   { label: 'Super admin', value: 'superadmin' },
@@ -256,8 +258,18 @@ const roleOptions = [
 ]
 
 onMounted(() => {
-  checkAccess()
-  loadData()
+  // Get auth data from localStorage
+  if (typeof localStorage !== 'undefined') {
+    token.value = localStorage.getItem('token') || ''
+    try {
+      user.value = JSON.parse(localStorage.getItem('user') || '{}')
+    } catch {
+      user.value = {}
+    }
+    
+    checkAccess()
+    loadData()
+  }
 })
 
 function checkAccess() {
@@ -314,34 +326,54 @@ function roleColorClass(role: string) {
   return 'dot-success'
 }
 
+// For Nuxt server routes, use relative paths
 async function loadData() {
   loading.value = true
   try {
-    const token = localStorage.getItem('token')
-    const query: Record<string, string> = {}
-    if (roleFilter.value) query.role = roleFilter.value
-    const res = await $fetch<{ success: boolean; data: any[] }>(apiUrl('admin/users'), {
-      query,
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    // Build query parameters
+    const queryParams = new URLSearchParams()
+    if (roleFilter.value) {
+      queryParams.append('role', roleFilter.value)
+    }
+    
+    // Use relative path for Nuxt server API
+    // This will hit: /api/admin/users
+    const response = await $fetch(`/api/admin/users${queryParams.toString() ? '?' + queryParams.toString() : ''}`, {
+      method: 'GET',
+      headers: token.value ? {
+        Authorization: `Bearer ${token.value}`
+      } : {}
     })
-    if (res?.success && Array.isArray(res.data)) {
-      users.value = res.data
+    
+    // Handle the response
+    const result = response as { 
+      success: boolean; 
+      data: any[] 
+    }
+    
+    if (result?.success && Array.isArray(result.data)) {
+      users.value = result.data
     } else {
-      throw new Error('Invalid response')
+      users.value = []
     }
   } catch (error: any) {
-    if (error?.statusCode === 401) {
+    console.error('Error loading users:', error)
+    
+    if (error?.status === 401 || error?.statusCode === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       router.push('/login')
       return
     }
+    
     toast.add({
       severity: 'error',
       summary: 'Error',
       detail: error?.data?.message || error?.message || 'Failed to load users',
       life: 5000,
     })
+    
+    users.value = []
   } finally {
     loading.value = false
   }
@@ -373,32 +405,45 @@ async function updateUserRole() {
     })
     return
   }
+  
   updatingUser.value = true
+  
   try {
-    const token = localStorage.getItem('token')
-    const res = await $fetch<{ success: boolean; data: any }>(apiUrl(`admin/users/${editForm.value.id}`), {
+    // Use relative path for Nuxt server API with dynamic ID
+    // This will hit: /api/admin/users/[id]
+    const response = await $fetch(`/api/admin/users/${editForm.value.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      } as Record<string, string>,
+        ...(token.value ? { Authorization: `Bearer ${token.value}` } : {})
+      },
       body: { role: editForm.value.role },
     })
-    if (res?.success && res.data) {
-      const idx = users.value.findIndex((u) => u.id === res.data.id)
-      if (idx !== -1) users.value[idx] = res.data
+    
+    const result = response as { 
+      success: boolean; 
+      data: any 
+    }
+    
+    if (result?.success && result.data) {
+      const idx = users.value.findIndex((u) => u.id === result.data.id)
+      if (idx !== -1) users.value[idx] = result.data
+      
       toast.add({
         severity: 'success',
         summary: 'Role updated',
-        detail: `User role updated to ${res.data.role}`,
+        detail: `User role updated to ${result.data.role}`,
         life: 3000,
       })
+      
       showEditDialog.value = false
-      selectedUser.value = res.data
+      selectedUser.value = result.data
     } else {
       throw new Error('Failed to update user')
     }
   } catch (error: any) {
+    console.error('Error updating user:', error)
+    
     toast.add({
       severity: 'error',
       summary: 'Update failed',
@@ -409,6 +454,11 @@ async function updateUserRole() {
     updatingUser.value = false
   }
 }
+
+//Watch for role filter changes to reload data
+watch(roleFilter, () => {
+  loadData()
+})
 </script>
 
 <style scoped>

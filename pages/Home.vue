@@ -647,7 +647,6 @@ import { exportCSV } from '~/utils/exportCSV.js'
 const router = useRouter()
 const toast = useToast()
 const config = useRuntimeConfig()
-const apiUrl = config.public.API_URL || 'http://localhost:4000/api'
 
 // State
 const user = ref(JSON.parse(localStorage.getItem('user') || '{}'))
@@ -822,7 +821,7 @@ const resetMissingRequestForm = () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const response = await fetch(`${apiUrl}/inventory/`, {
+    const response = await fetch(`api/inventory/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -950,7 +949,7 @@ const submitRequest = async () => {
   }
 
   try {
-    const response = await fetch(`${apiUrl}/requests/`, {
+    const response = await fetch(`api/requests/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1047,7 +1046,7 @@ const submitMissing = async () => {
   }
 
   try {
-    const response = await fetch(`${apiUrl}/missing/`, {
+    const response = await fetch(`api/missing/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1144,7 +1143,7 @@ const performUpdate = async () => {
       location: selectedItems.value.location || '',
     }
 
-    const response = await fetch(`${apiUrl}/inventory/${itemId}`, {
+    const response = await fetch(`api/inventory/${itemId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1204,7 +1203,7 @@ const deleteSelectedItem = (item) => {
       const itemId = item.id
       
       try {
-        const response = await fetch(`${apiUrl}/inventory/${itemId}`, {
+        const response = await fetch(`api/inventory/${itemId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1273,7 +1272,7 @@ const addNewItem = async () => {
   }
 
   try {
-    const response = await fetch(`${apiUrl}/inventory/`, {
+    const response = await fetch(`api/inventory/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

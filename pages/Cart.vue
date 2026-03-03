@@ -192,7 +192,6 @@ import { useToast } from 'primevue/usetoast'
 const router = useRouter()
 const toast = useToast()
 const config = useRuntimeConfig()
-const apiUrl = config.public.API_URL || 'http://localhost:4000/api'
 
 definePageMeta({
   layout: 'default',
@@ -263,7 +262,7 @@ const toggleRequestExpansion = (request) => {
 const loadRequests = async () => {
   loading.value = true
   try {
-    const response = await fetch(`${apiUrl}/requests/${encodeURIComponent(userEmail.value)}`, {
+    const response = await fetch(`api/requests/${encodeURIComponent(userEmail.value)}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -358,7 +357,7 @@ const confirmDelete = async () => {
   
   deletingRequest.value = true
   try {
-    const response = await fetch(`${apiUrl}/requests/${requestToDelete.value.id}`, {
+    const response = await fetch(`api/requests/${requestToDelete.value.id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

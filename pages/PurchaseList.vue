@@ -214,13 +214,10 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { PurchaseItem } from '@/types'
 
-definePageMeta({ middleware: 'auth', requiresAuth: true })
-
-const config = useRuntimeConfig()
-const apiBase = computed(() => (config.public?.API_URL as string) || '')
-function apiUrl (path: string) {
-  return apiBase.value ? `${String(apiBase.value).replace(/\/$/, '')}/${path}` : `/api/${path}`
-}
+definePageMeta({ 
+  middleware: 'auth', 
+  requiresAuth: true 
+})
 
 const toast = useToast()
 const router = useRouter()
@@ -230,22 +227,85 @@ const purchaseList = ref<PurchaseItem[]>([])
 const loading = ref(false)
 const searchQuery = ref('')
 const token = ref('')
+const user = ref<any>(null)
 
 onMounted(() => {
-  token.value = typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : ''
-  const user = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {}
-  
-  if (user?.role !== 'admin' && user?.role !== 'superadmin' && user?.role !== 'instructor') {
-    toast.add({ severity: 'error', summary: 'Access denied', detail: 'Technician or admin only', life: 3000 })
-    router.push('/home')
-    return
+  // Get auth data from localStorage
+  if (typeof localStorage !== 'undefined') {
+    token.value = localStorage.getItem('token') || ''
+    try {
+      user.value = JSON.parse(localStorage.getItem('user') || '{}')
+    } catch {
+      user.value = {}
+    }
+    
+    // Check authorization
+    if (!['admin', 'superadmin', 'instructor'].includes(user.value?.role)) {
+      toast.add({ 
+        severity: 'error', 
+        summary: 'Access denied', 
+        detail: 'Technician or admin only', 
+        life: 3000 
+      })
+      router.push('/home')
+      return
+    }
+    
+    loadData()
   }
-  
-  loadData()
 })
 
-function getHeaders () {
-  return token.value ? { Authorization: `Bearer ${token.value}` } : {}
+// For Nuxt server routes, use relative paths
+async function loadData() {
+  loading.value = true
+  try {
+    // Build query parameters
+    const queryParams = new URLSearchParams()
+    if (searchQuery.value?.trim()) {
+      queryParams.append('search', searchQuery.value.trim())
+    }
+    
+    // Use relative path for Nuxt server API
+    // This will hit: /api/admin/purchase-list
+    const response = await $fetch(`/api/admin/purchase-list${queryParams.toString() ? '?' + queryParams.toString() : ''}`, {
+      method: 'GET',
+      headers: token.value ? {
+        Authorization: `Bearer ${token.value}`
+      } : {}
+    })
+    
+    // Handle the response
+    const result = response as { 
+      success: boolean; 
+      data: PurchaseItem[] 
+    }
+    
+    if (result?.success && Array.isArray(result.data)) {
+      purchaseList.value = result.data
+    } else {
+      purchaseList.value = []
+    }
+  } catch (error: any) {
+    console.error('Error loading purchase list:', error)
+    
+    // Handle unauthorized
+    if (error?.status === 401 || error?.statusCode === 401) {
+      router.push('/login')
+      return
+    }
+    
+    // Show error toast
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: error?.data?.message || error?.message || 'Failed to load purchase list', 
+      life: 5000 
+    })
+    
+    purchaseList.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 // Computed properties
@@ -276,34 +336,6 @@ const filteredPurchaseList = computed(() => {
   })
 })
 
-async function loadData () {
-  loading.value = true
-  try {
-    const params = searchQuery.value ? { search: searchQuery.value } : {}
-    const res = await $fetch<{ success: boolean; data: PurchaseItem[] }>(apiUrl('admin/purchase-list'), {
-      query: params,
-      headers: getHeaders() as Record<string, string>,
-    })
-    
-    if (res?.success && Array.isArray(res.data)) {
-      purchaseList.value = res.data
-    }
-  } catch (e: any) {
-    if (e?.statusCode === 401) {
-      router.push('/login')
-      return
-    }
-    toast.add({ 
-      severity: 'error', 
-      summary: 'Error', 
-      detail: e?.data?.message || 'Failed to load purchase list', 
-      life: 5000 
-    })
-  } finally {
-    loading.value = false
-  }
-}
-
 // Handle search
 const handleSearch = () => {
   loadData()
@@ -332,7 +364,6 @@ const getPurchaseSeverity = (needed: number) => {
   return 'success'
 }
 </script>
-
 <style scoped>
 .purchase-list-view {
   min-height: 100vh;

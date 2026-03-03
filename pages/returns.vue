@@ -166,54 +166,95 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
-definePageMeta({ middleware: 'auth', requiresAuth: true })
-
-const config = useRuntimeConfig()
-const apiBase = computed(() => (config.public?.API_URL as string) || '')
-function apiUrl (path: string) {
-  return apiBase.value ? `${String(apiBase.value).replace(/\/$/, '')}/${path}` : `/api/${path}`
-}
+definePageMeta({ 
+  middleware: 'auth', 
+  requiresAuth: true 
+})
 
 const toast = useToast()
 const router = useRouter()
+
 const loans = ref<any[]>([])
 const search = ref('')
 const loading = ref(false)
 const returningId = ref<string | null>(null)
 
 const token = ref('')
+const user = ref<any>(null)
+
 onMounted(() => {
-  token.value = typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : ''
-  const user = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {}
-  if (user?.role !== 'admin' && user?.role !== 'superadmin' && user?.role !== 'instructor') {
-    toast.add({ severity: 'error', summary: 'Access denied', detail: 'Technician or admin only', life: 3000 })
-    router.push('/home')
-    return
+  // Get auth data from localStorage
+  if (typeof localStorage !== 'undefined') {
+    token.value = localStorage.getItem('token') || ''
+    try {
+      user.value = JSON.parse(localStorage.getItem('user') || '{}')
+    } catch {
+      user.value = {}
+    }
+    
+    // Check authorization
+    if (!['admin', 'superadmin', 'instructor'].includes(user.value?.role)) {
+      toast.add({ 
+        severity: 'error', 
+        summary: 'Access denied', 
+        detail: 'Technician or admin only', 
+        life: 3000 
+      })
+      router.push('/home')
+      return
+    }
+    
+    loadActiveLoans()
   }
-  loadActiveLoans()
 })
 
-function getHeaders () {
-  return token.value ? { Authorization: `Bearer ${token.value}` } : {}
-}
-
-async function loadActiveLoans () {
+// For Nuxt server routes, use relative paths
+async function loadActiveLoans() {
   loading.value = true
   try {
-    const params = search.value ? { search: search.value } : {}
-    const res = await $fetch<{ success: boolean; data: any[] }>(apiUrl('admin/active-loans'), {
-      query: params,
-      headers: getHeaders() as Record<string, string>,
-    })
-    if (res?.success && Array.isArray(res.data)) {
-      loans.value = res.data  
+    // Build query parameters
+    const queryParams = new URLSearchParams()
+    if (search.value?.trim()) {
+      queryParams.append('search', search.value.trim())
     }
-  } catch (e: any) {
-    if (e?.statusCode === 401) {
+    
+    // Use relative path for Nuxt server API
+    // This will hit: /api/admin/active-loans
+    const response = await $fetch(`/api/admin/active-loans${queryParams.toString() ? '?' + queryParams.toString() : ''}`, {
+      method: 'GET',
+      headers: token.value ? {
+        Authorization: `Bearer ${token.value}`
+      } : {}
+    })
+    
+    // Handle the response
+    const result = response as { 
+      success: boolean; 
+      data: any[] 
+    }
+    
+    if (result?.success && Array.isArray(result.data)) {
+      loans.value = result.data
+    } else {
+      loans.value = []
+    }
+  } catch (error: any) {
+    console.error('Error loading active loans:', error)
+    
+    // Handle unauthorized
+    if (error?.status === 401 || error?.statusCode === 401) {
       router.push('/login')
       return
     }
-    toast.add({ severity: 'error', summary: 'Error', detail: e?.data?.message || 'Failed to load active loans', life: 5000 })
+    
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: error?.data?.message || error?.message || 'Failed to load active loans', 
+      life: 5000 
+    })
+    
+    loans.value = []
   } finally {
     loading.value = false
   }
@@ -221,7 +262,7 @@ async function loadActiveLoans () {
 
 const filteredLoans = computed(() => loans.value)
 
-function formatDate (d: string | null) {
+function formatDate(d: string | null) {
   if (!d) return '—'
   const date = new Date(d)
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -231,18 +272,35 @@ function handleImageError(event: Event) {
   (event.target as HTMLImageElement).style.display = 'none'
 }
 
-async function markReturned (row: any) {
+async function markReturned(row: any) {
   returningId.value = row.id
   try {
-    await $fetch(apiUrl('admin/return-item'), {
+    await $fetch('/api/admin/return-item', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...getHeaders() } as Record<string, string>,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token.value ? { Authorization: `Bearer ${token.value}` } : {})
+      },
       body: { requestId: row.id },
     })
-    toast.add({ severity: 'success', summary: 'Returned', detail: `${row.component?.model ?? 'Item'} marked as returned`, life: 3000 })
+    
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Returned', 
+      detail: `${row.component?.model ?? 'Item'} marked as returned`, 
+      life: 3000 
+    })
+    
     loans.value = loans.value.filter((l) => l.id !== row.id)
-  } catch (e: any) {
-    toast.add({ severity: 'error', summary: 'Error', detail: e?.data?.message || 'Failed to mark as returned', life: 5000 })
+  } catch (error: any) {
+    console.error('Error marking as returned:', error)
+    
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: error?.data?.message || error?.message || 'Failed to mark as returned', 
+      life: 5000 
+    })
   } finally {
     returningId.value = null
   }
