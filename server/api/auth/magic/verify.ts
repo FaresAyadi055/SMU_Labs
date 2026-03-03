@@ -93,7 +93,6 @@ export default defineEventHandler(async (event) => {
       { expiresIn: '7d' }
     )
     
-    console.log("token: ", token)
     
     // Return user data and token
     return {

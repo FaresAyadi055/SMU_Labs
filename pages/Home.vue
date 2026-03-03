@@ -58,7 +58,8 @@
                 severity="primary"
               />
               <Button 
-                v-if="userRole !== 'admin'"
+                
+                v-if="userRole === ''"
                 label="Request Unavailable Item" 
                 icon="pi pi-exclamation-circle" 
                 @click="showMissingDialog = true" 

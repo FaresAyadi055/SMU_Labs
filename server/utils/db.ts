@@ -1,7 +1,6 @@
 // server/utils/db.ts
 import mongoose from "mongoose";
-
-const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
+import { useRuntimeConfig } from "#imports";
 
 let cached = globalThis.mongoose as {
   conn: typeof mongoose | null;
@@ -16,6 +15,13 @@ if (!cached) {
 }
 
 export default async function connectDB() {
+  const config = useRuntimeConfig();
+  const uri = config.MONGO_URI || process.env.MONGO_URI || process.env.MONGODB_URI || "";
+
+  if (!uri) {
+    throw new Error("MONGO_URI not set – configure it in your environment");
+  }
+
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {

@@ -132,7 +132,7 @@
                   icon="pi pi-pencil"
                   size="small"
                   @click="openEditDialog"
-                  class="change-role-btn primary-gradient"
+                  class="change-role-btn "
                 />
               </div>
             </div>

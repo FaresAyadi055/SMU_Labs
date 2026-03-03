@@ -35,6 +35,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     MAGIC_SECRET_KEY: process.env.MAGIC_SECRET_KEY,
     JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
+    MONGO_URI: process.env.MONGO_URI,
 
     public: {
       API_URL: process.env.VITE_API_URL || 'http://localhost:4000/api',

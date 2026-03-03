@@ -388,7 +388,7 @@ const loading = ref(false)
 const page = ref(1)
 const filterUserEmail = ref('')
 const filterAction = ref<string | null>(null)
-const pagination = reactive({ page: 1, limit: 50, total: 0, pages: 0 })
+const pagination = reactive({ page: 1, limit:10, total: 0, pages: 0 })
 
 // Dialog state
 const detailsDialogVisible = ref(false)
