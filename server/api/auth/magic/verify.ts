@@ -3,19 +3,13 @@ import { defineEventHandler, readBody, createError } from 'h3'
 import jwt from 'jsonwebtoken'
 import User from '~/server/models/Users'
 import connectDB from '~/server/utils/db'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const { Magic } = require('@magic-sdk/admin')
 
 const config = useRuntimeConfig()
-
-let magicInstance: any | null = null
-
-async function getMagic() {
-  if (!magicInstance) {
-    const mod = await import('@magic-sdk/admin')
-    const Magic = (mod as any).Magic || (mod as any).default?.Magic
-    magicInstance = new Magic(process.env.MAGIC_SECRET_KEY || config.MAGIC_SECRET_KEY)
-  }
-  return magicInstance
-}
+const magic = new Magic(process.env.MAGIC_SECRET_KEY || config.MAGIC_SECRET_KEY)
 
 export default defineEventHandler(async (event) => {
   try {
@@ -40,7 +34,6 @@ export default defineEventHandler(async (event) => {
     }
 
     // Validate the DID token with Magic
-    const magic = await getMagic()
     let magicUserMetadata
     try {
       magic.token.validate(didToken)
