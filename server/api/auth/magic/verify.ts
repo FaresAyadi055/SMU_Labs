@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import User from '~/server/models/Users'
 import connectDB from '~/server/utils/db'
 import { createRequire } from 'module'
+
 const require = createRequire(import.meta.url)
 const { Magic } = require('@magic-sdk/admin')
 

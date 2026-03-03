@@ -54,16 +54,16 @@ export default defineNuxtConfig({
   },
   
   build: {
-    transpile: ['primevue', '@magic-sdk/admin'],
+    transpile: ['primevue'],
   },
 
-  nitro: {
-    preset: 'vercel', 
-    plugins: ['@/server/index'],
-    externals: {
-      inline: ['@magic-sdk/admin']
-    }
-  },
+nitro: {
+  preset: 'vercel',
+  plugins: ['@/server/index'],
+  experimental: {
+    wasm: true
+  }
+},
   
   compatibilityDate: '2024-04-03',
   pages: true,
