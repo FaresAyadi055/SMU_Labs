@@ -1,32 +1,26 @@
 <!-- pages/inventory/index.vue -->
 <template>
   <div class="home">
-    <!-- Navbar will be handled by layout instead -->
-    
     <div class="main-container">
       <div class="content-wrapper">
         <!-- Header -->
         <div class="header-section">
           <div>
-            <h1 class="text-3xl font-bold text-surface-900">
+            <h1 class="page-title">
               {{ userRole === 'admin' ? 'Inventory Management' : 'Inventory Catalog' }}
             </h1>
-            <br />
-            <p class="text-surface-600 mt-2">
+            <p class="page-subtitle">
               {{ userRole === 'admin' ? 'Manage all inventory items' : 'Browse and request for components' }}
             </p>
-          </div>
-          <br />
-          <div class="flex items-center gap-4">
           </div>
         </div>
 
         <!-- Search and Actions -->
-        <div class="card mb-6">
-          <div class="flex justify-between items-left p-4">
+        <div class="card action-card">
+          <div class="action-bar">
             <!-- Search -->
-            <div class="flex items-center gap-4 w-full">
-              <span class="p-input-icon-left w-full md:w-96">
+            <div class="search-wrapper">
+              <span class="p-input-icon-left search-input">
                 <i class="pi pi-search" />
                 <InputText 
                   v-model="searchQuery" 
@@ -36,37 +30,40 @@
                 />
               </span>
             </div>
-            <br/>
+
             <!-- Action Buttons -->
-            <div class="flex items-center gap-2">
+            <div class="action-buttons-group">
               <Button 
                 label="Refresh" 
                 icon="pi pi-refresh" 
                 @click="loadData"
                 :loading="loading"
+                class="action-btn refresh-btn"
                 severity="secondary"
-              /> <span>   </span>
-              <Button v-if="false"
-                label="Request Unavailable Item" 
-                icon="pi pi-exclamation-circle" 
-                @click="showMissingDialog = true" 
-                v-tooltip="'Request unavailable item'"
-                severity="info"
-              /> <span>  </span>
+              />
               <Button 
                 v-if="userRole === 'admin'"   
                 label="Add Item" 
                 icon="pi pi-plus" 
                 @click="showAddDialog = true" 
+                class="action-btn primary-gradient"
                 severity="primary"  
-              /> <span>  </span>
-              <!-- Export CSV Button only for admin -->
+              />
               <Button 
                 v-if="userRole === 'admin'"   
                 label="Export CSV"
                 icon="pi pi-file-export" 
                 @click="exportCSV(filteredItems, 'inventory_export.csv')"
+                class="action-btn primary-gradient"
                 severity="primary"
+              />
+              <Button 
+                v-if="userRole !== 'admin'"
+                label="Request Unavailable Item" 
+                icon="pi pi-exclamation-circle" 
+                @click="showMissingDialog = true" 
+                class="action-btn warning-gradient"
+                severity="info"
               />
             </div>
           </div>
@@ -112,15 +109,15 @@
                   <!-- Product Details -->
                   <div class="product-details">
                     <div class="detail-item">
-                      <i class="pi pi-box text-surface-400"></i>
+                      <i class="pi pi-box"></i>
                       <span>{{ item.quantity }} in stock</span>
                     </div>
                     <div v-if="item.location" class="detail-item">
-                      <i class="pi pi-map-marker text-surface-400"></i>
+                      <i class="pi pi-map-marker"></i>
                       <span>{{ item.location }}</span>
                     </div>
                     <div v-if="item.category" class="detail-item">
-                      <i class="pi pi-tag text-surface-400"></i>
+                      <i class="pi pi-tag"></i>
                       <span>{{ item.category }}</span>
                     </div>
                   </div>
@@ -133,25 +130,22 @@
                         <Button 
                           label="Edit" 
                           icon="pi pi-pencil" 
-                          class="action-button"
+                          class="action-grid-btn edit-btn"
                           @click.stop="openUpdateDialog(item)"
-                          severity="secondary"
                           size="small"
                         />
                         <Button 
                           label="Delete" 
                           icon="pi pi-trash" 
-                          class="action-button"
+                          class="action-grid-btn delete-btn"
                           @click.stop="deleteSelectedItem(item)"
-                          severity="danger"
                           size="small"
                         />
                         <Button 
                           label="Request" 
                           icon="pi pi-shopping-cart" 
-                          class="action-button"
+                          class="action-grid-btn request-btn"
                           @click.stop="openRequestDialog(item)"
-                          severity="success"
                           size="small"
                         />
                       </div>
@@ -187,15 +181,17 @@
 
             <!-- Empty State -->
             <div v-if="!loading && filteredItems.length === 0" class="empty-state">
-              <i class="pi pi-box" style="font-size: 4rem; color: #e0e0e0;"></i>
-              <h3>No items found</h3>
-              <p v-if="searchQuery">Try adjusting your search query</p>
-              <p v-else>Inventory is currently empty</p>
+              <div class="empty-state-content">
+                <i class="pi pi-box empty-icon"></i>
+                <h3>No items found</h3>
+                <p v-if="searchQuery">Try adjusting your search query</p>
+                <p v-else>Inventory is currently empty</p>
+              </div>
             </div>
 
             <!-- Loading State -->
             <div v-if="loading" class="loading-state">
-              <ProgressSpinner style="width: 50px; height: 50px" />
+              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
               <p>Loading inventory...</p>
             </div>
 
@@ -209,7 +205,9 @@
                   icon="pi pi-chevron-left" 
                   @click="prevPage"
                   :disabled="currentPage === 1"
-                  class="p-button-rounded p-button-text"
+                  class="pagination-nav-btn"
+                  text
+                  rounded
                 />
                 <div class="page-numbers">
                   <span 
@@ -226,7 +224,9 @@
                   icon="pi pi-chevron-right" 
                   @click="nextPage"
                   :disabled="currentPage === totalPages"
-                  class="p-button-rounded p-button-text"
+                  class="pagination-nav-btn"
+                  text
+                  rounded
                 />
               </div>
               <div class="items-per-page">
@@ -241,25 +241,25 @@
             </div>
 
             <!-- Stats Summary Container -->
-            <div v-if="userRole === 'admin' && filteredItems.length > 0" class="summary-container card mt-8">
+            <div v-if="userRole === 'admin' && filteredItems.length > 0" class="summary-container">
               <div class="summary-header">
-                <h3 class="text-lg font-semibold text-surface-900">Inventory Summary</h3>
+                <h3>Inventory Summary</h3>
               </div>
               <div class="summary-stats">
                 <div class="stat-item">
-                  <div class="stat-value text-primary-600">{{ totalItems }}</div>
+                  <div class="stat-value total">{{ totalItems }}</div>
                   <div class="stat-label">Total Items</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value text-yellow-600">{{ lowStockItems }}</div>
+                  <div class="stat-value low-stock">{{ lowStockItems }}</div>
                   <div class="stat-label">Low Stock</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value text-red-600">{{ outOfStockItems }}</div>
+                  <div class="stat-value out-of-stock">{{ outOfStockItems }}</div>
                   <div class="stat-label">Out of Stock</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value text-green-600">{{ inStockItems }}</div>
+                  <div class="stat-value in-stock">{{ inStockItems }}</div>
                   <div class="stat-label">In Stock</div>
                 </div>
               </div>
@@ -276,56 +276,56 @@
       :style="{ width: '500px' }" 
       header="Update Item"
       :modal="true"
+      class="custom-dialog"
     >
-      <div class="p-fluid">
-        <div class="field">
-          <label for="updateModel">Model </label>
+      <div class="dialog-form">
+        <div class="form-field">
+          <label for="updateModel">Model</label>
           <InputText 
             id="updateModel"
             v-model="selectedItems.model"
-            class="mt-2"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="field">
-          <label for="updateDescription">Description </label>
+
+        <div class="form-field">
+          <label for="updateDescription">Description</label>
           <InputText 
             id="updateDescription"
             v-model="selectedItems.description"
-            class="mt-2"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="field">
-          <label for="updateLink">Image URL </label>
+
+        <div class="form-field">
+          <label for="updateLink">Image URL</label>
           <InputText 
             id="updateLink"
             v-model="selectedItems.link"
-            class="mt-2"
+            class="form-input"
             placeholder="https://example.com/image.jpg"
           />
         </div>
-        <br/>
-        <div class="field">
-          <label for="updateQuantity">Quantity </label>
+
+        <div class="form-field">
+          <label for="updateQuantity">Quantity</label>
           <InputNumber 
             id="updateQuantity"
             v-model="selectedItems.quantity"
             :min="0"
             showButtons
-            class="mt-2 w-full"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="field">
-          <label for="updateLocation">Location </label>
+
+        <div class="form-field">
+          <label for="updateLocation">Location</label>
           <InputText 
             id="updateLocation"
             v-model="selectedItems.location"
-            class="mt-2"
+            class="form-input"
           />
         </div>
-        <br/>
       </div>
 
       <template #footer>
@@ -333,15 +333,15 @@
           label="Cancel" 
           icon="pi pi-times" 
           @click="showUpdateDialog = false" 
-          class="p-button-text"
-          severity="danger"
+          class="dialog-btn cancel-btn"
+          text
         />
         <Button 
           label="Update" 
           icon="pi pi-check" 
           @click="updateSelectedItem"
-          autofocus
           :loading="updatingItem"
+          class="dialog-btn confirm-btn primary-gradient"
         />
       </template>
     </Dialog>
@@ -352,10 +352,11 @@
       :style="{ width: '450px' }" 
       header="Request Item"
       :modal="true"
+      class="custom-dialog"
     >
-      <div class="p-fluid">
+      <div class="dialog-form">
         <!-- Item Preview -->
-        <div v-if="selectedItems" class="request-item-preview mb-4">
+        <div v-if="selectedItems" class="request-item-preview">
           <img 
             :src="selectedItems.link || '/placeholder-image.png'" 
             :alt="selectedItems.model"
@@ -363,53 +364,53 @@
           />
           <div class="request-item-info">
             <h4>{{ selectedItems.model || selectedItems.name }}</h4>
-            <div class="flex items-center gap-2">
+            <div class="stock-indicator">
               <Badge 
                 :value="selectedItems.quantity" 
                 :severity="getQuantitySeverity(selectedItems.quantity)"
               />
-              <span class="text-sm text-surface-600"> available</span>
+              <span class="stock-text"> available</span>
             </div>
           </div>
         </div>
 
-        <div class="field">
-          <label for="quantity">Quantity </label>
+        <div class="form-field">
+          <label for="quantity">Quantity</label>
           <InputNumber 
             id="quantity"
             v-model="requestForm.quantity"
             :min="1"
             showButtons
-            class="mt-2"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="field mt-4">
-          <label for="class">Class</label>
-          <div class="flex gap-2 mt-2">
+
+        <div class="form-field">
+          <label>Class</label>
+          <div class="class-selectors">
             <Select 
               v-model="requestForm.class_prefix"
               :options="classPrefixes"
               placeholder="Cohort"
-              class="flex-1"
+              class="class-select"
             />
             <Select 
               v-model="requestForm.class_number"
               :options="classNumbers"
               placeholder="Group"
-              class="flex-1"
+              class="class-select"
             />
           </div>
         </div>
-        <br/>
-        <div class="field mt-4">
+
+        <div class="form-field">
           <label for="studentEmail">Student Email</label>
           <InputText 
             id="studentEmail"
             v-model="requestForm.student_email"
             :placeholder="userEmail"
             readonly
-            class="mt-2"
+            class="form-input readonly"
           />
         </div>
       </div>
@@ -419,28 +420,29 @@
           label="Cancel" 
           icon="pi pi-times" 
           @click="showRequestDialog = false" 
-          class="p-button-text"
-          severity="danger"
+          class="dialog-btn cancel-btn"
+          text
         />
         <Button 
           label="Submit Request" 
           icon="pi pi-check" 
           @click="submitRequest" 
-          autofocus
           :loading="submittingRequest"
+          class="dialog-btn confirm-btn success-gradient"
         />
       </template>
     </Dialog>
 
-    <!-- Confirmation Dialog Component -->
+    <!-- Confirmation Dialog -->
     <Dialog 
       v-model:visible="showConfirmDialog" 
       :style="{ width: '450px' }" 
       header="Confirmation"
       :modal="true"
+      class="confirm-dialog"
     >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+        <i class="pi pi-exclamation-triangle warning-icon" />
         <span>{{ confirmMessage }}</span>
       </div>
       
@@ -449,16 +451,15 @@
           label="No" 
           icon="pi pi-times" 
           @click="showConfirmDialog = false" 
-          class="p-button-text"
-          severity="secondary"
+          class="dialog-btn cancel-btn"
+          text
         />
         <Button 
           label="Yes" 
           icon="pi pi-check" 
           @click="confirmAction" 
-          autofocus
           :loading="confirmLoading"
-          :severity="confirmSeverity"
+          class="dialog-btn confirm-btn danger-gradient"
         />
       </template>
     </Dialog>
@@ -469,82 +470,103 @@
       :style="{ width: '600px' }" 
       header="Request an Unavailable Item"
       :modal="true"
+      class="custom-dialog missing-dialog"
     >
-      <div class="flex flex-wrap gap-4 p-fluid">
-        <div>
-          <a class="supplier" href="https://tuni-smart-innovation.com/" target="_blank" rel="noopener noreferrer">Tunisia Smart Innovation</a>
+      <div class="dialog-form">
+        <div class="supplier-section">
+          <a class="supplier-link" href="https://tuni-smart-innovation.com/" target="_blank" rel="noopener noreferrer">
+            <i class="pi pi-external-link"></i>
+            Tunisia Smart Innovation
+          </a>
         </div>
-          <br/>
-        <p class="instruction">This is a link to our supplier website, if you find the item you need, please copy the link to the item and paste it.</p>
-        <br/>
-        
-        <div class="flex-order-1 w-full">
-          <label for="modelName" class="font-bold block mb-2">Model Name </label>
+
+        <div class="instruction-box">
+          <i class="pi pi-info-circle"></i>
+          <p>This is a link to our supplier website. If you find the item you need, please copy the link and paste it below.</p>
+        </div>
+
+        <div class="form-field">
+          <label for="modelName">Model Name</label>
           <InputText 
             id="modelName"
             v-model="missingrequestForm.model"
             placeholder="e.g. Raspberry Pi 4"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="flex-order-2 w-full">
-          <label for="description" class="font-bold block mb-2">Product Link </label>
+
+        <div class="form-field">
+          <label for="description">Product Link</label>
           <InputText 
             id="description"
             v-model="missingrequestForm.description"
             placeholder="Paste product link here"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="flex-1 min-w-[200px]">
-          <label for="quantity" class="font-bold block mb-2">Quantity </label>
-          <InputNumber 
-            id="quantity"
-            v-model="missingrequestForm.quantity"
-            :min="1"
-            showButtons
-          />
+
+        <div class="form-row">
+          <div class="form-field flex-1">
+            <label for="quantity">Quantity</label>
+            <InputNumber 
+              id="quantity"
+              v-model="missingrequestForm.quantity"
+              :min="1"
+              showButtons
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-field flex-1">
+            <label for="studentEmail">Student Email</label>
+            <InputText 
+              id="studentEmail"
+              v-model="missingrequestForm.student_email"
+              :placeholder="userEmail"
+              readonly
+              class="form-input readonly"
+            />
+          </div>
         </div>
-        <br/>
-        <div class="flex-1 min-w-[200px]">
-          <label for="studentEmail" class="font-bold block mb-2">Student Email </label>
-          <InputText 
-            id="studentEmail"
-            v-model="missingrequestForm.student_email"
-            :placeholder="userEmail"
-            readonly
-          />
-        </div>
-        <br/>
-        <div class="w-full">
-          <label class="font-bold block mb-2">Class</label>
-          <div class="flex gap-2">
-            <br/>
+
+        <div class="form-field">
+          <label>Class</label>
+          <div class="class-selectors">
             <Select 
               v-model="missingrequestForm.class_prefix"
               :options="classPrefixes"
               placeholder="Cohort"
-              class="flex-1"
+              class="class-select"
             />
             <Select 
               v-model="missingrequestForm.class_number"
               :options="classNumbers"
               placeholder="Group"
-              class="flex-1"
+              class="class-select"
             />
           </div>
         </div>
-        <br/>
-        <p class = "warning">Please do not request an item that is already on the inventory list even if it's out of stock, and do not request an item that is not listed on the supplier website.</p>
+
+        <div class="warning-box">
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>Please do not request an item that is already on the inventory list even if it's out of stock, and do not request an item that is not listed on the supplier website.</p>
+        </div>
       </div>
 
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" @click="showMissingDialog = false" class="p-button-text" severity="danger"/>
+        <Button 
+          label="Cancel" 
+          icon="pi pi-times" 
+          @click="showMissingDialog = false" 
+          class="dialog-btn cancel-btn"
+          text
+        />
         <Button 
           label="Submit Request" 
           icon="pi pi-check" 
           @click="submitMissing" 
           :loading="submittingMissingRequest"
+          class="dialog-btn confirm-btn warning-gradient"
         />
       </template>
     </Dialog>
@@ -556,43 +578,43 @@
       :style="{ width: '500px' }" 
       header="Add New Item"
       :modal="true"
+      class="custom-dialog"
     >
-      <div class="p-fluid">
-        <div class="field">
-          <label for="itemName">Model Name </label>
-          <InputText id="itemName" v-model="newItem.model" class="mt-2" />
+      <div class="dialog-form">
+        <div class="form-field">
+          <label for="itemName">Model Name</label>
+          <InputText id="itemName" v-model="newItem.model" class="form-input" />
         </div>
-        <br/>
-        <div class="field">
-          <label for="itemDescription">Description </label>
-          <InputText id="itemDescription" v-model="newItem.description" class="mt-2" />
+
+        <div class="form-field">
+          <label for="itemDescription">Description</label>
+          <InputText id="itemDescription" v-model="newItem.description" class="form-input" />
         </div>
-        <br/>
-        <div class="field mt-4">
-          <label for="itemLink">Image URL </label>
+
+        <div class="form-field">
+          <label for="itemLink">Image URL</label>
           <InputText 
             id="itemLink"
             v-model="newItem.link"
-            class="mt-2"
+            class="form-input"
             placeholder="https://example.com/image.jpg"
           />
         </div>
-        <br/>
-        <div class="field mt-4">
-          <label for="itemQuantity">Quantity </label>
+
+        <div class="form-field">
+          <label for="itemQuantity">Quantity</label>
           <InputNumber 
             id="itemQuantity"
             v-model="newItem.quantity"
             :min="0"
-            class="mt-2"
+            class="form-input"
           />
         </div>
-        <br/>
-        <div class="field mt-4">
-          <label for="itemLocation">Location </label>
-          <InputText id="itemLocation" v-model="newItem.location" class="mt-2" />
+
+        <div class="form-field">
+          <label for="itemLocation">Location</label>
+          <InputText id="itemLocation" v-model="newItem.location" class="form-input" />
         </div>
-        <br/>
       </div>
 
       <template #footer>
@@ -600,21 +622,21 @@
           label="Cancel" 
           icon="pi pi-times" 
           @click="showAddDialog = false; resetNewItemForm()"  
-          class="p-button-text"
-          severity="danger"
+          class="dialog-btn cancel-btn"
+          text
         />
         <Button 
           label="Add Item" 
           icon="pi pi-check" 
           @click="addNewItem" 
-          autofocus
           :loading="addingItem"
+          class="dialog-btn confirm-btn primary-gradient"
         />
       </template>
     </Dialog>
 
     <!-- Toast -->
-    <Toast />
+    <Toast position="top-right" />
   </div>
 </template>
 
@@ -622,8 +644,6 @@
 import { useToast } from 'primevue/usetoast'
 import { exportCSV } from '~/utils/exportCSV.js' 
 
-// Nuxt 3 uses #build/imports for auto-imported composables
-// useRouter is auto-imported in Nuxt 3
 const router = useRouter()
 const toast = useToast()
 const config = useRuntimeConfig()
@@ -798,7 +818,7 @@ const resetMissingRequestForm = () => {
   }
 }
 
-// Load data - using fetch instead of $fetch
+// Load data
 const loadData = async () => {
   loading.value = true
   try {
@@ -825,7 +845,6 @@ const loadData = async () => {
   } catch (error) {
     console.error('Error loading data:', error)
     
-    // Handle 401 unauthorized
     if (error.message?.includes('401') || error.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
@@ -889,7 +908,7 @@ const openRequestDialog = (item) => {
   showRequestDialog.value = true
 }
 
-// Submit request - using fetch (already done)
+// Submit request
 const submitRequest = async () => {
   if (!selectedItems.value) {
     toast.add({
@@ -977,9 +996,8 @@ const submitRequest = async () => {
   }
 }
 
-// Submit missing item request - using fetch instead of $fetch
+// Submit missing item request
 const submitMissing = async () => {
-  // Validation
   if (!missingrequestForm.value.model?.trim()) {
     toast.add({
       severity: 'warn',
@@ -1111,7 +1129,7 @@ const updateSelectedItem = () => {
   )
 }
 
-// Actual update logic - using fetch instead of $fetch
+// Actual update logic
 const performUpdate = async () => {
   updatingItem.value = true
   
@@ -1171,7 +1189,7 @@ const performUpdate = async () => {
   }
 }
 
-// Delete selected item (admin only) - using fetch instead of $fetch
+// Delete selected item
 const deleteSelectedItem = (item) => {
   if (!item) return
   
@@ -1222,9 +1240,8 @@ const deleteSelectedItem = (item) => {
   )
 }
 
-// Add new item (admin only) - using fetch instead of $fetch
+// Add new item
 const addNewItem = async () => {
-  // Validation
   if (!newItem.value.model?.trim()) {
     toast.add({
       severity: 'warn',
@@ -1376,26 +1393,28 @@ const formatDate = (dateString) => {
   }
 }
 
-// Define page meta for layout/navigation
 definePageMeta({
   layout: 'default',
   middleware: 'auth',
   requiresAuth: true
 })
 </script>
+
 <style scoped>
-/* Keep all your existing styles exactly as they are */
 .home {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
   width: 100%;
   overflow-x: hidden;
 }
 
 .main-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
   padding: 1.5rem;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .content-wrapper {
@@ -1405,43 +1424,111 @@ definePageMeta({
 }
 
 .header-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 0.25rem 0;
+}
+
+.page-subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Action Card */
+.action-card {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.action-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.main-content-area {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
+.search-wrapper {
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-input {
   width: 100%;
 }
 
-.table-section {
-  flex: 1;
-  min-width: 0;
+.search-input :deep(.p-inputtext) {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  transition: all 0.2s;
 }
 
-.card {
+.search-input :deep(.p-inputtext:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.search-input :deep(.pi-search) {
+  left: 1rem;
+  color: #999;
+}
+
+.action-buttons-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+  border: none;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.warning-gradient {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.refresh-btn {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
+  color: #333;
+  border: 1px solid #e5e7eb;
 }
 
-.grid {
-  display: grid;
-}
-
-.ml-4 {
-  margin-left: 1rem;
-}
-
-/* Product Grid Styles */
+/* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -1449,25 +1536,23 @@ definePageMeta({
 .product-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
   border: 2px solid transparent;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+  border-color: #667eea;
 }
 
-.product-card.selected {
-  border-color: #3b82f6;
-}
-
+.product-card.selected,
 .product-card.expanded {
-  border-color: #3b82f6;
-  background-color: #f8fafc;
+  border-color: #667eea;
+  background: #f8fafc;
 }
 
 .product-image-container {
@@ -1491,41 +1576,31 @@ definePageMeta({
 
 .stock-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stock-badge.in-stock {
-  background-color: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 .stock-badge.low-stock {
-  background-color: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
 .stock-badge.out-of-stock {
-  background-color: #ef4444;
-}
-
-.status-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 .product-info {
-  padding: 1rem;
-}
-
-.product-id {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-bottom: 0.25rem;
+  padding: 1.5rem;
 }
 
 .product-title {
@@ -1533,7 +1608,6 @@ definePageMeta({
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 0.5rem;
-  line-height: 1.3;
 }
 
 .product-description {
@@ -1559,6 +1633,7 @@ definePageMeta({
 }
 
 .detail-item i {
+  color: #667eea;
   font-size: 0.875rem;
 }
 
@@ -1581,46 +1656,60 @@ definePageMeta({
   }
 }
 
-.admin-actions {
-  margin-bottom: 1rem;
-}
-
 .action-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
-}
-
-.action-button {
-  width: 100%;
-}
-
-.student-actions {
   margin-bottom: 1rem;
+}
+
+.action-grid-btn {
+  width: 100%;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s;
+}
+
+.action-grid-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.request-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
 }
 
 .request-button {
   width: 100%;
-}
-
-.out-of-stock-note {
-  font-size: 0.875rem;
-  color: #ef4444;
-  margin-top: 0.5rem;
-  text-align: center;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 .additional-details {
   background: #f1f5f9;
-  padding: 0.75rem;
-  border-radius: 6px;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
 }
 
 .detail-row:last-child {
@@ -1637,8 +1726,9 @@ definePageMeta({
 }
 
 .detail-link {
-  color: #3b82f6;
+  color: #667eea;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .detail-link:hover {
@@ -1652,10 +1742,10 @@ definePageMeta({
   align-items: center;
   gap: 1rem;
   margin-top: 2rem;
-  padding: 1rem;
+  padding: 1.5rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .pagination-info {
@@ -1669,6 +1759,16 @@ definePageMeta({
   gap: 1rem;
 }
 
+.pagination-nav-btn {
+  color: #667eea;
+  transition: all 0.2s;
+}
+
+.pagination-nav-btn:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.1);
+}
+
 .page-numbers {
   display: flex;
   gap: 0.25rem;
@@ -1678,56 +1778,69 @@ definePageMeta({
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
   padding: 0 0.5rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.875rem;
+  font-weight: 500;
   color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .page-number:hover:not(.active):not(.ellipsis) {
-  background-color: #f1f5f9;
+  background: #f1f5f9;
   color: #334155;
 }
 
 .page-number.active {
-  background-color: #3b82f6;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
 .page-number.ellipsis {
   cursor: default;
-  pointer-events: none;
+  color: #94a3b8;
 }
 
 .items-per-page {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   font-size: 0.875rem;
   color: #64748b;
 }
 
 .page-select {
-  width: 100px;
+  width: 120px;
+}
+
+.page-select :deep(.p-dropdown) {
+  border-radius: 8px;
+  border-color: #e5e7eb;
 }
 
 /* Summary Container */
 .summary-container {
-  padding: 1.5rem;
   margin-top: 2rem;
+  padding: 1.5rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .summary-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
 }
 
 .summary-stats {
@@ -1742,7 +1855,15 @@ definePageMeta({
   text-align: center;
   flex: 1;
   min-width: 120px;
-  padding: 0.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .stat-value {
@@ -1750,6 +1871,22 @@ definePageMeta({
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 0.25rem;
+}
+
+.stat-value.total {
+  color: #667eea;
+}
+
+.stat-value.low-stock {
+  color: #f59e0b;
+}
+
+.stat-value.out-of-stock {
+  color: #ef4444;
+}
+
+.stat-value.in-stock {
+  color: #10b981;
 }
 
 .stat-label {
@@ -1761,26 +1898,39 @@ definePageMeta({
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 4rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+.empty-state-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #667eea;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
 .empty-state h3 {
   font-size: 1.5rem;
   color: #1e293b;
-  margin: 1rem 0 0.5rem 0;
+  margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
   color: #64748b;
+  margin: 0;
 }
 
 /* Loading State */
 .loading-state {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 4rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -1789,9 +1939,86 @@ definePageMeta({
 .loading-state p {
   margin-top: 1rem;
   color: #64748b;
+  font-size: 1rem;
 }
 
-/* Request Dialog Preview */
+/* Dialog Styles */
+.custom-dialog :deep(.p-dialog-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.custom-dialog :deep(.p-dialog-title) {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.custom-dialog :deep(.p-dialog-header-icon) {
+  color: white;
+}
+
+.custom-dialog :deep(.p-dialog-content) {
+  padding: 1.5rem;
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-weight: 500;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.form-input {
+  width: 100%;
+}
+
+.form-input :deep(.p-inputtext) {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.form-input :deep(.p-inputtext:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.form-input.readonly :deep(.p-inputtext) {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.class-selectors {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.class-select {
+  flex: 1;
+}
+
+.class-select :deep(.p-dropdown) {
+  width: 100%;
+  border-radius: 8px;
+  border-color: #e5e7eb;
+}
+
 .request-item-preview {
   display: flex;
   gap: 1rem;
@@ -1799,14 +2026,14 @@ definePageMeta({
   padding: 1rem;
   background: #f8fafc;
   border-radius: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .request-item-image {
   width: 60px;
   height: 60px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
   padding: 0.25rem;
 }
@@ -1818,69 +2045,198 @@ definePageMeta({
 .request-item-info h4 {
   margin: 0 0 0.5rem 0;
   color: #1e293b;
+  font-size: 1rem;
 }
 
-/* MOBILE FIX */
-@media (max-width: 1000px) {
-  .home {
-    padding: 0;
-    margin: 0;
+.stock-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stock-text {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+/* Confirmation Dialog */
+.confirm-dialog :deep(.p-dialog-header) {
+  background: #f8fafc;
+  color: #1e293b;
+  padding: 1.5rem;
+}
+
+.confirmation-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.warning-icon {
+  font-size: 2rem;
+  color: #f59e0b;
+}
+
+/* Missing Item Dialog */
+.missing-dialog .supplier-section {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.supplier-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.supplier-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.instruction-box,
+.warning-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.instruction-box {
+  background: #e8f4fd;
+  color: #0284c7;
+  border: 1px solid #b8e1ff;
+}
+
+.warning-box {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.instruction-box i,
+.warning-box i {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.instruction-box p,
+.warning-box p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Dialog Footer Buttons */
+.dialog-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.dialog-btn.confirm-btn {
+  color: white;
+  border: none;
+}
+
+.dialog-btn.confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-btn.cancel-btn {
+  color: #64748b;
+}
+
+.dialog-btn.cancel-btn:hover {
+  background: #f1f5f9;
+}
+
+.success-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.danger-gradient {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
-  .card.mb-6 {
-    margin-bottom: 1rem !important; 
+  
+  .summary-stats {
+    gap: 0.75rem;
+  }
+  
+  .stat-item {
+    min-width: 100px;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .home {
+    padding: 1rem;
   }
   
   .main-container {
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    max-width: 100vw;
+    padding: 1rem;
   }
   
-  .content-wrapper {
-    max-width: 100vw;
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-  }
-  
-  .main-content-area {
+  .action-bar {
     flex-direction: column;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 0;
+    align-items: stretch;
+  }
+  
+  .search-wrapper {
+    min-width: 100%;
+  }
+  
+  .action-buttons-group {
+    justify-content: stretch;
+  }
+  
+  .action-btn {
+    flex: 1;
   }
   
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
   }
   
-  .action-grid {
+  .product-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .table-section {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 1rem !important;
-    box-sizing: border-box;
-  }
-  
-  .card.mb-6 {
-    margin-bottom: 1rem !important; 
-  }
-  
-  .header-section {
-    padding: 0 1rem;
-    box-sizing: border-box;
-  }
-  
-  .pagination-container {
-    padding: 0.75rem;
   }
   
   .pagination-controls {
@@ -1892,40 +2248,6 @@ definePageMeta({
     flex-wrap: wrap;
     justify-content: center;
   }
-
-  .summary-stats {
-    gap: 0.5rem;
-  }
-  
-  .stat-item {
-    min-width: 100px;
-  }
-  
-  .stat-value {
-    font-size: 1.5rem;
-  }
-  
-  .stat-label {
-    font-size: 0.75rem;
-  }
-}
-
-/* Responsive grid */
-@media (max-width: 768px) {
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .pagination-controls {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
   
   .summary-stats {
     display: grid;
@@ -1933,83 +2255,54 @@ definePageMeta({
     gap: 1rem;
   }
   
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .class-selectors {
+    flex-direction: column;
+  }
+  
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 0.75rem;
+  }
+  
+  .action-buttons-group {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+  
   .stat-item {
-    min-width: auto;
+    padding: 0.75rem;
+  }
+  
+  .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  
+  .empty-state {
+    padding: 2rem;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.25rem;
   }
 }
-
-/* The rest of your existing styles remain as they are */
-.home .page-header {
-  margin-bottom: 16px;
-}
-
-.home .toolbar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.home .content-wrapper {
-  gap: 16px;
-}
-
-.home .table-section {
-  padding: 16px;
-}
-
-.home table {
-  margin-top: 8px;
-}
-
-.home .pagination {
-  margin-top: 12px;
-}
-
-.home .summary-section {
-  margin-top: 16px;
-}
-
-.home .toolbar {
-  margin-bottom: 24px;
-}
-
-.confirmation-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.warning {
-  color: #856404;
-  background-color: #fff3cd;
-  border-color: #ffeeba;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.supplier {
-  color: #0d6efd;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.supplier:hover {
-  text-decoration: underline;
-}
-
-.supplier:visited {
-  color: #6610f2;
-}
-
-.instruction{
-  color: black;
-  background-color: #e9ecef;
-  border-color: #ced4da;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.card.mb-6 {
-    margin-bottom: 1rem !important; 
-  }
 </style>

@@ -11,22 +11,35 @@
           <!-- Sidebar: users with pending requests -->
           <aside class="sidebar">
             <div class="card sidebar-card">
-              <h3 class="sidebar-title">Users with pending requests</h3>
+              <h3 class="sidebar-title">
+                <i class="pi pi-users" style="margin-right: 0.5rem;"></i>
+                Users with pending requests
+              </h3>
               <div class="user-list">
-                <button
-                  v-for="u in pendingUsers"
-                  :key="u.id"
-                  type="button"
-                  class="user-row"
-                  :class="{ active: selectedUser?.id === u.id }"
-                  @click="selectUser(u)"
-                >
-                  <span class="user-email">{{ u.email }}</span>
-                  <Badge :value="u.totalPending" severity="warning" />
-                </button>
-                <p v-if="!loading && pendingUsers.length === 0" class="empty-list">
+                <template v-if="pendingUsers && pendingUsers.length > 0">
+                  <button
+                    v-for="u in pendingUsers"
+                    :key="u.id"
+                    type="button"
+                    class="user-row"
+                    :class="{ active: selectedUser?.id === u.id }"
+                    @click="selectUser(u)"
+                  >
+                    <div class="user-info">
+                      <span class="user-email">{{ u.email }}</span>
+                      <span class="user-id">ID: {{ u.id }}</span>
+                    </div>
+                    <Badge :value="u.totalPending" severity="warning" class="pending-badge" />
+                  </button>
+                </template>
+                <p v-else-if="!loading" class="empty-list">
+                  <i class="pi pi-inbox" style="margin-right: 0.5rem;"></i>
                   No pending requests
                 </p>
+                <div v-else class="loading-state">
+                  <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem;"></i>
+                  <p>Loading users...</p>
+                </div>
               </div>
             </div>
           </aside>
@@ -34,105 +47,166 @@
           <!-- Main: selected user's cart -->
           <main class="main-content">
             <div class="card main-card">
-              <template v-if="selectedUser">
+              <template v-if="selectedUser && selectedUser.requests">
                 <div class="cart-header">
-                  <h2>Cart — {{ selectedUser.email }}</h2>
+                  <div class="cart-title-section">
+                    <h2>
+                      <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
+                      Cart — {{ selectedUser.email }}
+                    </h2>
+                    <Badge 
+                      :value="selectedUser.requests.length + ' items'" 
+                      severity="info"
+                      class="item-count-badge"
+                    />
+                  </div>
                   <Button
                     label="Confirm Cart"
                     icon="pi pi-check"
                     severity="success"
                     :loading="submitting"
                     :disabled="!hasDraftChanges"
-                    @click="confirmCart"
+                    class="confirm-button"
                   />
                 </div>
                 <DataTable
                   :value="selectedUser.requests"
                   :loading="false"
                   dataKey="id"
-                  class="p-datatable-sm"
+                  class="p-datatable-sm custom-table"
                   responsiveLayout="scroll"
                 >
                   <Column header="Image" style="width: 80px">
                     <template #body="{ data }">
-                      <img
-                        v-if="data.component?.link"
-                        :src="data.component.link"
-                        :alt="data.component.model"
-                        class="component-thumb"
-                        loading="lazy"
-                        @error="($event.target as HTMLImageElement).style.display = 'none'"
+                      <div class="image-container">
+                        <img
+                          v-if="data.component?.link"
+                          :src="data.component.link"
+                          :alt="data.component.model"
+                          class="component-thumb"
+                          loading="lazy"
+                          @error="($event.target as HTMLImageElement).style.display = 'none'"
+                        />
+                        <div v-else class="no-image">
+                          <i class="pi pi-image"></i>
+                        </div>
+                      </div>
+                    </template>
+                  </Column>
+                  <Column field="component.model" header="Component">
+                    <template #body="{ data }">
+                      <div class="component-info">
+                        <span class="component-model">{{ data.component?.model || '—' }}</span>
+                        <span v-if="data.component?.manufacturer" class="component-manufacturer">
+                          {{ data.component.manufacturer }}
+                        </span>
+                      </div>
+                    </template>
+                  </Column>
+                  <Column header="Requested" style="width: 100px">
+                    <template #body="{ data }">
+                      <div class="quantity-badge requested">
+                        {{ data.quantityRequested }}
+                      </div>
+                    </template>
+                  </Column>
+                  <Column header="In stock" style="width: 100px">
+                    <template #body="{ data }">
+                      <div 
+                        class="quantity-badge stock"
+                        :class="{ 'low-stock': data.component?.quantityInStock < data.quantityRequested }"
+                      >
+                        {{ data.component?.quantityInStock ?? '—' }}
+                      </div>
+                    </template>
+                  </Column>
+                  <Column header="Location" style="width: 100px">
+                    <template #body="{ data }">
+                      <Badge 
+                        :value="data.component?.location ?? '—'" 
+                        severity="secondary"
+                        class="location-badge"
                       />
-                      <span v-else class="no-image">—</span>
                     </template>
                   </Column>
-                  <Column field="component.model" header="Component" />
-                  <Column header="Requested">
+                  <Column header="Class" style="width: 100px">
                     <template #body="{ data }">
-                      {{ data.quantityRequested }}
+                      <Tag 
+                        :value="data.class" 
+                        severity="info"
+                        class="class-tag"
+                      />
                     </template>
                   </Column>
-                  <Column header="In stock">
-                    <template #body="{ data }">
-                      {{ data.component?.quantityInStock ?? '—' }}
-                    </template>
-                  </Column>
-                  <Column header="Location">
-                    <template #body="{ data }">
-                      <Badge :value="data.component?.location ?? '—'" severity="secondary" />
-                    </template>
-                  </Column>
-                  <Column header="Class">
-                    <template #body="{ data }">
-                      <Tag :value="data.class" severity="info" />
-                    </template>
-                  </Column>
-                  <Column header="Status">
+                  <Column header="Status" style="width: 100px">
                     <template #body="{ data }">
                       <Tag
                         :value="data.status"
                         :severity="data.status === 'declined' ? 'danger' : 'info'"
+                        class="status-tag"
                       />
                     </template>
                   </Column>
-                  <Column header="Action" style="min-width: 220px">
+                  <Column header="Action" style="min-width: 280px">
                     <template #body="{ data }">
                       <div v-if="data.status === 'declined'" class="declined-label">
-                        <Tag value="Declined" severity="danger" />
+                        <Tag value="Declined" severity="danger" icon="pi pi-ban" />
                       </div>
                       <div v-else class="action-cell">
-                        <InputNumber
-                          :model-value="draftQty(data.id)"
-                          :min="0"
-                          :max="Math.min(data.quantityRequested, data.component?.quantityInStock ?? 0)"
-                          show-buttons
-                          class="qty-input"
-                          placeholder="Qty"
-                          @update:model-value="(v: number) => setDraftQty(data.id, v ?? 0)"
-                        />
-                        <Button
-                          label="Approve"
-                          icon="pi pi-check"
-                          severity="success"
-                          size="small"
-                          :disabled="!(draftQty(data.id) > 0)"
-                          @click="setApprove(data)"
-                        />
-                        <Button
-                          label="Decline"
-                          icon="pi pi-times"
-                          severity="secondary"
-                          size="small"
-                          @click="setDecline(data)"
-                        />
+                        <div class="action-controls">
+                          <div class="qty-input-wrapper">
+                            <label class="qty-label">Qty:</label>
+                            <InputNumber
+                              :model-value="draftQty(data.id)"
+                              :min="0"
+                              :max="Math.min(data.quantityRequested, data.component?.quantityInStock ?? 0)"
+                              show-buttons
+                              class="qty-input"
+                              :class="{ 'has-value': draftQty(data.id) > 0 }"
+                              button-layout="horizontal"
+                              increment-button-class="qty-btn"
+                              decrement-button-class="qty-btn"
+                              @update:model-value="(v: number) => setDraftQty(data.id, v ?? 0)"
+                            />
+                          </div>
+                          <div class="action-buttons">
+                            <Button
+                              label="Approve"
+                              icon="pi pi-check"
+                              severity="success"
+                              size="small"
+                              class="action-btn approve-btn"
+                              :disabled="!(draftQty(data.id) > 0)"
+                              @click="setApprove(data)"
+                            />
+                            <Button
+                              label="Decline"
+                              icon="pi pi-times"
+                              severity="secondary"
+                              size="small"
+                              class="action-btn decline-btn"
+                              @click="setDecline(data)"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </template>
                   </Column>
                 </DataTable>
               </template>
+              <div v-else-if="loading" class="empty-state">
+                <div class="empty-state-content">
+                  <i class="pi pi-spin pi-spinner empty-icon" />
+                  <h3>Loading...</h3>
+                  <p>Please wait while we load the data</p>
+                </div>
+              </div>
               <div v-else class="empty-state">
-                <i class="pi pi-inbox empty-icon" />
-                <p>Select a user from the list to view their pending cart</p>
+                <div class="empty-state-content">
+                  <i class="pi pi-inbox empty-icon" />
+                  <h3>No User Selected</h3>
+                  <p>Select a user from the list to view their pending cart</p>
+                </div>
               </div>
             </div>
           </main>
@@ -155,25 +229,32 @@ const toast = useToast()
 const router = useRouter()
 const config = useRuntimeConfig()
 const apiBase = computed(() => (config.public?.API_URL as string) || '')
+
 function apiUrl (path: string) {
   return apiBase.value ? `${apiBase.value.replace(/\/$/, '')}/${path}` : `/api/${path}`
 }
 
+// Initialize all refs with default values
 const pendingUsers = ref<any[]>([])
 const selectedUser = ref<any>(null)
 const loading = ref(false)
 const submitting = ref(false)
+const draftQuantities = ref<Record<string, number>>({})
+
 const cartStore = useTechnicianCartStore()
 
 const token = ref('')
+
 onMounted(() => {
   token.value = typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : ''
   const user = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {}
+  
   if (user?.role !== 'admin' && user?.role !== 'superadmin' && user?.role !== 'instructor') {
     toast.add({ severity: 'error', summary: 'Access denied', detail: 'Technician or admin only', life: 3000 })
     router.push('/home')
     return
   }
+  
   loadPendingUsers()
 })
 
@@ -187,12 +268,16 @@ async function loadPendingUsers () {
     const res = await $fetch<{ success: boolean; data: any[] }>(apiUrl('admin/pending-users'), {
       headers: getHeaders() as Record<string, string>,
     })
+    
     if (res?.success && Array.isArray(res.data)) {
       pendingUsers.value = res.data
+      
       if (selectedUser.value) {
         const found = res.data.find((u: any) => u.id === selectedUser.value.id)
         selectedUser.value = found || null
       }
+    } else {
+      pendingUsers.value = []
     }
   } catch (e: any) {
     if (e?.statusCode === 401) {
@@ -200,6 +285,7 @@ async function loadPendingUsers () {
       return
     }
     toast.add({ severity: 'error', summary: 'Error', detail: e?.data?.message || 'Failed to load pending users', life: 5000 })
+    pendingUsers.value = []
   } finally {
     loading.value = false
   }
@@ -209,10 +295,11 @@ function selectUser (u: any) {
   selectedUser.value = u
 }
 
-const draftQuantities = ref<Record<string, number>>({})
+// Watch for selected user changes
 watch(selectedUser, (u) => {
   draftQuantities.value = {}
-  if (u?.requests) {
+  
+  if (u?.requests && Array.isArray(u.requests)) {
     u.requests.forEach((r: any) => {
       const d = cartStore.getDraft(r.id)
       if (d?.decision === 'approve') {
@@ -228,6 +315,7 @@ watch(selectedUser, (u) => {
 function draftQty (requestId: string) {
   return draftQuantities.value[requestId] ?? 0
 }
+
 function setDraftQty (requestId: string, value: number) {
   draftQuantities.value[requestId] = value
   cartStore.setDraft(requestId, {
@@ -261,6 +349,7 @@ function setDecline (data: any) {
 
 const hasDraftChanges = computed(() => {
   if (!selectedUser.value?.requests?.length) return false
+  
   return selectedUser.value.requests.some((r: any) => {
     const d = cartStore.getDraft(r.id)
     return d && (d.decision === 'decline' || (d.decision === 'approve' && d.approvedQuantity > 0))
@@ -269,7 +358,9 @@ const hasDraftChanges = computed(() => {
 
 async function confirmCart () {
   if (!selectedUser.value?.requests?.length) return
+  
   const items: { requestId: string; approvedQuantity: number; decision: 'approve' | 'decline' }[] = []
+  
   for (const r of selectedUser.value.requests) {
     const d = cartStore.getDraft(r.id)
     if (d?.decision === 'decline') {
@@ -278,17 +369,21 @@ async function confirmCart () {
       items.push({ requestId: r.id, approvedQuantity: d.approvedQuantity, decision: 'approve' })
     }
   }
+  
   if (items.length === 0) {
     toast.add({ severity: 'warn', summary: 'No actions', detail: 'Set Approve or Decline for at least one item', life: 3000 })
     return
   }
+  
   submitting.value = true
+  
   try {
     await $fetch(apiUrl('admin/process-cart'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getHeaders() } as Record<string, string>,
       body: { items },
     })
+    
     toast.add({ severity: 'success', summary: 'Cart processed', detail: `${items.length} item(s) updated`, life: 3000 })
     cartStore.clearDraftsForUser(selectedUser.value.requests.map((r: any) => r.id))
     await loadPendingUsers()
@@ -307,35 +402,549 @@ async function confirmCart () {
 </script>
 
 <style scoped>
-.technician-view { min-height: 100vh; background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%); }
-.main-container { padding: 1.5rem; }
-.content-wrapper { max-width: 1600px; margin: 0 auto; }
-.header-section { margin-bottom: 1.5rem; }
-.page-title { font-size: 1.75rem; font-weight: 700; color: #111; margin: 0 0 0.25rem 0; }
-.page-subtitle { color: #666; margin: 0; }
-.dashboard-layout { display: flex; gap: 1.5rem; align-items: flex-start; }
-.sidebar { width: 280px; flex-shrink: 0; }
-.sidebar-card { padding: 1rem; }
-.sidebar-title { font-size: 1rem; font-weight: 600; margin: 0 0 1rem 0; }
-.user-list { display: flex; flex-direction: column; gap: 0.25rem; }
-.user-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.6rem 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;
-  background: #fff; cursor: pointer; text-align: left; width: 100%;
+.technician-view {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
 }
-.user-row:hover { background: #f9fafb; border-color: #d1d5db; }
-.user-row.active { background: #eff6ff; border-color: #3b82f6; }
-.user-email { font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.empty-list { color: #6b7280; font-size: 0.9rem; margin: 0.5rem 0 0 0; }
-.main-content { flex: 1; min-width: 0; }
-.main-card { padding: 1.25rem; }
-.cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
-.cart-header h2 { margin: 0; font-size: 1.25rem; }
-.component-thumb { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; }
-.no-image { color: #9ca3af; }
-.action-cell { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.qty-input { width: 100px; }
-.empty-state { text-align: center; padding: 3rem; color: #6b7280; }
-.empty-icon { font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.5; }
-@media (max-width: 900px) { .dashboard-layout { flex-direction: column; } .sidebar { width: 100%; } }
+
+.main-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+}
+
+.content-wrapper {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.header-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 0.25rem 0;
+}
+
+.page-subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.dashboard-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.sidebar-card {
+  padding: 1.5rem;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 200px;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.user-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+}
+
+.user-row.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+}
+
+.user-row.active .user-email,
+.user-row.active .user-id {
+  color: white;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-email {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.user-id {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.pending-badge {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.empty-list, .loading-state {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 1rem 0 0 0;
+  text-align: center;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-state i {
+  color: #667eea;
+}
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.main-card {
+  padding: 1.5rem;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.cart-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cart-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.item-count-badge {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.confirm-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.confirm-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Table Styles */
+.custom-table :deep(.p-datatable-thead > tr > th) {
+  background: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr:hover) {
+  background: #f8f9fa;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr > td) {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Image Styles */
+.image-container {
+  width: 48px;
+  height: 48px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.component-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 1.2rem;
+}
+
+/* Component Info */
+.component-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.component-model {
+  font-weight: 500;
+  color: #333;
+}
+
+.component-manufacturer {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* Quantity Badges */
+.quantity-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  min-width: 60px;
+}
+
+.quantity-badge.requested {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.quantity-badge.stock {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.quantity-badge.stock.low-stock {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Location Badge */
+.location-badge {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+}
+
+/* Class Tag */
+.class-tag {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+}
+
+/* Status Tag */
+.status-tag {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+}
+
+/* Action Cell - FIXED */
+.action-cell {
+  padding: 0.5rem 0;
+}
+
+.action-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.qty-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.qty-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+  min-width: 30px;
+}
+
+.qty-input {
+  width: 120px !important;
+}
+
+.qty-input :deep(.p-inputnumber-input) {
+  width: 60px !important;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+.qty-input :deep(.p-inputnumber-input:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.qty-input.has-value :deep(.p-inputnumber-input) {
+  background: #e8f5e8;
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+
+.qty-btn {
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  color: #333 !important;
+}
+
+.qty-btn:hover {
+  background: #f8f9fa !important;
+  border-color: #667eea !important;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  min-width: 80px;
+  transition: all 0.2s;
+}
+
+.action-btn.approve-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  border: none;
+}
+
+.action-btn.approve-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.action-btn.decline-btn {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  border: none;
+  color: white;
+}
+
+.action-btn.decline-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.declined-label {
+  display: flex;
+  justify-content: center;
+}
+
+.declined-label :deep(.p-tag) {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+  color: #6b7280;
+}
+
+.empty-state-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+  color: #667eea;
+}
+
+.empty-state h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #999;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .action-controls {
+    flex-direction: column;
+  }
+  
+  .qty-input-wrapper {
+    width: 100%;
+  }
+  
+  .qty-input {
+    width: 100% !important;
+  }
+  
+  .qty-input :deep(.p-inputnumber) {
+    width: 100%;
+  }
+  
+  .qty-input :deep(.p-inputnumber-input) {
+    width: 100% !important;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .technician-view {
+    padding: 1rem;
+  }
+  
+  .main-container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .confirm-button {
+    width: 100%;
+  }
+  
+  .action-cell {
+    min-width: 250px;
+  }
+  
+  .action-controls {
+    flex-direction: column;
+  }
+  
+  .qty-input-wrapper {
+    width: 100%;
+  }
+  
+  .qty-input {
+    width: 100% !important;
+  }
+  
+  .qty-input :deep(.p-inputnumber) {
+    width: 100%;
+  }
+  
+  .qty-input :deep(.p-inputnumber-input) {
+    width: 100% !important;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .action-btn {
+    flex: 1;
+  }
+}
 </style>

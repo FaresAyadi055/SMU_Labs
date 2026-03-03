@@ -2,22 +2,17 @@
   <div class="users-view">
     <div class="main-container">
       <div class="content-wrapper">
+        <!-- Header -->
         <div class="header-section">
-          <div>
-            <h1 class="text-3xl font-bold text-surface-900">
-              Users Management
-            </h1>
-            <br />
-            <p class="text-surface-600 mt-2">
-              View and manage user roles with filtering
-            </p>
-          </div>
+          <h1 class="page-title">Users Management</h1>
+          <p class="page-subtitle">View and manage user roles with filtering</p>
         </div>
 
-        <div class="card mb-6">
-          <div class="flex justify-between items-left p-4 gap-3 flex-wrap">
-            <div class="flex items-center gap-4 w-full md:w-auto">
-              <span class="p-input-icon-left w-full md:w-96">
+        <!-- Search and Actions -->
+        <div class="card action-card">
+          <div class="action-bar">
+            <div class="search-wrapper">
+              <span class="p-input-icon-left search-input">
                 <i class="pi pi-search" />
                 <InputText
                   v-model="searchQuery"
@@ -27,14 +22,15 @@
                 />
               </span>
             </div>
-            <div class="flex items-center gap-2">
+            
+            <div class="filter-group">
               <Select
                 v-model="roleFilter"
                 :options="roleOptions"
                 option-label="label"
                 option-value="value"
                 placeholder="All roles"
-                class="w-44"
+                class="filter-select"
                 @change="loadData"
               />
               <Button
@@ -42,14 +38,16 @@
                 icon="pi pi-refresh"
                 @click="loadData"
                 :loading="loading"
+                class="action-btn refresh-btn"
               />
             </div>
           </div>
         </div>
 
+        <!-- Main Content Area -->
         <div class="main-content-area">
           <div class="table-section">
-            <div class="card">
+            <div class="card table-card">
               <DataTable
                 :value="filteredUsers"
                 :paginator="true"
@@ -62,20 +60,20 @@
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
                 responsiveLayout="scroll"
-                class="p-datatable-sm"
+                class="custom-table"
                 sortField="createdAt"
                 :sortOrder="-1"
               >
                 <Column field="email" header="Email" :sortable="true">
                   <template #body="{ data }">
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-user text-surface-400" />
-                      <span>{{ data.email }}</span>
+                    <div class="user-info">
+                      <i class="pi pi-user user-icon" />
+                      <span class="user-email">{{ data.email }}</span>
                       <Badge
                         v-if="data.email === currentUserEmail"
                         value="You"
                         severity="info"
-                        size="small"
+                        class="you-badge"
                       />
                     </div>
                   </template>
@@ -83,49 +81,86 @@
 
                 <Column field="role" header="Role" :sortable="true">
                   <template #body="{ data }">
-                    <Tag :value="data.role" :severity="roleSeverity(data.role)" rounded />
+                    <Tag 
+                      :value="data.role" 
+                      :severity="roleSeverity(data.role)"
+                      class="role-tag"
+                      rounded
+                    />
                   </template>
                 </Column>
 
                 <Column field="createdAt" header="Created" :sortable="true">
                   <template #body="{ data }">
-                    {{ formatDate(data.createdAt) }}
+                    <div class="date-info">
+                      <i class="pi pi-calendar"></i>
+                      <span>{{ formatDate(data.createdAt) }}</span>
+                    </div>
                   </template>
                 </Column>
+
+                <!-- Empty State -->
+                <template #empty>
+                  <div class="empty-state">
+                    <div class="empty-state-content">
+                      <i class="pi pi-users empty-icon"></i>
+                      <h3>No users found</h3>
+                      <p>Try adjusting your filters</p>
+                    </div>
+                  </div>
+                </template>
               </DataTable>
             </div>
 
-            <div v-if="selectedUser" class="mt-4 p-4 bg-primary-50 rounded-lg">
-              <div class="flex justify-between items-center">
-                <div>
-                  <span class="font-medium text-primary-900">
-                    Selected user
-                  </span>
-                  <p class="text-sm text-primary-700 mt-1">
-                    {{ selectedUser.email }} — {{ selectedUser.role }}
-                  </p>
+            <!-- Selected User Info -->
+            <div v-if="selectedUser" class="selected-user-card">
+              <div class="selected-user-content">
+                <div class="selected-user-icon">
+                  <i class="pi pi-user"></i>
+                </div>
+                <div class="selected-user-details">
+                  <span class="selected-user-label">Selected user</span>
+                  <span class="selected-user-value">{{ selectedUser.email }}</span>
+                  <Tag 
+                    :value="selectedUser.role" 
+                    :severity="roleSeverity(selectedUser.role)"
+                    class="selected-user-role"
+                  />
                 </div>
                 <Button
                   label="Change role"
                   icon="pi pi-pencil"
                   size="small"
                   @click="openEditDialog"
+                  class="change-role-btn primary-gradient"
                 />
               </div>
             </div>
           </div>
-
+            
           <div class="sidebar-section">
-            <div class="card sticky-sidebar">
-              <div class="p-4 border-b">
-                <div class="text-lg font-semibold text-surface-900">
-                  <strong>Role summary</strong>
-                </div>
+            <div class="card sidebar-card">
+              <div class="sidebar-header">
+                <i class="pi pi-chart-pie"></i>
+                <h3>Role Summary</h3>
               </div>
-              <div class="p-4 space-y-2 text-sm text-surface-700">
-                <div v-for="opt in roleOptions" :key="opt.label" class="flex justify-between">
-                  <span>{{ opt.label }}</span>
-                  <span class="font-semibold">{{ countByRole(opt.value) }}</span>
+              <div class="sidebar-content">
+                <div v-for="opt in roleOptions.filter(r => r.value)" :key="opt.label" class="stat-row">
+                  <div class="stat-label-group">
+                    <span class="stat-dot" :class="roleColorClass(opt.value)"></span>
+                    <span class="stat-label">{{ opt.label }}</span>
+                  </div>
+                  <div class="stat-value-group">
+                    <span class="stat-number">{{ countByRole(opt.value) }}</span>
+                    <span class="stat-percentage">{{ calculatePercentage(opt.value) }}%</span>
+                  </div>
+                </div>
+                
+                <Divider />
+                
+                <div class="total-row">
+                  <span class="total-label">Total Users</span>
+                  <span class="total-value">{{ users.length }}</span>
                 </div>
               </div>
             </div>
@@ -134,26 +169,29 @@
       </div>
     </div>
 
+    <!-- Edit Role Dialog -->
     <Dialog
       v-model:visible="showEditDialog"
       :style="{ width: '400px' }"
       header="Update User Role"
       :modal="true"
+      class="custom-dialog"
     >
-      <div class="p-fluid">
-        <div class="field">
+      <div class="dialog-form">
+        <div class="form-field">
           <label>Email</label>
-          <InputText :value="editForm.email" disabled class="mt-2" />
+          <InputText :value="editForm.email" disabled class="form-input readonly" />
         </div>
-        <br />
-        <div class="field">
+
+        <div class="form-field">
           <label>Role</label>
           <Select
             v-model="editForm.role"
             :options="roleOptions.filter(r => r.value)"
             option-label="label"
             option-value="value"
-            class="mt-2 w-full"
+            class="form-select"
+            placeholder="Select a role"
           />
         </div>
       </div>
@@ -163,36 +201,26 @@
           label="Cancel"
           icon="pi pi-times"
           @click="showEditDialog = false"
-          class="p-button-text"
-          severity="danger"
+          class="dialog-btn cancel-btn"
+          text
         />
         <Button
           label="Update"
           icon="pi pi-check"
           @click="updateUserRole"
           :loading="updatingUser"
-          autofocus
+          class="dialog-btn confirm-btn primary-gradient"
         />
       </template>
     </Dialog>
 
-    <Toast />
+    <Toast position="top-right" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Navbar from '@/components/Navbar.vue'
-import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import InputText from 'primevue/inputtext'
-import Select from 'primevue/select'
-import Dialog from 'primevue/dialog'
-import Badge from 'primevue/badge'
-import Tag from 'primevue/tag'
-import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 
 definePageMeta({ middleware: 'auth', requiresAuth: true })
@@ -266,11 +294,24 @@ function countByRole(role: string | null) {
   return users.value.filter((u) => u.role === role).length
 }
 
+function calculatePercentage(role: string) {
+  if (!users.value.length) return 0
+  const count = countByRole(role)
+  return ((count / users.value.length) * 100).toFixed(1)
+}
+
 function roleSeverity(role: string) {
   if (role === 'superadmin') return 'danger'
   if (role === 'admin') return 'warning'
   if (role === 'instructor') return 'info'
   return 'success'
+}
+
+function roleColorClass(role: string) {
+  if (role === 'superadmin') return 'dot-danger'
+  if (role === 'admin') return 'dot-warning'
+  if (role === 'instructor') return 'dot-info'
+  return 'dot-success'
 }
 
 async function loadData() {
@@ -373,68 +414,712 @@ async function updateUserRole() {
 <style scoped>
 .users-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
 }
+
 .main-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
   padding: 1.5rem;
 }
+
 .content-wrapper {
   max-width: 1800px;
   margin: 0 auto;
 }
+
 .header-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 0.25rem 0;
+}
+
+.page-subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Action Card */
+.action-card {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.action-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
+
+.search-wrapper {
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.search-input :deep(.p-inputtext) {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  transition: all 0.2s;
+}
+
+.search-input :deep(.p-inputtext:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.search-input :deep(.pi-search) {
+  left: 1rem;
+  color: #999;
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.filter-select {
+  width: 200px;
+}
+
+.filter-select :deep(.p-dropdown) {
+  width: 100%;
+  border-radius: 8px;
+  border-color: #e5e7eb;
+  height: 47px;
+}
+
+.action-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+  border: none;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.refresh-btn {
+  background: white;
+  color: #333;
+  border: 1px solid #e5e7eb;
+}
+
+/* Main Content Area */
 .main-content-area {
   display: flex;
   gap: 1.5rem;
   align-items: flex-start;
 }
+
 .table-section {
   flex: 1;
   min-width: 0;
 }
+
+/* Table Card */
+.table-card {
+  padding: 1.5rem;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Table Styles */
+.custom-table :deep(.p-datatable-thead > tr > th) {
+  background: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr:hover) {
+  background: #f8f9fa;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr.p-highlight) {
+  background: rgba(102, 126, 234, 0.1);
+  color: #1e293b;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr > td) {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* User Info */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.user-icon {
+  color: #667eea;
+  font-size: 1rem;
+}
+
+.user-email {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.you-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+}
+
+/* Role Tag */
+.role-tag {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  font-weight: 500;
+}
+
+/* Date Info */
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.date-info i {
+  color: #667eea;
+}
+
+/* Selected User Card */
+.selected-user-card {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.selected-user-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.selected-user-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.selected-user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.selected-user-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selected-user-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.selected-user-role {
+  width: fit-content;
+}
+
+.selected-user-role :deep(.p-tag) {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.change-role-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.change-role-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar Section */
 .sidebar-section {
-  width: 260px;
+  width: 300px;
   flex-shrink: 0;
 }
-.card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
-}
-.sticky-sidebar {
+
+.sidebar-card {
   position: sticky;
   top: 6rem;
-  max-height: calc(100vh - 8rem);
-  overflow-y: auto;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
+
+.sidebar-header {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar-header i {
+  font-size: 1.25rem;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sidebar-content {
+  padding: 1.25rem;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.stat-row:hover {
+  background: #f8f9fa;
+}
+
+.stat-label-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.stat-dot.dot-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.stat-dot.dot-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-dot.dot-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.stat-dot.dot-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-label {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.stat-value-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-number {
+  font-weight: 600;
+  color: #1e293b;
+  min-width: 2rem;
+  text-align: right;
+}
+
+.stat-percentage {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  min-width: 3rem;
+  text-align: right;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.total-label {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.total-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Divider */
+.divider {
+  margin: 1rem 0;
+  border-color: #e5e7eb;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-state-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #667eea;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  color: #64748b;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Dialog Styles */
+.custom-dialog :deep(.p-dialog-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.custom-dialog :deep(.p-dialog-title) {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.custom-dialog :deep(.p-dialog-header-icon) {
+  color: white;
+}
+
+.custom-dialog :deep(.p-dialog-content) {
+  padding: 1.5rem;
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-weight: 500;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.form-input {
+  width: 100%;
+}
+
+.form-input :deep(.p-inputtext) {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.form-input.readonly :deep(.p-inputtext) {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.form-select {
+  width: 100%;
+}
+
+.form-select :deep(.p-dropdown) {
+  width: 100%;
+  border-radius: 8px;
+  border-color: #e5e7eb;
+}
+
+.dialog-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.dialog-btn.cancel-btn {
+  color: #64748b;
+}
+
+.dialog-btn.cancel-btn:hover {
+  background: #f1f5f9;
+}
+
+.dialog-btn.confirm-btn {
+  color: white;
+  border: none;
+}
+
+.dialog-btn.confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Pagination Styling */
+.custom-table :deep(.p-paginator) {
+  background: transparent;
+  border: none;
+  padding: 1rem 0 0 0;
+}
+
+.custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+  border-radius: 8px;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  transition: all 0.2s;
+}
+
+.custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+/* Loading State */
+.custom-table :deep(.p-datatable-loading-overlay) {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.custom-table :deep(.p-datatable-loading-icon) {
+  color: #667eea;
+  font-size: 2rem;
+}
+
+/* Scrollbar Styling */
+.custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive Design */
 @media (max-width: 1200px) {
   .main-content-area {
     flex-direction: column;
   }
+  
   .sidebar-section {
     width: 100%;
     margin-top: 1.5rem;
   }
-  .sticky-sidebar {
+  
+  .sidebar-card {
     position: static;
-    max-height: none;
   }
 }
-@media (max-width: 768px) {
-  .header-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+
+@media (max-width: 900px) {
+  .users-view {
+    padding: 1rem;
   }
+  
   .main-container {
     padding: 1rem;
   }
+  
+  .action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-wrapper {
+    min-width: 100%;
+  }
+  
+  .filter-group {
+    justify-content: stretch;
+  }
+  
+  .filter-select {
+    flex: 1;
+  }
+  
+  .action-btn {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .selected-user-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .change-role-btn {
+    width: 100%;
+  }
+  
+  .stat-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .stat-value-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 0.75rem;
+  }
+  
+  .action-card,
+  .table-card {
+    padding: 1rem;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
 }
 </style>
-

@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
 
     const requests = await Request.find(filter)
       .populate('user_id', 'email role')
-      .populate('component_id', 'model description link quantity')
+      .populate('component_id', 'model description link quantity location')
       .sort({ createdAt: -1 })
       .lean()
 
@@ -78,6 +78,7 @@ export default defineEventHandler(async (event) => {
             description: req.component_id.description,
             link: req.component_id.link,
             currentStock: req.component_id.quantity,
+            location: req.component_id.location
           }
         : null,
       quantityBorrowed: req.quantity_requested,

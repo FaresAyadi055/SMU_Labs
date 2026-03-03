@@ -1,47 +1,56 @@
 <template>
-  <div>
-    <div class="cart-view">
-      <div class="container mx-auto px-4 py-6">
+  <div class="cart-view">
+    <div class="main-container">
+      <div class="content-wrapper">
         <!-- Header -->
         <div class="header-section">
-          <div>
-            <h1 class="text-3xl font-bold text-surface-900 mb-2">My Requests</h1>
-            <br/>
-            <p class="text-surface-600">View all your submitted requests</p>
-            <br/>
-          </div>
+          <h1 class="page-title">My Requests</h1>
+          <p class="page-subtitle">View all your submitted requests</p>
         </div>
 
-        <!-- Loading State -->  
+        <!-- Loading State -->
         <div v-if="loading" class="loading-state">
-          <ProgressSpinner style="width: 50px; height: 50px" />
+          <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
           <p>Loading requests...</p>
         </div>
 
         <!-- Content -->
         <div v-else>
           <!-- Tabs for filtering -->
-          <div class="filter-tabs mb-6">
-            <div class="flex gap-2 border-b pb-2 overflow-x-auto">
+          <div class="card tabs-card">
+            <div class="tabs-container">
               <Button 
                 v-for="tab in tabs" 
                 :key="tab.id"
                 @click="activeTab = tab.id"
-                :text="activeTab !== tab.id"
-                :outlined="activeTab !== tab.id"
-                :class="['tab-button', { 'active-tab': activeTab === tab.id }]"
-                :severity="activeTab === tab.id ? 'primary' : 'secondary'"
+                :class="[
+                  'tab-button',
+                  { 'active-tab': activeTab === tab.id }
+                ]"
               >
-                {{ tab.label }} ({{ getRequestCount(tab.id) }})
+                <span class="tab-label">{{ tab.label }}</span>
+                <Badge 
+                  :value="getRequestCount(tab.id)" 
+                  :severity="activeTab === tab.id ? 'primary' : 'secondary'"
+                  class="tab-badge"
+                />
               </Button>
             </div>
           </div>
 
           <!-- No Requests Message -->
           <div v-if="filteredRequests.length === 0" class="empty-state">
-            <i class="pi pi-inbox text-6xl text-surface-300 mb-4"></i>
-            <h3 class="text-xl font-semibold text-surface-700 mb-2">No Requests Found</h3>
-            <p class="text-surface-500">You haven't submitted any requests yet.</p>
+            <div class="empty-state-content">
+              <i class="pi pi-inbox empty-icon"></i>
+              <h3>No Requests Found</h3>
+              <p>You haven't submitted any requests yet.</p>
+              <Button 
+                label="Browse Inventory"
+                icon="pi pi-box"
+                class="empty-state-btn primary-gradient"
+                @click="router.push('/home')"
+              />
+            </div>
           </div>
 
           <!-- Product Grid - Requests Cards -->
@@ -62,31 +71,34 @@
                   @error="handleImageError"
                 />
                 <!-- Status Badge -->
-                <div class="stock-badge" :class="getStatusClass(request.status)">
+                <div class="status-badge" :class="getStatusClass(request.status)">
+                  <i :class="getStatusIcon(request.status)"></i>
                   {{ request.status || 'pending' }}
                 </div>
               </div>
 
               <!-- Product Info -->
               <div class="product-info">
-                <div class="flex justify-between items-start">
+                <div class="product-header">
                   <h3 class="product-title">{{ request.model || 'Unknown Item' }}</h3>
-                  <!-- Cancel button only for pending requests -->
                 </div>
                 
                 <!-- Request Details -->
                 <div class="product-details">
                   <div class="detail-item">
-                    <i class="pi pi-hashtag text-surface-400"></i>
-                    <span>Quantity: {{ request.requested_quantity }}</span>
+                    <i class="pi pi-hashtag detail-icon"></i>
+                    <span class="detail-label">Quantity:</span>
+                    <span class="detail-value">{{ request.requested_quantity }}</span>
                   </div>
                   <div class="detail-item">
-                    <i class="pi pi-users text-surface-400"></i>
-                    <span>{{ request.class || 'No class specified' }}</span>
+                    <i class="pi pi-users detail-icon"></i>
+                    <span class="detail-label">Class:</span>
+                    <span class="detail-value">{{ request.class || '—' }}</span>
                   </div>
                   <div class="detail-item">
-                    <i class="pi pi-calendar text-surface-400"></i>
-                    <span>{{ formatDate(request.timestamp) }}</span>
+                    <i class="pi pi-calendar detail-icon"></i>
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value">{{ formatDate(request.timestamp) }}</span>
                   </div>
                 </div>
 
@@ -98,7 +110,7 @@
                       <span class="detail-label">Description:</span>
                       <span class="detail-value">{{ request.description }}</span>
                     </div>
-                    <div v-if="request.student_email" class="detail-row">
+                    <div class="detail-row">
                       <span class="detail-label">Student Email:</span>
                       <span class="detail-value">{{ request.student_email }}</span>
                     </div>
@@ -108,20 +120,20 @@
                     </div>
                     <div class="detail-row">
                       <span class="detail-label">Request ID:</span>
-                      <span class="detail-value">{{ request.id }}</span>
+                      <span class="detail-value request-id">{{ request.id }}</span>
                     </div>
                   </div>
 
                   <!-- Action Buttons for Pending Requests -->
-                  <div v-if="request.status?.toLowerCase() === 'pending'" class="action-buttons">
+                  <div v-if="request.status?.toLowerCase() === 'pending'" class="action-section">
                     <Button 
                       label="Cancel Request"
                       icon="pi pi-trash"
-                      class="w-full"
+                      class="cancel-button"
                       @click.stop="openDeleteDialog(request)"
                       :loading="deletingRequest && requestToDelete?.id === request.id"
                       severity="danger"
-                      size="small"
+                      outlined
                     />
                   </div>
                 </div>
@@ -138,10 +150,16 @@
       :style="{ width: '450px' }" 
       header="Cancel Request"
       :modal="true"
+      class="custom-dialog"
     >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: #ef4444;"></i>
-        <span>Are you sure you want to cancel this request? This action cannot be undone.</span>
+        <div class="warning-icon-container">
+          <i class="pi pi-exclamation-triangle warning-icon"></i>
+        </div>
+        <div class="confirmation-message">
+          <h4>Are you sure?</h4>
+          <p>This action cannot be undone. The request will be permanently cancelled.</p>
+        </div>
       </div>
       
       <template #footer>
@@ -149,22 +167,20 @@
           label="No, Keep it" 
           icon="pi pi-times" 
           @click="showDeleteDialog = false" 
-          class="p-button-text"
-          severity="secondary"
+          class="dialog-btn cancel-btn"
+          text
         />
         <Button 
           label="Yes, Cancel Request" 
           icon="pi pi-trash" 
           @click="confirmDelete"
-          autofocus
           :loading="deletingRequest"
-          severity="danger"
+          class="dialog-btn delete-btn"
         />
       </template>
     </Dialog>
 
-    <!-- Toast -->
-    <Toast />
+    <Toast position="top-right" />
   </div>
 </template>
 
@@ -172,18 +188,12 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import Badge from 'primevue/badge'
-import Toast from 'primevue/toast'
-import ProgressSpinner from 'primevue/progressspinner'
 
 const router = useRouter()
 const toast = useToast()
 const config = useRuntimeConfig()
 const apiUrl = config.public.API_URL || 'http://localhost:4000/api'
 
-// Define page meta
 definePageMeta({
   layout: 'default',
   middleware: 'auth',
@@ -212,7 +222,6 @@ const tabs = [
 // Computed properties
 const userEmail = computed(() => user.value?.email || '')
 
-// Filter requests by status - FIXED: Added proper computed properties
 const pendingRequests = computed(() => 
   requests.value.filter(req => req.status?.toLowerCase() === 'pending')
 )
@@ -226,7 +235,6 @@ const returnedRequests = computed(() =>
   requests.value.filter(req => req.status?.toLowerCase() === 'returned')
 )
 
-// Filtered requests based on active tab - FIXED: Added missing 'declined' case and proper returns
 const filteredRequests = computed(() => {
   switch (activeTab.value) {
     case 'pending':
@@ -234,7 +242,7 @@ const filteredRequests = computed(() => {
     case 'approved':
       return approvedRequests.value
     case 'declined':
-      return declinedRequests.value  // FIXED: Return the value
+      return declinedRequests.value
     case 'returned':
       return returnedRequests.value
     default:
@@ -264,17 +272,9 @@ const loadRequests = async () => {
     if (response.ok) {
       const data = await response.json()
       if (data.success) {
-        // Sort by timestamp (newest first)
         requests.value = (data.data || []).sort((a, b) => 
           new Date(b.timestamp) - new Date(a.timestamp)
         )
-        
-        toast.add({
-          severity: 'success',
-          summary: 'Requests Loaded',
-          detail: `Loaded ${requests.value.length} requests`,
-          life: 3000
-        })
       }
     } else {
       throw new Error('Failed to load requests')
@@ -292,12 +292,12 @@ const loadRequests = async () => {
   }
 }
 
-// Helper functions - FIXED: Added proper return values for all cases
+// Helper functions
 const getRequestCount = (tabId) => {
   switch (tabId) {
     case 'pending': return pendingRequests.value.length
     case 'approved': return approvedRequests.value.length
-    case 'declined': return declinedRequests.value.length  // FIXED: Use correct variable name
+    case 'declined': return declinedRequests.value.length
     case 'returned': return returnedRequests.value.length
     default: return requests.value.length
   }
@@ -305,11 +305,21 @@ const getRequestCount = (tabId) => {
 
 const getStatusClass = (status) => {
   switch (status?.toLowerCase()) {
-    case 'approved': return 'in-stock'
-    case 'pending': return 'low-stock'
-    case 'declined': return 'out-of-stock'
-    case 'returned': return 'returned-stock'
-    default: return 'low-stock'
+    case 'approved': return 'status-approved'
+    case 'pending': return 'status-pending'
+    case 'declined': return 'status-declined'
+    case 'returned': return 'status-returned'
+    default: return 'status-pending'
+  }
+}
+
+const getStatusIcon = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'approved': return 'pi pi-check-circle'
+    case 'pending': return 'pi pi-clock'
+    case 'declined': return 'pi pi-times-circle'
+    case 'returned': return 'pi pi-undo'
+    default: return 'pi pi-clock'
   }
 }
 
@@ -363,16 +373,13 @@ const confirmDelete = async () => {
         life: 3000
       })
       
-      // Remove from local state
       requests.value = requests.value.filter(
         req => req.id !== requestToDelete.value.id
       )
       
-      // Update cart count if needed
       localStorage.setItem('cartCount', requests.value.length.toString())
       window.dispatchEvent(new CustomEvent('cart-updated'))
       
-      // Close expanded view if the deleted request was expanded
       if (expandedRequestId.value === requestToDelete.value.id) {
         expandedRequestId.value = null
       }
@@ -398,15 +405,12 @@ const confirmDelete = async () => {
 onMounted(() => {
   loadRequests()
   
-  // Clear cart notification
   window.dispatchEvent(new CustomEvent('clear-cart-notification'))
   localStorage.setItem('cartCount', '0')
   
-  // Listen for cart updates to refresh requests
   window.addEventListener('cart-updated', loadRequests)
 })
 
-// Cleanup
 onUnmounted(() => {
   window.removeEventListener('cart-updated', loadRequests)
 })
@@ -415,57 +419,130 @@ onUnmounted(() => {
 <style scoped>
 .cart-view {
   min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
   width: 100%;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   box-sizing: border-box;
+}
+
+.main-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
   padding: 1.5rem;
+}
+
+.content-wrapper {
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 .header-section {
   margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.filter-tabs {
-  width: 100%;
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 0.25rem 0;
+}
+
+.page-subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Tabs Card */
+.tabs-card {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tabs-container {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .tab-button {
-  white-space: nowrap;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-}
-
-.active-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: #f8f9fa;
+  color: #64748b;
+  border-radius: 8px;
   font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
-/* Product Grid Styles - Copied from Home.vue */
+.tab-button:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.tab-button.active-tab {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.tab-label {
+  font-size: 0.95rem;
+}
+
+.tab-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.tab-button.active-tab .tab-badge :deep(.p-badge) {
+  background: white;
+  color: #667eea;
+}
+
+/* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .product-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
   border: 2px solid transparent;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
 }
 
 .product-card.expanded {
-  border-color: #3b82f6;
-  background-color: #f8fafc;
+  border-color: #667eea;
+  background: #f8fafc;
 }
 
 .product-image-container {
@@ -487,58 +564,63 @@ onUnmounted(() => {
   transform: scale(1.05);
 }
 
-.stock-badge {
+/* Status Badge */
+.status-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: white;
   text-transform: capitalize;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.stock-badge.in-stock {
-  background-color: #10b981;
+.status-badge.status-approved {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
-.stock-badge.low-stock {
-  background-color: #f59e0b;
+.status-badge.status-pending {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
-.stock-badge.out-of-stock {
-  background-color: #ef4444;
+.status-badge.status-declined {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
-.stock-badge.returned-stock {
-  background-color: #3b82f6;
+.status-badge.status-returned {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
+.status-badge i {
+  font-size: 0.9rem;
+}
+
+/* Product Info */
 .product-info {
-  padding: 1rem;
+  padding: 1.5rem;
+}
+
+.product-header {
+  margin-bottom: 1rem;
 }
 
 .product-title {
-  font-size: 1.125rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 0.75rem;
-  line-height: 1.3;
-  padding-right: 2rem;
-}
-
-.cancel-button {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 10;
+  margin: 0;
 }
 
 .product-details {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
@@ -546,12 +628,24 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: #64748b;
 }
 
-.detail-item i {
-  font-size: 0.875rem;
+.detail-icon {
+  color: #667eea;
+  font-size: 0.9rem;
+  width: 1.2rem;
+}
+
+.detail-label {
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.detail-value {
+  color: #334155;
+  font-weight: 500;
 }
 
 /* Expanded Content */
@@ -575,67 +669,68 @@ onUnmounted(() => {
 
 .additional-details {
   background: #f1f5f9;
-  padding: 0.75rem;
-  border-radius: 6px;
+  padding: 1rem;
+  border-radius: 8px;
   margin-bottom: 1rem;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  margin-bottom: 0.25rem;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
 }
 
 .detail-row:last-child {
   margin-bottom: 0;
 }
 
-.detail-label {
+.detail-row .detail-label {
   color: #64748b;
   font-weight: 500;
+  min-width: 100px;
 }
 
-.detail-value {
+.detail-row .detail-value {
   color: #334155;
   text-align: right;
+  word-break: break-word;
 }
 
-.action-buttons {
-  margin-top: 0.5rem;
-}
-
-/* Card styles */
-.card {
+.request-id {
+  font-family: monospace;
+  font-size: 0.75rem;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 }
 
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.action-section {
+  display: flex;
+  justify-content: flex-end;
 }
 
-.empty-state h3 {
-  font-size: 1.5rem;
-  color: #1e293b;
-  margin: 1rem 0 0.5rem 0;
+.cancel-button {
+  width: 100%;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
-.empty-state p {
-  color: #64748b;
+.cancel-button:hover {
+  background: #ef4444;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* Loading State */
 .loading-state {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 4rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -644,48 +739,222 @@ onUnmounted(() => {
 .loading-state p {
   margin-top: 1rem;
   color: #64748b;
+  font-size: 1rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #667eea;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+}
+
+.empty-state-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Dialog Styles */
+.custom-dialog :deep(.p-dialog-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.custom-dialog :deep(.p-dialog-title) {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.custom-dialog :deep(.p-dialog-header-icon) {
+  color: white;
+}
+
+.custom-dialog :deep(.p-dialog-content) {
+  padding: 1.5rem;
 }
 
 .confirmation-content {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
-/* Summary Cards */
-.summary-cards {
-  margin-top: 2rem;
+.warning-icon-container {
+  flex-shrink: 0;
+}
+
+.warning-icon {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.confirmation-message h4 {
+  margin: 0 0 0.5rem 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.confirmation-message p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dialog-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.dialog-btn.cancel-btn {
+  color: #64748b;
+}
+
+.dialog-btn.cancel-btn:hover {
+  background: #f1f5f9;
+}
+
+.dialog-btn.delete-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+}
+
+.dialog-btn.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .cart-view {
     padding: 1rem;
   }
   
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+  .main-container {
+    padding: 1rem;
   }
   
-  .filter-tabs {
+  .tabs-container {
+    flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: 0.5rem;
+    justify-content: flex-start;
   }
   
   .tab-button {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.75rem;
+    flex-shrink: 0;
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
   .product-grid {
     grid-template-columns: 1fr;
   }
   
-  .summary-cards {
-    grid-template-columns: 1fr 1fr !important;
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .detail-row .detail-label {
+    min-width: auto;
+  }
+  
+  .detail-row .detail-value {
+    text-align: left;
+  }
+  
+  .confirmation-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 0.75rem;
+  }
+  
+  .tabs-card {
+    padding: 0.75rem;
+  }
+  
+  .tab-button {
+    padding: 0.5rem 1rem;
+  }
+  
+  .tab-label {
+    font-size: 0.85rem;
+  }
+  
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+  
+  .loading-state {
+    padding: 2rem 1rem;
   }
 }
 </style>
