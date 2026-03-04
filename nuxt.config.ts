@@ -57,10 +57,22 @@ export default defineNuxtConfig({
     transpile: ['primevue'],
   },
 
-  nitro: {
-    preset: 'vercel',
-    plugins: ['@/server/index'],
+// nuxt.config.ts
+nitro: {
+  preset: 'vercel',
+  externals: {
+    inline: ['@magic-sdk/admin']
   },
+  vercel: {
+    functions: {
+      // Update this path to match your renamed file
+      'server/api/auth/magic/verify.post': {
+        maxDuration: 10,
+        includeFiles: ['node_modules/@magic-sdk/admin/**']
+      }
+    }
+  }
+},
   
   compatibilityDate: '2024-04-03',
   pages: true,

@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "magic-sdk": "^33.4.1",
     "mongoose": "^9.2.3",
+    "node-fetch": "^2.7.0",
     "nuxt": "^3.13.0",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",

@@ -1,4 +1,4 @@
-// api/auth/magic/verify.ts
+// server/api/auth/magic/verify.post.ts
 import { defineEventHandler, readBody, createError } from 'h3'
 import jwt from 'jsonwebtoken'
 import User from '~/server/models/Users'
