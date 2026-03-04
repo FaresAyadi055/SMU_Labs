@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "postbuild": "bash ./vercel-build.sh",
+    "vercel-build": "bash ./vercel-build.sh"
     "dev": "set HOST=0.0.0.0 && nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
