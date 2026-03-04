@@ -1,5 +1,5 @@
 import Lara from '@primevue/themes/lara';
-
+import '@magic-sdk/admin'
 export default defineNuxtConfig({
   // Modules
   modules: [
