@@ -78,6 +78,20 @@
                     </div>
                   </template>
                 </Column>
+                                <Column field="ID" header="ID" :sortable="true">
+                  <template #body="{ data }">
+                    <div class="user-info">
+                      <i class="pi pi-user user-icon" />
+                      <span class="user-email">{{ data.id }}</span>
+                      <Badge
+                        v-if="data.email === currentUserEmail"
+                        value="You"
+                        severity="info"
+                        class="you-badge"
+                      />
+                    </div>
+                  </template>
+                </Column>
 
                 <Column field="role" header="Role" :sortable="true">
                   <template #body="{ data }">

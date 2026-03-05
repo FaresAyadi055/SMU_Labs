@@ -40,7 +40,7 @@
                   >
                     <div class="user-info">
                       <span class="user-email">{{ u.email }}</span>
-                      <span class="user-id">ID: {{ u.id }}</span>
+                      <span class="user-date">{{formatDate(u.oldestPendingAt)}}</span>
                     </div>
                     <Badge :value="u.totalPending" severity="warning" class="pending-badge" />
                   </button>
@@ -114,6 +114,13 @@
                         <span v-if="data.component?.manufacturer" class="component-manufacturer">
                           {{ data.component.manufacturer }}
                         </span>
+                      </div>
+                    </template>
+                  </Column>
+                    <Column field="component.date" header="Created at">
+                    <template #body="{ data }">
+                      <div class="component-info">
+                        <span class="component-date">{{ formatDate(data.createdAt) || '—' }}</span>
                       </div>
                     </template>
                   </Column>
@@ -355,7 +362,11 @@ const sortedPendingUsers = computed(() => {
 function toggleOrder() {
   isReversed.value = !isReversed.value
 }
-
+function formatDate(d: string | Date | null) {
+  if (!d) return '—'
+  const date = new Date(d)
+  return date.toLocaleString()
+}
 function selectUser(u: any) {
   selectedUser.value = u
 }
