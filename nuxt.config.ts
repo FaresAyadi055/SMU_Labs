@@ -43,12 +43,15 @@ export default defineNuxtConfig({
       MAGIC_PUBLISHABLE_KEY: process.env.MAGIC_PUBLISHABLE_KEY || ''
     }
   },
-  
+  css :['~/assets/css/main.css'],
   app: {
     head: {
       title: 'FabLab Inventory Manager',
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ],
+        meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale= 1, maximum-scale=1.0, user-scalable=no' }
       ]
     }
   },
