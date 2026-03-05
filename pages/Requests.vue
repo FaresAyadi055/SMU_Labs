@@ -80,6 +80,7 @@
                     :loading="submitting"
                     :disabled="!hasDraftChanges"
                     class="confirm-button"
+                    @click="confirmCart"  
                   />
                 </div>
                 <DataTable
@@ -482,8 +483,7 @@ async function confirmCart() {
   }
 }
 </script>
-
-<style scoped>
+<style scoped>  
 .technician-view {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -561,6 +561,10 @@ async function confirmCart() {
   align-items: center;
 }
 
+.sidebar-title i {
+  margin-right: 0.5rem;
+}
+
 .sort-button {
   transition: transform 0.3s ease;
 }
@@ -636,7 +640,8 @@ async function confirmCart() {
   padding: 0.25rem 0.5rem;
 }
 
-.empty-list, .loading-state {
+.empty-list,
+.loading-state {
   color: #6b7280;
   font-size: 0.95rem;
   margin: 1rem 0 0 0;
@@ -694,6 +699,10 @@ async function confirmCart() {
   color: #333;
   display: flex;
   align-items: center;
+}
+
+.cart-header h2 i {
+  margin-right: 0.5rem;
 }
 
 .item-count-badge {
@@ -781,7 +790,7 @@ async function confirmCart() {
   color: #999;
 }
 
-/* Quantity Badges */
+/* Quantity Badges - Consolidated */
 .quantity-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -807,25 +816,15 @@ async function confirmCart() {
   color: #c62828;
 }
 
-/* Location Badge */
-.location-badge {
-  font-size: 0.85rem;
-  padding: 0.25rem 0.75rem;
-}
-
-/* Class Tag */
-.class-tag {
-  font-size: 0.85rem;
-  padding: 0.25rem 0.75rem;
-}
-
-/* Status Tag */
+/* Badge & Tag Styles - Consolidated */
+.location-badge,
+.class-tag,
 .status-tag {
   font-size: 0.85rem;
   padding: 0.25rem 0.75rem;
 }
 
-/* Action Cell - FIXED */
+/* Action Cell */
 .action-cell {
   padding: 0.5rem 0;
 }
@@ -959,7 +958,7 @@ async function confirmCart() {
   font-size: 1rem;
 }
 
-/* Responsive */
+/* Responsive - Consolidated Media Queries */
 @media (max-width: 1200px) {
   .action-controls {
     flex-direction: column;
@@ -969,12 +968,9 @@ async function confirmCart() {
     width: 100%;
   }
   
-  .qty-input {
-    width: 100% !important;
-  }
-  
+  .qty-input,
   .qty-input :deep(.p-inputnumber) {
-    width: 100%;
+    width: 100% !important;
   }
   
   .qty-input :deep(.p-inputnumber-input) {
@@ -1019,18 +1015,9 @@ async function confirmCart() {
     min-width: 250px;
   }
   
-  .action-controls {
-    flex-direction: column;
-  }
-  
-  .qty-input-wrapper {
-    width: 100%;
-  }
-  
-  .qty-input {
-    width: 100% !important;
-  }
-  
+  .action-controls,
+  .qty-input-wrapper,
+  .qty-input,
   .qty-input :deep(.p-inputnumber) {
     width: 100%;
   }
