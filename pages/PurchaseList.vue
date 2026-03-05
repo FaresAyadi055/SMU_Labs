@@ -167,9 +167,6 @@
                     severity="warning"
                     class="requested-badge"
                   />
-                  <span v-if="data.pendingRequests?.length" class="pending-count">
-                    ({{ data.pendingRequests.length }} pending)
-                  </span>
                 </div>
               </template>
             </Column>
