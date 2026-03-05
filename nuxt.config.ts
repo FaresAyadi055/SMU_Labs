@@ -1,5 +1,6 @@
 import Lara from '@primevue/themes/lara';
 import '@magic-sdk/admin'
+
 export default defineNuxtConfig({
   // Modules
   modules: [
@@ -7,7 +8,7 @@ export default defineNuxtConfig({
     '@primevue/nuxt-module'
   ],
   
-  // PrimeVue configuration - this is all you need!
+  // PrimeVue configuration
   primevue: {
     options: {
       ripple: true,
@@ -15,7 +16,7 @@ export default defineNuxtConfig({
         preset: Lara,
         options: {
           prefix: 'p',
-          darkModeSelector: '.p-dark', // Changed from 'false' for better compatibility
+          darkModeSelector: '.p-dark',
           cssLayer: false
         }
       }
@@ -43,40 +44,42 @@ export default defineNuxtConfig({
       MAGIC_PUBLISHABLE_KEY: process.env.MAGIC_PUBLISHABLE_KEY || ''
     }
   },
-  css :['~/assets/css/main.css'],
+  
+  // Global CSS
+  css: ['~/assets/css/main.css'],
+  
+  // App configuration
   app: {
     head: {
       title: 'FabLab Inventory Manager',
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-      ],
-        meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale= 1, maximum-scale=1.0, user-scalable=no' }
       ]
     }
   },
   
+  // Build configuration
   build: {
     transpile: ['primevue'],
   },
 
-// nuxt.config.ts
-nitro: {
-  preset: 'vercel',
-  externals: {
-    inline: ['@magic-sdk/admin']
-  },
-  vercel: {
-    functions: {
-      // Update this path to match your renamed file
-      'server/api/auth/magic/verify.post': {
-        maxDuration: 10,
-        includeFiles: ['node_modules/@magic-sdk/admin/**']
+  // Nitro configuration
+  nitro: {
+    preset: 'vercel',
+    externals: {
+      inline: ['@magic-sdk/admin']
+    },
+    vercel: {
+      functions: {
+        'server/api/auth/magic/verify.post': {
+          maxDuration: 10,
+          includeFiles: ['node_modules/@magic-sdk/admin/**']
+        }
       }
     }
-  }
-},
+  },
   
+  // Other options
   compatibilityDate: '2024-04-03',
   pages: true,
   devtools: { enabled: true },

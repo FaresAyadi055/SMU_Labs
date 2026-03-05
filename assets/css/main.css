@@ -1,7 +1,0 @@
-@media screen and (min-width: 1024px) {
-    body {
-        zoom: 0.8;  /* Standard zoom property */
-        -moz-transform: scale(0.8);  /* For Firefox */
-        -moz-transform-origin: 0 0;
-    }
-}
