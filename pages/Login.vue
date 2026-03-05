@@ -358,4 +358,25 @@ definePageMeta({
     font-size: 1rem;
   }
 }
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-y: auto; /* Allows scrolling if content is too tall */
+}
+
+/* Ensure no parent constraints */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
 </style>

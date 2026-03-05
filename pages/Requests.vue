@@ -11,14 +11,27 @@
           <!-- Sidebar: users with pending requests -->
           <aside class="sidebar">
             <div class="card sidebar-card">
-              <h3 class="sidebar-title">
-                <i class="pi pi-users" style="margin-right: 0.5rem;"></i>
-                Users with pending requests
-              </h3>
+              <div class="sidebar-header">
+                <h3 class="sidebar-title">
+                  <i class="pi pi-users" style="margin-right: 0.5rem;"></i>
+                  Users pending requests
+                </h3>
+                <Button
+                  v-if="sortedPendingUsers.length > 0"
+                  icon="pi pi-sort-alt"
+                  :class="['sort-button', { 'reversed': isReversed }]"
+                  @click="toggleOrder"
+                  severity="secondary"
+                  text
+                  rounded
+                  size="small"
+                  :aria-label="isReversed ? 'Sort ascending' : 'Sort descending'"
+                />
+              </div>
               <div class="user-list">
-                <template v-if="pendingUsers && pendingUsers.length > 0">
+                <template v-if="sortedPendingUsers && sortedPendingUsers.length > 0">
                   <button
-                    v-for="u in pendingUsers"
+                    v-for="u in sortedPendingUsers"
                     :key="u.id"
                     type="button"
                     class="user-row"
@@ -237,6 +250,7 @@ const selectedUser = ref<any>(null)
 const loading = ref(false)
 const submitting = ref(false)
 const draftQuantities = ref<Record<string, number>>({})
+const isReversed = ref(true) // Set to true for reversed by default
 
 const cartStore = useTechnicianCartStore()
 
@@ -318,6 +332,27 @@ async function loadPendingUsers() {
   } finally {
     loading.value = false
   }
+}
+
+// Computed property for sorted users
+const sortedPendingUsers = computed(() => {
+  if (!pendingUsers.value.length) return []
+  
+  // Create a copy of the array and sort
+  const sorted = [...pendingUsers.value]
+  
+  if (isReversed.value) {
+    // Reverse order
+    return sorted.reverse()
+  } else {
+    // Original order (by email or whatever the API returns)
+    return sorted
+  }
+})
+
+// Toggle order function
+function toggleOrder() {
+  isReversed.value = !isReversed.value
 }
 
 function selectUser(u: any) {
@@ -510,13 +545,32 @@ async function confirmCart() {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .sidebar-title {
   font-size: 1.1rem;
   font-weight: 600;
-  margin: 0 0 1.5rem 0;
+  margin: 0;
   color: #333;
   display: flex;
   align-items: center;
+}
+
+.sort-button {
+  transition: transform 0.3s ease;
+}
+
+.sort-button.reversed {
+  transform: rotate(180deg);
+}
+
+.sort-button:hover {
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .user-list {
