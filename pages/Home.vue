@@ -716,7 +716,8 @@ const activeFilter = ref('all') // Track which summary filter is active
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const itemsPerPageOptions = ref([5, 10, 15, 30, 50, 100])
-
+const lastUsedClassPrefix = ref('')
+const lastUsedClassNumber = ref(null)
 // Dialog states
 const showRequestDialog = ref(false)
 const showAddDialog = ref(false)
@@ -755,11 +756,30 @@ const missingrequestForm = ref({
 })
 
 onMounted(() => {
+  // Load saved class values from localStorage
+  const savedPrefix = localStorage.getItem('lastUsedClassPrefix')
+  const savedNumber = localStorage.getItem('lastUsedClassNumber')
+  
+  if (savedPrefix) lastUsedClassPrefix.value = savedPrefix
+  if (savedNumber) lastUsedClassNumber.value = parseInt(savedNumber)
+  
   loadData()
   resetRequestForm()
-  resetMissingRequestForm() 
+  resetMissingRequestForm()
 })
 
+// Add watchers to persist to localStorage
+watch(lastUsedClassPrefix, (newValue) => {
+  if (newValue) {
+    localStorage.setItem('lastUsedClassPrefix', newValue)
+  }
+})
+
+watch(lastUsedClassNumber, (newValue) => {
+  if (newValue) {
+    localStorage.setItem('lastUsedClassNumber', newValue.toString())
+  }
+})
 // New item form (for admin)
 const newItem = ref({
   model: '',
@@ -773,7 +793,6 @@ const newItem = ref({
 // Options
 const classPrefixes = ref(['Freshman', 'Sophomore RE','Sophomore CSE','Junior RE', 'Junior CSE','Senior RE', 'Senior CSE', 'Final Year RE', 'Final Year CSE',"L1", "L2", "L3"])
 const classNumbers = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-const statusOptions = ref(['available', 'reserved', 'maintenance', 'broken'])
 
 // Searchable columns configuration (admin only)
 const searchableColumns = ref([
@@ -1087,7 +1106,8 @@ const submitRequest = async () => {
     })
     return
   }
-
+  lastUsedClassPrefix.value = requestForm.value.class_prefix
+  lastUsedClassNumber.value = requestForm.value.class_number
   submittingRequest.value = true
   
   const requestData = {
@@ -1473,8 +1493,8 @@ const resetRequestForm = () => {
   requestForm.value = {
     model_id: '',
     student_email: userEmail.value,
-    class_prefix: '',
-    class_number: null,
+    class_prefix: lastUsedClassPrefix.value || '', // Use last used value
+    class_number: lastUsedClassNumber.value || null, // Use last used value
     quantity: 1
   }
 }

@@ -262,7 +262,7 @@ const logout = async () => {
     // Call backend logout (optional)
     if (token) {
       try {
-        await $fetch(`${apiUrl}/auth/logout`, {
+        await $fetch(`api/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
