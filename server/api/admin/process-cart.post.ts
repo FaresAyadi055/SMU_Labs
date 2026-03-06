@@ -140,6 +140,7 @@ export default defineEventHandler(async (event) => {
 
       // Approve flow
       const approvedQty = item.approvedQuantity
+      const originalQty = request.quantity_requested // capture before any mutation
 
       if (approvedQty > component.quantity) {
         throw createError({
@@ -155,12 +156,13 @@ export default defineEventHandler(async (event) => {
       component.quantity = newQuantity
       await component.save({ session })
 
-      // Update request status
+      // Update request status and reflect the actual approved quantity
       request.status = 'approved'
+      request.quantity_requested = approvedQty
       await request.save({ session })
 
-      // Create log entry
-      const log = new Log({
+      // Log the approval
+      const approveLog = new Log({
         action: 'REQUEST_APPROVE',
         userId: new mongoose.Types.ObjectId(currentUser.userId),
         userEmail: currentUser.email,
@@ -177,12 +179,11 @@ export default defineEventHandler(async (event) => {
             change: -approvedQty,
           },
           approvedQuantity: approvedQty,
-          requestedQuantity: request.quantity_requested,
+          requestedQuantity: originalQty,
           description: 'Request approved and inventory decremented via technician dashboard',
         },
       })
-
-      await log.save({ session })
+      await approveLog.save({ session })
 
       processed.push({
         requestId: String(request._id),
@@ -190,6 +191,51 @@ export default defineEventHandler(async (event) => {
         approvedQuantity: approvedQty,
         remainingStock: newQuantity,
       })
+
+      // If partially approved, create a companion declined request for the remainder
+      const declinedQty = originalQty - approvedQty
+      if (declinedQty > 0) {
+        const declinedRequest = new Request({
+          ...request.toObject(),
+          _id: new mongoose.Types.ObjectId(),   // new identity
+          status: 'declined',
+          quantity_requested: declinedQty,
+        })
+        await declinedRequest.save({ session })
+
+        const declineLog = new Log({
+          action: 'REQUEST_DECLINE',
+          userId: new mongoose.Types.ObjectId(currentUser.userId),
+          userEmail: currentUser.email,
+          userRole: currentUser.role,
+          metadata: {
+            entityId: declinedRequest._id,
+            entityType: 'request',
+            requestStatus: 'declined',
+            itemId: component._id,
+            itemModel: component.model,
+            quantity: {
+              previous: component.quantity,
+              new: component.quantity,
+              change: 0,
+            },
+            requestedQuantity: originalQty,
+            declinedQuantity: declinedQty,
+            approvedQuantity: approvedQty,
+            parentRequestId: request._id,
+            description: 'Remainder declined as part of partial approval via technician dashboard',
+          },
+        })
+        await declineLog.save({ session })
+
+        processed.push({
+          requestId: String(declinedRequest._id),
+          status: 'declined',
+          approvedQuantity: 0,
+          declinedQuantity: declinedQty,
+          parentRequestId: String(request._id),
+        })
+      }
     }
 
     await session.commitTransaction()
@@ -218,4 +264,3 @@ export default defineEventHandler(async (event) => {
     session.endSession()
   }
 })
-
