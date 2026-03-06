@@ -778,8 +778,7 @@ const statusOptions = ref(['available', 'reserved', 'maintenance', 'broken'])
 // Searchable columns configuration (admin only)
 const searchableColumns = ref([
   { label: 'All Columns', value: 'all', icon: 'pi pi-search' },
-  { label: 'Model', value: 'model', icon: 'pi pi-tag' },
-  { label: 'Name', value: 'name', icon: 'pi pi-tag' },
+  { label: 'Model Name', value: 'model', icon: 'pi pi-tag' },
   { label: 'Description', value: 'description', icon: 'pi pi-align-left' },
   { label: 'Quantity', value: 'quantity', icon: 'pi pi-box' },
   { label: 'Location', value: 'location', icon: 'pi pi-map-marker' },
