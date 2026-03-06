@@ -369,7 +369,7 @@ function confirmReturn(items: any[]) {
     confirmSeverity.value = 'success'
   } else {
     confirmMessage.value = `Are you sure you want to mark ${items.length} items as returned?`
-    confirmSeverity.value = 'danger'
+    confirmSeverity.value = 'success'
   }
   
   showConfirmDialog.value = true

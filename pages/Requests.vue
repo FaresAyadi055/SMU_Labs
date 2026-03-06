@@ -212,7 +212,7 @@
                             size="small"
                             class="action-btn approve-btn"
                             :class="{ 'selected-action': getDecision(data.id) === 'approve' }"
-                            :disabled="getDecision(data.id) === 'decline'"
+                            :disabled="getDecision(data.id) === 'decline' || (getDecision(data.id) === 'approve' && draftQty(data.id) < data.quantityRequested)"
                             @click="setApprove(data)"
                           />
                           <Button
