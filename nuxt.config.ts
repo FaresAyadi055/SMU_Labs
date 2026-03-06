@@ -54,6 +54,11 @@ export default defineNuxtConfig({
       title: 'FabLab Inventory Manager',
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ],
+      meta: [
+        { 
+          content: 'width=device-width, initial-scale=0.8, maximum-scale=0.8, user-scalable=no' 
+        }
       ]
     }
   },

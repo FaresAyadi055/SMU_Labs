@@ -5,7 +5,9 @@ import User from '~/server/models/Users'
 import Component from '~/server/models/Components'
 import connectDB from '~/server/utils/db'
 import { requireRole, UserRole } from '~/server/utils/auth'
-
+import '~/server/models/Users'
+import '~/server/models/Requests'
+import '~/server/models/Components'
 type PendingUserItem = {
   id: string
   email: string
