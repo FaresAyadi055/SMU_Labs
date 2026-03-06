@@ -18,17 +18,44 @@
         <!-- Search and Actions -->
         <div class="card action-card">
           <div class="action-bar">
-            <!-- Search -->
-            <div class="search-wrapper">
-              <span class="p-input-icon-left search-input">
-                <i class="pi pi-search" />
-                <InputText 
-                  v-model="searchQuery" 
-                  placeholder="Search across all columns..." 
-                  class="w-full"
-                  @input="handleSearch"
-                />
-              </span>
+            <!-- Search with Column Filter (Admin only) -->
+            <div class="search-wrapper" :class="{ 'with-filter': userRole === 'admin' }">
+              <div class="search-container">
+                <span class="p-input-icon-left search-input">
+                  <i class="pi pi-search" />
+                  <InputText 
+                    v-model="searchQuery" 
+                    :placeholder="searchPlaceholder"
+                    class="w-full"
+                    @input="handleSearch"
+                  />
+                </span>
+                
+                <!-- Column Filter Dropdown (Admin only) -->
+                <Select 
+                  v-if="userRole === 'admin'"
+                  v-model="selectedSearchColumn"
+                  :options="searchableColumns"
+                  optionLabel="label"
+                  optionValue="value"
+                  class="column-filter-dropdown"
+                  @change="handleSearch"
+                >
+                  <template #value="slotProps">
+                    <div v-if="slotProps.value" class="column-filter-value">
+                      <i :class="getColumnIcon(slotProps.value)"></i>
+                      <span>{{ getColumnLabel(slotProps.value) }}</span>
+                    </div>
+                    <span v-else>All Columns</span>
+                  </template>
+                  <template #option="slotProps">
+                    <div class="column-filter-option">
+                      <i :class="getColumnIcon(slotProps.option.value)"></i>
+                      <span>{{ slotProps.option.label }}</span>
+                    </div>
+                  </template>
+                </Select>
+              </div>
             </div>
 
             <!-- Action Buttons -->
@@ -58,7 +85,6 @@
                 severity="primary"
               />
               <Button 
-                
                 v-if="userRole === ''"
                 label="Request Unavailable Item" 
                 icon="pi pi-exclamation-circle" 
@@ -241,25 +267,50 @@
               </div>
             </div>
 
-            <!-- Stats Summary Container -->
+            <!-- Stats Summary Container (Admin only - now clickable for filtering) -->
             <div v-if="userRole === 'admin' && filteredItems.length > 0" class="summary-container">
               <div class="summary-header">
                 <h3>Inventory Summary</h3>
+                <Button 
+                  v-if="activeFilter !== 'all'"
+                  label="Clear Filter" 
+                  icon="pi pi-times" 
+                  @click="clearSummaryFilter"
+                  class="clear-filter-btn"
+                  text
+                  size="small"
+                />
               </div>
               <div class="summary-stats">
-                <div class="stat-item">
+                <div 
+                  class="stat-item clickable" 
+                  :class="{ 'active-filter': activeFilter === 'all' }"
+                  @click="filterBySummary('all')"
+                >
                   <div class="stat-value total">{{ totalItems }}</div>
                   <div class="stat-label">Total Items</div>
                 </div>
-                <div class="stat-item">
+                <div 
+                  class="stat-item clickable" 
+                  :class="{ 'active-filter': activeFilter === 'low-stock' }"
+                  @click="filterBySummary('low-stock')"
+                >
                   <div class="stat-value low-stock">{{ lowStockItems }}</div>
                   <div class="stat-label">Low Stock</div>
                 </div>
-                <div class="stat-item">
+                <div 
+                  class="stat-item clickable" 
+                  :class="{ 'active-filter': activeFilter === 'out-of-stock' }"
+                  @click="filterBySummary('out-of-stock')"
+                >
                   <div class="stat-value out-of-stock">{{ outOfStockItems }}</div>
                   <div class="stat-label">Out of Stock</div>
                 </div>
-                <div class="stat-item">
+                <div 
+                  class="stat-item clickable" 
+                  :class="{ 'active-filter': activeFilter === 'in-stock' }"
+                  @click="filterBySummary('in-stock')"
+                >
                   <div class="stat-value in-stock">{{ inStockItems }}</div>
                   <div class="stat-label">In Stock</div>
                 </div>
@@ -657,6 +708,10 @@ const selectedItems = ref(null)
 const searchQuery = ref('')
 const expandedItemId = ref(null)
 
+// Filter state (admin only)
+const selectedSearchColumn = ref('all')
+const activeFilter = ref('all') // Track which summary filter is active
+
 // Pagination
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
@@ -720,6 +775,34 @@ const classPrefixes = ref(['Freshman', 'Sophomore RE','Sophomore CSE','Junior RE
 const classNumbers = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 const statusOptions = ref(['available', 'reserved', 'maintenance', 'broken'])
 
+// Searchable columns configuration (admin only)
+const searchableColumns = ref([
+  { label: 'All Columns', value: 'all', icon: 'pi pi-search' },
+  { label: 'Model', value: 'model', icon: 'pi pi-tag' },
+  { label: 'Name', value: 'name', icon: 'pi pi-tag' },
+  { label: 'Description', value: 'description', icon: 'pi pi-align-left' },
+  { label: 'Quantity', value: 'quantity', icon: 'pi pi-box' },
+  { label: 'Location', value: 'location', icon: 'pi pi-map-marker' },
+
+])
+
+// Helper functions for column filter
+const getColumnIcon = (columnValue) => {
+  const column = searchableColumns.value.find(col => col.value === columnValue)
+  return column ? column.icon : 'pi pi-search'
+}
+
+const getColumnLabel = (columnValue) => {
+  const column = searchableColumns.value.find(col => col.value === columnValue)
+  return column ? column.label : 'All Columns'
+}
+
+const searchPlaceholder = computed(() => {
+  if (userRole.value !== 'admin') return 'Search across all columns...'
+  const columnLabel = getColumnLabel(selectedSearchColumn.value)
+  return `Search in ${columnLabel.toLowerCase()}...`
+})
+
 // Computed properties
 const userEmail = computed(() => user.value?.email || '')
 const userRole = computed(() => user.value?.role || 'student')
@@ -730,19 +813,85 @@ const lowStockItems = computed(() => inventoryItems.value.filter(item => item.qu
 const outOfStockItems = computed(() => inventoryItems.value.filter(item => item.quantity === 0).length)
 const inStockItems = computed(() => inventoryItems.value.filter(item => item.quantity > 0).length)
 
-// Filter items based on search
-const filteredItems = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return [...inventoryItems.value].sort((a, b) => (a.id || 0) - (b.id || 0))
+// Apply summary filter
+const applySummaryFilter = (items) => {
+  if (userRole.value !== 'admin' || activeFilter.value === 'all') {
+    return items
   }
   
-  const searchTerm = searchQuery.value.toLowerCase().trim()
-  return inventoryItems.value.filter(item => {
-    return Object.values(item).some(value => {
-      if (value === null || value === undefined) return false
-      return String(value).toLowerCase().includes(searchTerm)
+  switch (activeFilter.value) {
+    case 'low-stock':
+      return items.filter(item => item.quantity < 10 && item.quantity > 0)
+    case 'out-of-stock':
+      return items.filter(item => item.quantity === 0)
+    case 'in-stock':
+      return items.filter(item => item.quantity > 0)
+    default:
+      return items
+  }
+}
+
+// Filter by summary category
+const filterBySummary = (filterType) => {
+  if (userRole.value !== 'admin') return
+  
+  activeFilter.value = filterType
+  currentPage.value = 1
+  expandedItemId.value = null
+  
+  toast.add({
+    severity: 'info',
+    summary: 'Filter Applied',
+    detail: filterType === 'all' ? 'Showing all items' : `Showing ${filterType.replace('-', ' ')} items`,
+    life: 2000
+  })
+}
+
+// Clear summary filter
+const clearSummaryFilter = () => {
+  activeFilter.value = 'all'
+  currentPage.value = 1
+  
+  toast.add({
+    severity: 'info',
+    summary: 'Filter Cleared',
+    detail: 'Showing all items',
+    life: 2000
+  })
+}
+
+// Filter items based on search and summary filter
+const filteredItems = computed(() => {
+  let items = [...inventoryItems.value]
+  
+  // Apply summary filter first (admin only)
+  items = applySummaryFilter(items)
+  
+  // Apply search filter
+  if (searchQuery.value.trim()) {
+    const searchTerm = searchQuery.value.toLowerCase().trim()
+    const searchColumn = userRole.value === 'admin' ? selectedSearchColumn.value : 'all'
+    
+    items = items.filter(item => {
+      if (searchColumn === 'all') {
+        // Search across all columns except link/image
+        return Object.entries(item).some(([key, value]) => {
+          // Skip link/image fields and null/undefined values
+          if (key === 'link' || key === 'image' || key === 'image_link' || value === null || value === undefined) {
+            return false
+          }
+          return String(value).toLowerCase().includes(searchTerm)
+        })
+      } else {
+        // Search in specific column
+        const value = item[searchColumn]
+        if (value === null || value === undefined) return false
+        return String(value).toLowerCase().includes(searchTerm)
+      }
     })
-  }).sort((a, b) => (a.id || 0) - (b.id || 0))
+  }
+  
+  return items.sort((a, b) => (a.id || 0) - (b.id || 0))
 })
 
 // Pagination computed properties
@@ -1468,8 +1617,18 @@ definePageMeta({
   min-width: 300px;
 }
 
+.search-wrapper.with-filter {
+  min-width: 450px;
+}
+
+.search-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .search-input {
-  width: 100%;
+  flex: 1;
 }
 
 .search-input :deep(.p-inputtext) {
@@ -1488,6 +1647,33 @@ definePageMeta({
 .search-input :deep(.pi-search) {
   left: 1rem;
   color: #999;
+}
+
+.column-filter-dropdown {
+  min-width: 180px;
+}
+
+.column-filter-dropdown :deep(.p-dropdown) {
+  border-radius: 8px;
+  border-color: #e5e7eb;
+  height: 42px;
+}
+
+.column-filter-dropdown :deep(.p-dropdown:hover) {
+  border-color: #667eea;
+}
+
+.column-filter-value,
+.column-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.column-filter-value i,
+.column-filter-option i {
+  font-size: 0.875rem;
+  color: #667eea;
 }
 
 .action-buttons-group {
@@ -1831,6 +2017,9 @@ definePageMeta({
 }
 
 .summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -1841,6 +2030,14 @@ definePageMeta({
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+}
+
+.clear-filter-btn {
+  color: #64748b;
+}
+
+.clear-filter-btn:hover {
+  color: #ef4444;
 }
 
 .summary-stats {
@@ -1858,12 +2055,21 @@ definePageMeta({
   padding: 1rem;
   background: #f8fafc;
   border-radius: 8px;
-  transition: transform 0.2s;
+  transition: all 0.2s;
 }
 
-.stat-item:hover {
+.stat-item.clickable {
+  cursor: pointer;
+}
+
+.stat-item.clickable:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item.active-filter {
+  border: 2px solid #667eea;
+  background: #eef2ff;
 }
 
 .stat-value {
@@ -2215,6 +2421,18 @@ definePageMeta({
   
   .search-wrapper {
     min-width: 100%;
+  }
+  
+  .search-wrapper.with-filter {
+    min-width: 100%;
+  }
+  
+  .search-container {
+    flex-direction: column;
+  }
+  
+  .column-filter-dropdown {
+    width: 100%;
   }
   
   .action-buttons-group {
