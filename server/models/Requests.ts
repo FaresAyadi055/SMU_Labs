@@ -51,8 +51,6 @@ requestSchema.methods.toJSON = function() {
   delete obj.__v;
   return obj;
 }
-const Request =
-  mongoose.models.Request ||
-  mongoose.model<IRequest>('Request',requestSchema, 'requests');
+const Request = mongoose.models.Request || mongoose.model<IRequest>('Request',requestSchema, 'requests');
 
 export default Request;

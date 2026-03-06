@@ -1,15 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-// 1. Define an interface representing a User document
 export interface IUser extends Document {
   email: string;
   role: 'superadmin' | 'admin' | 'instructor' | 'student';
-  magicIssuer?: string; // Optional because it's added after login
+  magicIssuer?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// 2. Update the Schema to include magicIssuer
 const userSchema = new Schema<IUser>({
   email: {
     type: String,
@@ -26,12 +24,13 @@ const userSchema = new Schema<IUser>({
   },
   magicIssuer: {
     type: String,
-    required: false // Set to true if every user MUST have one
+    required: false
   }
 }, {
   timestamps: true,
 });
 
-// 3. Export the typed model
-const User = mongoose.model<IUser>('User', userSchema, 'users');
+// Use this pattern for all models to avoid "Schema hasn't been registered" errors
+const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+
 export default User;
