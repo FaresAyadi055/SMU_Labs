@@ -61,28 +61,38 @@
           <main class="main-content">
             <div class="card main-card">
               <template v-if="selectedUser && selectedUser.requests">
-                <div class="cart-header">
-                  <div class="cart-title-section">
-                    <h2>
-                      <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
-                      Cart — {{ selectedUser.email }}
-                    </h2>
-                    <Badge 
-                      :value="selectedUser.requests.length + ' items'" 
-                      severity="info"
-                      class="item-count-badge"
-                    />
-                  </div>
-                  <Button
-                    label="Confirm Cart"
-                    icon="pi pi-check"
-                    severity="success"
-                    :loading="submitting"
-                    :disabled="!hasDraftChanges"
-                    class="confirm-button"
-                    @click="confirmCart"  
-                  />
-                </div>
+          <div class="cart-header">
+            <div class="cart-title-section">
+              <h2>
+                <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
+                Cart — {{ selectedUser.email }}
+              </h2>
+              <Badge 
+                :value="selectedUser.requests.length + ' items'" 
+                severity="info"
+                class="item-count-badge"
+              />
+            </div>
+            <div class="action-buttons-container">
+              <Button
+                v-if="hasDraftChanges"
+                label="Cancel"
+                icon="pi pi-times"
+                severity="secondary"
+                class="cancel-button"
+                @click="cancelChanges"
+              />
+              <Button
+                label="Confirm Cart"
+                icon="pi pi-check"
+                severity="success"
+                :loading="submitting"
+                :disabled="!hasDraftChanges"
+                class="confirm-button"
+                @click="confirmCart"  
+              />
+            </div>
+          </div>
                 <DataTable
                   :value="selectedUser.requests"
                   :loading="false"
@@ -168,51 +178,58 @@
                       />
                     </template>
                   </Column>
-                  <Column header="Action" style="min-width: 280px">
-                    <template #body="{ data }">
-                      <div v-if="data.status === 'declined'" class="declined-label">
-                        <Tag value="Declined" severity="danger" icon="pi pi-ban" />
-                      </div>
-                      <div v-else class="action-cell">
-                        <div class="action-controls">
-                          <div class="qty-input-wrapper">
-                            <label class="qty-label">Qty:</label>
-                            <InputNumber
-                              :model-value="draftQty(data.id)"
-                              :min="0"
-                              :max="Math.min(data.quantityRequested, data.component?.quantityInStock ?? 0)"
-                              show-buttons
-                              class="qty-input"
-                              :class="{ 'has-value': draftQty(data.id) > 0 }"
-                              button-layout="horizontal"
-                              increment-button-class="qty-btn"
-                              decrement-button-class="qty-btn"
-                              @update:model-value="(v: number) => setDraftQty(data.id, v ?? 0)"
-                            />
-                          </div>
-                          <div class="action-buttons">
-                            <Button
-                              label="Approve"
-                              icon="pi pi-check"
-                              severity="success"
-                              size="small"
-                              class="action-btn approve-btn"
-                              :disabled="!(draftQty(data.id) > 0)"
-                              @click="setApprove(data)"
-                            />
-                            <Button
-                              label="Decline"
-                              icon="pi pi-times"
-                              severity="secondary"
-                              size="small"
-                              class="action-btn decline-btn"
-                              @click="setDecline(data)"
-                            />
-                          </div>
+                <Column header="Action" style="min-width: 280px">
+                  <template #body="{ data }">
+                    <div v-if="data.status === 'declined'" class="declined-label">
+                      <Tag value="Declined" severity="danger" icon="pi pi-ban" />
+                    </div>
+                    <div v-else class="action-cell">
+                      <div class="action-controls">
+                        <div class="qty-input-wrapper">
+                          <label class="qty-label">Qty:</label>
+                          <InputNumber
+                            :model-value="draftQty(data.id)"
+                            :min="0"
+                            :max="Math.min(data.quantityRequested, data.component?.quantityInStock ?? 0)"
+                            show-buttons
+                            class="qty-input"
+                            :class="{ 
+                              'has-value': draftQty(data.id) > 0,
+                              'disabled': getDecision(data.id) === 'decline'
+                            }"
+                            :disabled="getDecision(data.id) === 'decline'"
+                            button-layout="horizontal"
+                            increment-button-class="qty-btn"
+                            decrement-button-class="qty-btn"
+                            @update:model-value="(v: number) => setDraftQty(data.id, v ?? 0)"
+                          />
+                        </div>
+                        <div class="action-buttons">
+                          <Button
+                            label="Approve"
+                            icon="pi pi-check"
+                            severity="success"
+                            size="small"
+                            class="action-btn approve-btn"
+                            :class="{ 'selected-action': getDecision(data.id) === 'approve' }"
+                            :disabled="getDecision(data.id) === 'decline'"
+                            @click="setApprove(data)"
+                          />
+                          <Button
+                            label="Decline"
+                            icon="pi pi-times"
+                            severity="secondary"
+                            size="small"
+                            class="action-btn decline-btn"
+                            :class="{ 'selected-action': getDecision(data.id) === 'decline' }"
+                            :disabled="getDecision(data.id) === 'approve' && draftQty(data.id) > 0"
+                            @click="setDecline(data)"
+                          />
                         </div>
                       </div>
-                    </template>
-                  </Column>
+                    </div>
+                  </template>
+                </Column>
                 </DataTable>
               </template>
               <div v-else-if="loading" class="empty-state">
@@ -492,6 +509,34 @@ async function confirmCart() {
   } finally {
     submitting.value = false
   }
+}
+
+function getDecision(requestId: string) {
+  const draft = cartStore.getDraft(requestId)
+  return draft?.decision || null
+}
+function cancelChanges() {
+  if (!selectedUser.value?.requests?.length) return
+  
+  // Get all request IDs for the current user
+  const requestIds = selectedUser.value.requests.map((r: any) => r.id)
+  
+  // Clear drafts for this user from the store
+  cartStore.clearDraftsForUser(requestIds)
+  
+  // Reset draft quantities to default (max available)
+  selectedUser.value.requests.forEach((r: any) => {
+    const maxQty = Math.min(r.quantityRequested, r.component?.quantityInStock ?? 0)
+    draftQuantities.value[r.id] = maxQty
+  })
+  
+  // Show feedback toast
+  toast.add({ 
+    severity: 'info', 
+    summary: 'Cancelled', 
+    detail: 'All selections have been reset', 
+    life: 3000 
+  })
 }
 </script>
 <style scoped>  
@@ -1046,4 +1091,53 @@ async function confirmCart() {
     flex: 1;
   }
 }
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cart-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.action-buttons-container {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancel-button {
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+  background-color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.confirm-button {
+  min-width: 140px;
+}
+
+.cancel-button {
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 </style>

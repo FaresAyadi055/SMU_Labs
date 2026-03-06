@@ -20,7 +20,7 @@ global.mongoose = cached;
 
 export default async function connectDB(retries = 3, delay = 1000): Promise<typeof mongoose> {
   const config = useRuntimeConfig();
-  const uri = config.MONGO_URI || "";
+  const uri = config.MONGO_URI || "http://localhost:27017/test";
 
   if (!uri) {
     throw new Error("MONGO_URI not set – configure it in your environment");

@@ -40,9 +40,37 @@
           </div>
         </div>
 
+        <!-- Selection Toolbar -->
+        <div v-if="selectedLoans.length > 0" class="card selection-toolbar">
+          <div class="selection-content">
+            <div class="selection-info">
+              <i class="pi pi-check-circle selection-icon"></i>
+              <span class="selection-count">{{ selectedLoans.length }} item(s) selected</span>
+            </div>
+            <div class="selection-actions">
+              <Button
+                label="Clear Selection"
+                icon="pi pi-times"
+                @click="clearSelection"
+                class="clear-btn"
+                text
+              />
+              <Button
+                label="Mark Selected as Returned"
+                icon="pi pi-check"
+                severity="success"
+                :loading="returningInProgress"
+                @click="confirmReturn(selectedLoans)"
+                class="batch-return-btn"
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Loans Table -->
         <div class="card table-card">
           <DataTable
+            ref="dataTable"
             :value="filteredLoans"
             :loading="loading"
             dataKey="id"
@@ -53,7 +81,11 @@
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} loans"
             responsiveLayout="scroll"
             class="custom-table"
+            v-model:selection="selectedLoans"
+            selectionMode="multiple"
           >
+            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+
             <Column field="user.email" header="Student">
               <template #body="{ data }">
                 <div class="student-info">
@@ -129,20 +161,6 @@
               </template>
             </Column>
 
-            <Column header="Action" style="width: 160px">
-              <template #body="{ data }">
-                <Button
-                  label="Mark returned"
-                  icon="pi pi-check"
-                  severity="success"
-                  size="small"
-                  :loading="returningId === data.id"
-                  @click="markReturned(data)"
-                  class="return-button"
-                />
-              </template>
-            </Column>
-
             <!-- Empty State Template -->
             <template #empty>
               <div class="empty-state">
@@ -157,6 +175,44 @@
         </div>
       </div>
     </div>
+    
+    <!-- Confirmation Dialog -->
+    <Dialog 
+      v-model:visible="showConfirmDialog" 
+      :style="{ width: '450px' }" 
+      header="Confirm Return"
+      :modal="true"
+      class="confirm-dialog"
+    >
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle warning-icon" :class="confirmSeverity" />
+        <div class="confirmation-text">
+          <p class="confirm-message">{{ confirmMessage }}</p>
+          <p v-if="pendingItems.length > 1" class="confirm-details">
+            Items: {{ pendingItems.map(item => item.component?.model).join(', ') }}
+          </p>
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button 
+          label="Cancel" 
+          icon="pi pi-times" 
+          @click="cancelReturn" 
+          class="dialog-btn cancel-btn"
+          text
+        />
+        <Button 
+          label="Confirm Return" 
+          icon="pi pi-check" 
+          @click="executeReturn" 
+          :loading="returningInProgress"
+          class="dialog-btn confirm-btn" 
+          :class="confirmSeverity === 'danger' ? 'danger-gradient' : 'success-gradient'"
+        />
+      </template>
+    </Dialog>
+    
     <Toast position="top-right" />
   </div>
 </template>
@@ -177,7 +233,18 @@ const router = useRouter()
 const loans = ref<any[]>([])
 const search = ref('')
 const loading = ref(false)
-const returningId = ref<string | null>(null)
+const selectedLoans = ref<any[]>([])
+const dataTable = ref()
+const selectedForRequest = ref(null) 
+// Unified return state
+const returningItems = ref<Set<string>>(new Set())
+const returningInProgress = ref(false)
+
+// Confirmation dialog state
+const showConfirmDialog = ref(false)
+const confirmMessage = ref('')
+const confirmSeverity = ref('success')
+const pendingItems = ref<any[]>([])
 
 const token = ref('')
 const user = ref<any>(null)
@@ -197,7 +264,7 @@ onMounted(() => {
       toast.add({ 
         severity: 'error', 
         summary: 'Access denied', 
-        detail: 'Technician or admin only', 
+        detail: 'Instructor or admin only', 
         life: 3000 
       })
       router.push('/home')
@@ -208,7 +275,11 @@ onMounted(() => {
   }
 })
 
-// For Nuxt server routes, use relative paths
+// Helper to check if a specific item is being returned
+function isReturningItem(itemId: string): boolean {
+  return returningItems.value.has(itemId)
+}
+
 async function loadActiveLoans() {
   loading.value = true
   try {
@@ -218,8 +289,6 @@ async function loadActiveLoans() {
       queryParams.append('search', search.value.trim())
     }
     
-    // Use relative path for Nuxt server API
-    // This will hit: /api/admin/active-loans
     const response = await $fetch(`/api/admin/active-loans${queryParams.toString() ? '?' + queryParams.toString() : ''}`, {
       method: 'GET',
       headers: token.value ? {
@@ -227,7 +296,6 @@ async function loadActiveLoans() {
       } : {}
     })
     
-    // Handle the response
     const result = response as { 
       success: boolean; 
       data: any[] 
@@ -238,10 +306,12 @@ async function loadActiveLoans() {
     } else {
       loans.value = []
     }
+    
+    // Clear selection after loading new data
+    clearSelection()
   } catch (error: any) {
     console.error('Error loading active loans:', error)
     
-    // Handle unauthorized
     if (error?.status === 401 || error?.statusCode === 401) {
       router.push('/login')
       return
@@ -272,41 +342,103 @@ function handleImageError(event: Event) {
   (event.target as HTMLImageElement).style.display = 'none'
 }
 
-async function markReturned(row: any) {
-  returningId.value = row.id
+function clearSelection() {
+  selectedLoans.value = []
+}
+
+// Unified confirmation for both single and batch returns
+function confirmReturn(items: any[]) {
+  if (items.length === 0) {
+    toast.add({
+      severity: 'warn',
+      summary: 'No selection',
+      detail: 'Please select items to return',
+      life: 3000
+    })
+    return
+  }
+  
+  pendingItems.value = items
+  
+  const itemNames = items
+    .map(item => item.component?.model || 'Unknown')
+    .join(', ')
+  
+  if (items.length === 1) {
+    confirmMessage.value = `Are you sure you want to mark "${itemNames}" as returned?`
+    confirmSeverity.value = 'success'
+  } else {
+    confirmMessage.value = `Are you sure you want to mark ${items.length} items as returned?`
+    confirmSeverity.value = 'danger'
+  }
+  
+  showConfirmDialog.value = true
+}
+
+function cancelReturn() {
+  showConfirmDialog.value = false
+  pendingItems.value = []
+}
+
+// Unified return execution
+async function executeReturn() {
+  if (pendingItems.value.length === 0) return
+  
+  const items = pendingItems.value
+  const requestIds = items.map(item => item.id)
+  const isBatch = items.length > 1
+  
+  // Set loading states
+  returningInProgress.value = true
+  items.forEach(item => returningItems.value.add(item.id))
+  
   try {
-    await $fetch('/api/admin/return-item', {
+    const response = await $fetch('/api/admin/return-item', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token.value ? { Authorization: `Bearer ${token.value}` } : {})
       },
-      body: { requestId: row.id },
-    })
+      body: { requestIds: isBatch ? requestIds : requestIds[0] }, // Send array for batch, single ID for single
+    }) as any
     
+    // Show success message
     toast.add({ 
       severity: 'success', 
-      summary: 'Returned', 
-      detail: `${row.component?.model ?? 'Item'} marked as returned`, 
-      life: 3000 
+      summary: 'Success', 
+      detail: response.message || `Successfully returned ${items.length} item(s)`, 
+      life: 5000 
     })
     
-    loans.value = loans.value.filter((l) => l.id !== row.id)
+    // Remove returned items from the list
+    const returnedIds = new Set(items.map(item => item.id))
+    loans.value = loans.value.filter(loan => !returnedIds.has(loan.id))
+    
+    // Clear selection and dialog
+    clearSelection()
+    showConfirmDialog.value = false
+    pendingItems.value = []
+    
   } catch (error: any) {
-    console.error('Error marking as returned:', error)
+    console.error('Error marking items as returned:', error)
     
     toast.add({ 
       severity: 'error', 
       summary: 'Error', 
-      detail: error?.data?.message || error?.message || 'Failed to mark as returned', 
+      detail: error?.data?.message || error?.message || 'Failed to mark items as returned', 
       life: 5000 
     })
   } finally {
-    returningId.value = null
+    // Clear loading states
+    returningInProgress.value = false
+    items.forEach(item => returningItems.value.delete(item.id))
   }
 }
 </script>
 
+<style scoped>
+/* ... (keep all existing styles exactly the same) ... */
+</style>
 <style scoped>
 .returns-view {
   min-height: 100vh;
@@ -352,7 +484,7 @@ async function markReturned(row: any) {
 
 /* Toolbar Card */
 .toolbar-card {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding: 1.25rem;
   border: none;
   border-radius: 12px;
@@ -365,6 +497,78 @@ async function markReturned(row: any) {
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+/* Selection Toolbar */
+.selection-toolbar {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.selection-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.selection-icon {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.selection-count {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.selection-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.clear-btn {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.clear-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.batch-return-btn {
+  background: white !important;
+  color: #059669 !important;
+  border: none !important;
+  font-weight: 600;
+}
+
+.batch-return-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3) !important;
 }
 
 .search-wrapper {
@@ -458,6 +662,11 @@ async function markReturned(row: any) {
 .custom-table :deep(.p-datatable-tbody > tr > td) {
   padding: 1rem;
   border-bottom: 1px solid #e5e7eb;
+}
+
+/* Selection styling */
+.custom-table :deep(.p-datatable-tbody > tr.p-highlight) {
+  background: #e8f0fe;
 }
 
 /* Student Info */
@@ -561,25 +770,6 @@ async function markReturned(row: any) {
   font-size: 0.9rem;
 }
 
-/* Return Button */
-.return-button {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border: none;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  transition: all 0.2s;
-  width: 100%;
-}
-
-.return-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.return-button:disabled {
-  opacity: 0.6;
-}
-
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -671,6 +861,63 @@ async function markReturned(row: any) {
   font-size: 2rem;
 }
 
+/* Confirmation Dialog */
+.confirm-dialog :deep(.p-dialog-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px 12px 0 0;
+}
+
+.confirm-dialog :deep(.p-dialog-title) {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.confirmation-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.warning-icon {
+  font-size: 2rem;
+}
+
+.warning-icon.danger {
+  color: #ef4444;
+}
+
+.warning-icon.success {
+  color: #10b981;
+}
+
+.dialog-btn {
+  min-width: 100px;
+}
+
+.cancel-btn {
+  color: #64748b !important;
+}
+
+.confirm-btn.danger-gradient {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  color: white !important;
+}
+
+.confirm-btn.success-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: white !important;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
   .returns-view {
@@ -684,6 +931,20 @@ async function markReturned(row: any) {
   .toolbar-content {
     flex-direction: column;
     align-items: stretch;
+  }
+  
+  .selection-content {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .selection-info {
+    justify-content: center;
+  }
+  
+  .selection-actions {
+    justify-content: center;
   }
   
   .search-wrapper {
@@ -729,17 +990,9 @@ async function markReturned(row: any) {
     gap: 0.25rem;
   }
   
-  .return-button {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-  }
-  
-  .return-button .p-button-label {
-    display: none;
-  }
-  
-  .return-button .p-button-icon {
-    margin: 0;
+  .confirmation-content {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
@@ -756,10 +1009,7 @@ async function markReturned(row: any) {
     font-size: 0.9rem;
   }
   
-  .toolbar-card {
-    padding: 1rem;
-  }
-  
+  .toolbar-card,
   .table-card {
     padding: 1rem;
   }
@@ -787,6 +1037,14 @@ async function markReturned(row: any) {
   .empty-state p {
     font-size: 0.9rem;
   }
+  
+  .selection-actions {
+    flex-direction: column;
+  }
+  
+  .dialog-btn {
+    width: 100%;
+  }
 }
 
 /* PrimeVue Overrides */
@@ -804,15 +1062,6 @@ async function markReturned(row: any) {
   background: #f1f5f9;
   color: #64748b;
   font-weight: 500;
-}
-
-.custom-table :deep(.p-button.p-button-success) {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border: none;
-}
-
-.custom-table :deep(.p-button.p-button-success:hover) {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 /* Scrollbar Styling */
