@@ -71,6 +71,13 @@ export default defineNuxtConfig({
   // Nitro configuration
   nitro: {
     preset: 'vercel',
+     publicAssets: [
+    {
+      baseURL: '/',
+      dir: 'public',
+      maxAge: 60 * 60 * 24 * 365
+    }
+  ],
     externals: {
       inline: ['@magic-sdk/admin']
     },
