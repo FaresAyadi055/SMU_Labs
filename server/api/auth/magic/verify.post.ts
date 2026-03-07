@@ -120,18 +120,10 @@ export default defineEventHandler(async (event) => {
       console.log(`User not found: ${email}, creating new user`)
       user = await User.create({
         email,
-        role: 'student',
-        magicIssuer: issuer // Store Magic issuer for future reference
+        role: 'student'
       })
       console.log(`New user created: ${email}`)
-    } else {
-      // Update Magic issuer if not set
-      if (!user.magicIssuer && issuer) {
-        user.magicIssuer = issuer
-        await user.save()
-        console.log(`Updated Magic issuer for: ${email}`)
-      }
-    }
+    } 
 
     // Generate JWT token for your app
     const jwtSecret = process.env.JWT_SECRET || config.JWT_SECRET

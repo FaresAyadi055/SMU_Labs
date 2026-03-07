@@ -81,7 +81,7 @@
                                 <Column field="ID" header="ID" :sortable="true">
                   <template #body="{ data }">
                     <div class="user-info">
-                      <i class="pi pi-user user-icon" />
+                      <i class="pi pi-id-card user-icon" />
                       <span class="user-email">{{ data.id }}</span>
                       <Badge
                         v-if="data.email === currentUserEmail"

@@ -6,7 +6,6 @@ import Log from '~/server/models/Logs'
 import connectDB from '~/server/utils/db'
 import { requireRole } from '~/server/utils/auth'
 
-console.log('return-item.post.ts - Unified return endpoint')
 
 export default defineEventHandler(async (event) => {
   const session = await mongoose.startSession()

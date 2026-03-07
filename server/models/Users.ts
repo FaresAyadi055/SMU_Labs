@@ -22,10 +22,6 @@ const userSchema = new Schema<IUser>({
     required: true,
     default: 'student'
   },
-  magicIssuer: {
-    type: String,
-    required: false
-  }
 }, {
   timestamps: true,
 });

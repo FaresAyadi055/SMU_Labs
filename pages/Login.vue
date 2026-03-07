@@ -1,5 +1,4 @@
 <!-- pages/login.vue -->
-<!-- pages/login.vue -->
 <template>
   <div class="login-container">
     <div class="login-card">
@@ -10,8 +9,14 @@
         <p class="text-surface-600 mt-2">Sign in with your school email</p>
       </div>
 
+      <!-- Auto-login loading state -->
+      <div v-if="checkingAuth" class="auth-check">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary-500"></i>
+        <p class="text-surface-600 mt-3">Signing you in...</p>
+      </div>
+
       <!-- Single Email Input Form -->
-      <div class="space-y-6">
+      <div v-else class="space-y-6">
         <div class="field">
           <label for="email" class="block text-sm font-medium text-surface-700 mb-2">
             School Email
@@ -62,6 +67,7 @@ import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
 const config = useRuntimeConfig()
+const router = useRouter()
 
 // Magic SDK instance
 let magic = null
@@ -70,7 +76,45 @@ const loading = ref(false)
 const emailError = ref('')
 const magicInitialized = ref(false)
 
-// Initialize Magic
+// Controls whether we show the spinner (checking token) vs the email form
+const checkingAuth = ref(true)
+
+// ─── Auto-login: check for a valid JWT on mount ───────────────────────────────
+onMounted(async () => {
+  // If the user explicitly logged out, skip auto-login and show the form
+  const explicitLogout = sessionStorage.getItem('explicit_logout')
+  if (explicitLogout) {
+    sessionStorage.removeItem('explicit_logout')
+    checkingAuth.value = false
+    await initMagic()
+    return
+  }
+
+  // Check for an existing, non-expired JWT
+  const token = localStorage.getItem('token')
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const isExpired = payload.exp * 1000 < Date.now()
+
+      if (!isExpired) {
+        // Valid token — redirect immediately, no email form needed
+        await navigateTo('/home')
+        return
+      }
+    } catch {
+      // Malformed token — clean up and fall through to the form
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    }
+  }
+
+  // No valid token — show the email form and initialize Magic
+  checkingAuth.value = false
+  await initMagic()
+})
+
+// ─── Initialize Magic SDK ─────────────────────────────────────────────────────
 const initMagic = async () => {
   if (!config.public.MAGIC_PUBLISHABLE_KEY) {
     console.error('Magic Publishable Key is missing')
@@ -78,18 +122,11 @@ const initMagic = async () => {
   }
 
   try {
-    // Dynamic import of Magic SDK
     const { Magic } = await import('magic-sdk')
-    
-    // Create new instance
     magic = new Magic(config.public.MAGIC_PUBLISHABLE_KEY)
-    
-    // Store globally
     window.magic = magic
-    
     magicInitialized.value = true
     return true
-    
   } catch (error) {
     console.error('Failed to initialize Magic SDK:', error)
     magicInitialized.value = false
@@ -97,11 +134,10 @@ const initMagic = async () => {
   }
 }
 
-// Main login function
+// ─── Main login function ──────────────────────────────────────────────────────
 const loginWithMagic = async () => {
   if (!validateEmail()) return
-  
-  // Initialize Magic if needed
+
   if (!magic || !magicInitialized.value) {
     const initialized = await initMagic()
     if (!initialized) {
@@ -114,45 +150,43 @@ const loginWithMagic = async () => {
       return
     }
   }
-  
+
   loading.value = true
   emailError.value = ''
-  
+
   try {
-    // First, check if user exists
+    // Step 1: Validate email domain on the server
     const userCheck = await $fetch(`api/auth/login`, {
       method: 'POST',
       body: { email: email.value }
     }).catch(err => {
-      console.error('Login endpoint error:', err)
-      throw new Error('Failed to connect to server')
+      throw new Error(err.data?.message || 'Failed to connect to server')
     })
-    
+
     if (!userCheck.success) {
       throw new Error(userCheck.message || 'Failed to initiate login')
     }
-    
-    // Show Magic OTP popup
+
+    // Step 2: Trigger Magic OTP — Magic is ONLY used for OTP delivery
     const didToken = await magic.auth.loginWithEmailOTP({
       email: email.value
     })
-    
-    // Verify with backend
+
+    // Step 3: Exchange DID token for our own JWT
     const verifyData = await $fetch(`api/auth/magic/verify`, {
       method: 'POST',
       body: { didToken }
     })
-    
+
     if (verifyData.success && verifyData.data) {
       handleLoginSuccess(verifyData.data)
     } else {
       throw new Error(verifyData.message || 'Verification failed')
     }
-    
+
   } catch (error) {
     console.error('Login error:', error)
-    
-    // Handle specific Magic errors
+
     if (error.message?.includes('Magic RPC Error') || error.code === 'MAGIC_EMAIL_OTP_CANCELLED') {
       toast.add({
         severity: 'info',
@@ -173,12 +207,11 @@ const loginWithMagic = async () => {
   }
 }
 
-// Handle successful login
+// ─── Handle successful login ──────────────────────────────────────────────────
 const handleLoginSuccess = (data) => {
   const { token, user } = data
-  
+
   if (!token || !user) {
-    console.error('Invalid login response:', data)
     toast.add({
       severity: 'error',
       summary: 'Login Error',
@@ -187,46 +220,39 @@ const handleLoginSuccess = (data) => {
     })
     return
   }
-  
-  // Save token and user data
+
   localStorage.setItem('token', token)
   localStorage.setItem('user', JSON.stringify(user))
-  
+
   toast.add({
     severity: 'success',
     summary: 'Welcome!',
     detail: `Logged in as ${user.email}`,
     life: 2000
   })
-  
-  // Redirect to home
+
   setTimeout(() => {
     navigateTo('/home')
   }, 1500)
 }
 
-// Email validation
+// ─── Email validation ─────────────────────────────────────────────────────────
 const validateEmail = () => {
   emailError.value = ''
-  
+
   if (!email.value) {
     emailError.value = 'Email is required'
     return false
   }
-  
+
   const emailRegex = /^[a-zA-Z0-9._%+-]+@(medtech|smu)\.tn$/i
   if (!emailRegex.test(email.value)) {
     emailError.value = 'Please use a valid @medtech.tn or @smu.tn email'
     return false
   }
-  
+
   return true
 }
-
-// Initialize on mount
-onMounted(async () => {
-  await initMagic()
-})
 
 definePageMeta({
   layout: 'auth',
@@ -238,9 +264,9 @@ definePageMeta({
 <style scoped>
 .login-container {
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
@@ -264,6 +290,14 @@ definePageMeta({
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.auth-check {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
 }
 
 .text-center {
@@ -318,19 +352,6 @@ definePageMeta({
   letter-spacing: 0.025em;
 }
 
-.pi-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .text-red-500 {
   font-size: 0.875rem;
   margin-top: 0.5rem;
@@ -349,34 +370,13 @@ definePageMeta({
     padding: 32px 24px;
     margin: 0 16px;
   }
-  
+
   .text-center h1 {
     font-size: 1.875rem;
   }
-  
+
   .text-center p {
     font-size: 1rem;
   }
-}
-.login-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  overflow-y: auto; /* Allows scrolling if content is too tall */
-}
-
-/* Ensure no parent constraints */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
 }
 </style>

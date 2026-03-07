@@ -273,16 +273,16 @@ const logout = async () => {
         // Silently fail - client-side cleanup is more important
       }
     }
-    
     // Clear all auth-related items
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     localStorage.removeItem('cartCount')
     localStorage.removeItem('cartItems')
-    
+  
     // Clear session storage
     sessionStorage.clear()
-    
+    sessionStorage.setItem('explicit_logout', 'true') // Set explicit logout flag
+
     toast.add({
       severity: 'success',
       summary: 'Logged Out',
