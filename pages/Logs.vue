@@ -12,15 +12,15 @@
         <div class="card toolbar-card">
           <div class="filter-row">
             <div class="filter-group">
-              <span class="p-input-icon-left filter-input-wrapper">
-                <i class="pi pi-search" />
+              <IconField class="p-input-icon-left filter-input-wrapper">
+                <InputIcon class="pi pi-search" />
                 <InputText
                   v-model="filterUserEmail"
                   placeholder="Filter by user email..."
                   class="filter-input"
                   @keyup.enter="loadLogs(1)"
                 />
-              </span>
+              </IconField>
               <Select
                 v-model="filterAction"
                 :options="actionOptions"
@@ -685,6 +685,10 @@ function formatJSON(obj: any) {
   border: none;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filter-input-wrapper :deep(.p-inputicon) {
+  color: #667eea;
 }
 
 .filter-row {

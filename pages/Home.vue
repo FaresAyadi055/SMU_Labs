@@ -21,15 +21,15 @@
             <!-- Search with Column Filter (Admin only) -->
             <div class="search-wrapper" :class="{ 'with-filter': userRole === 'admin' || userRole ==='superadmin' }">
               <div class="search-container">
-                <span class="p-input-icon-left search-input">
-                  <i class="pi pi-search" />
+                <IconField class="search-input">
+                  <InputIcon class="pi pi-search" />
                   <InputText 
                     v-model="searchQuery" 
                     :placeholder="searchPlaceholder"
                     class="w-full"
                     @input="handleSearch"
                   />
-                </span>
+                </IconField>
                 
                 <!-- Column Filter Dropdown (Admin only) -->
                 <Select 
@@ -1664,8 +1664,7 @@ definePageMeta({
 }
 
 .search-input :deep(.pi-search) {
-  left: 1rem;
-  color: #999;
+  color: #667eea;
 }
 
 .column-filter-dropdown {

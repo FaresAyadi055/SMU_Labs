@@ -12,15 +12,15 @@
         <div class="card toolbar-card">
           <div class="toolbar-content">
             <div class="search-wrapper">
-              <span class="p-input-icon-left search-input">
-                <i class="pi pi-search" />
+              <IconField class="p-input-icon-left search-input">
+                <InputIcon class="pi pi-search" />
                 <InputText
                   v-model="searchQuery"
                   placeholder="Search by component name, description, location..."
                   class="w-full"
                   @keyup.enter="handleSearch"
                 />
-              </span>
+              </IconField>
             </div>
             <div class="action-buttons-group">
               <Button 
@@ -405,6 +405,10 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 /* Toolbar Card */
+.search-wrapper :deep(.p-inputicon) {
+  color: #667eea !important;
+}
+
 .toolbar-card {
   margin-bottom: 2rem;
   padding: 1.25rem;

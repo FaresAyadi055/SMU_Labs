@@ -12,15 +12,15 @@
         <div class="card toolbar-card">
           <div class="toolbar-content">
             <div class="search-wrapper">
-              <span class="p-input-icon-left search-input">
-                <i class="pi pi-search" />
+              <IconField class="p-input-icon-left search-input">
+                <InputIcon class="pi pi-search" />
                 <InputText
                   v-model="search"
                   placeholder="Search by student email or component..."
                   class="w-full"
                   @keyup.enter="loadActiveLoans"
                 />
-              </span>
+              </IconField>
             </div>
             <div class="action-buttons-group">
               <Button 
@@ -848,6 +848,10 @@ async function executeReturn() {
 
 .custom-table :deep(.p-paginator .p-dropdown .p-dropdown-label) {
   padding: 0.5rem 1rem;
+}
+
+.search-input :deep(.p-inputicon) {
+  color: #667eea;
 }
 
 /* Loading State */

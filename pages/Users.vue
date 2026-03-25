@@ -12,15 +12,15 @@
         <div class="card action-card">
           <div class="action-bar">
             <div class="search-wrapper">
-              <span class="p-input-icon-left search-input">
-                <i class="pi pi-search" />
+              <IconField class="p-input-icon-left search-input">
+                <InputIcon   class="pi pi-search" />
                 <InputText
                   v-model="searchQuery"
                   placeholder="Search by email..."
                   class="w-full"
                   @input="handleSearch"
                 />
-              </span>
+              </IconField>
             </div>
             
             <div class="filter-group">
@@ -925,6 +925,10 @@ async function showRequests(userData: any) {
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.search-input :deep(.p-inputicon) {
+  color: #667eea;
 }
 
 .selected-user-value {
