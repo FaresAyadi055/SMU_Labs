@@ -112,7 +112,20 @@
                     </div>
                   </template>
                 </Column>
-
+                <Column field="request" header="Request History" :sortable="false">
+                  <template #body="{ data }"> 
+                    <div style="display: flex; justify-content: center; align-items: center;">               
+                    <Button
+                      icon="pi pi-eye"
+                      @click="showRequests(data)"
+                      class="view-btn"
+                      v-tooltip.top="'View details'"
+                    text
+                    rounded
+                    />
+                    </div>  
+                  </template>
+                </Column>
                 <!-- Empty State -->
                 <template #empty>
                   <div class="empty-state">
@@ -228,12 +241,118 @@
       </template>
     </Dialog>
 
+    <!-- Request History Dialog -->
+    <Dialog
+      v-model:visible="showRequestsDialog"
+      :style="{ width: '560px', maxWidth: '95vw' }"
+      :header="`Request History — ${selectedUserForRequests?.email || ''}`"
+      :modal="true"
+      class="custom-dialog requests-history-dialog"
+    >
+      <!-- Loading -->
+      <div v-if="loadingRequests" class="rh-loading">
+        <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" />
+        <p>Loading requests…</p>
+      </div>
+
+      <!-- Empty -->
+      <div v-else-if="requestsForUser.length === 0" class="rh-empty">
+        <i class="pi pi-inbox rh-empty-icon"></i>
+        <p>No requests found for this user.</p>
+      </div>
+
+      <!-- Cards List -->
+      <div v-else class="rh-cards-list">
+        <div
+          v-for="request in requestsForUser"
+          :key="request.id"
+          class="rh-card"
+          :class="{ 'rh-card--expanded': expandedRequestId === request.id }"
+          @click="toggleRequestExpansion(request.id)"
+        >
+          <!-- Image + status badge -->
+          <div class="rh-image-container">
+            <img
+              :src="request.link || '/placeholder-image.png'"
+              :alt="request.model"
+              class="rh-image"
+              @error="handleImageError"
+            />
+            <div class="rh-status-badge" :class="getStatusClass(request.status)">
+              <i :class="getStatusIcon(request.status)"></i>
+              {{ request.status || 'pending' }}
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="rh-info">
+            <div class="rh-header">
+              <h3 class="rh-title">{{ request.model || 'Unknown Item' }}</h3>
+              <i
+                class="pi rh-chevron"
+                :class="expandedRequestId === request.id ? 'pi-chevron-up' : 'pi-chevron-down'"
+              ></i>
+            </div>
+
+            <div class="rh-details">
+              <div class="rh-detail-item">
+                <i class="pi pi-hashtag rh-detail-icon"></i>
+                <span class="rh-detail-label">Quantity:</span>
+                <span class="rh-detail-value">{{ request.requested_quantity }}</span>
+              </div>
+              <div class="rh-detail-item">
+                <i class="pi pi-users rh-detail-icon"></i>
+                <span class="rh-detail-label">Class:</span>
+                <span class="rh-detail-value">{{ request.class || '—' }}</span>
+              </div>
+              <div class="rh-detail-item">
+                <i class="pi pi-calendar rh-detail-icon"></i>
+                <span class="rh-detail-label">Date:</span>
+                <span class="rh-detail-value">{{ formatDate(request.timestamp) }}</span>
+              </div>
+            </div>
+
+            <!-- Expanded -->
+            <div v-if="expandedRequestId === request.id" class="rh-expanded">
+              <div v-if="request.description" class="rh-detail-row">
+                <span class="rh-detail-label">Description:</span>
+                <span class="rh-detail-value">{{ request.description }}</span>
+              </div>
+              <div class="rh-detail-row">
+                <span class="rh-detail-label">Stock qty:</span>
+                <span class="rh-detail-value">{{ request.current_quantity }}</span>
+              </div>
+              <div class="rh-detail-row">
+                <span class="rh-detail-label">Request ID:</span>
+                <span class="rh-detail-value rh-mono">{{ request.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="rh-footer">
+          <span class="rh-count" v-if="!loadingRequests && requestsForUser.length">
+            {{ requestsForUser.length }} request{{ requestsForUser.length !== 1 ? 's' : '' }} total
+          </span>
+          <Button
+            label="Close"
+            icon="pi pi-times"
+            @click="showRequestsDialog = false"
+            class="dialog-btn cancel-btn"
+            text
+          />
+        </div>
+      </template>
+    </Dialog>
+
     <Toast position="top-right" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
@@ -262,6 +381,13 @@ const editForm = ref<{ id: string | null; email: string; role: string | null }>(
 })
 
 const token = ref('')
+
+// Request History
+const showRequestsDialog = ref(false)
+const requestsForUser = ref<any[]>([])
+const loadingRequests = ref(false)
+const selectedUserForRequests = ref<any | null>(null)
+const expandedRequestId = ref<string | null>(null)
 
 const roleOptions = [
   { label: 'All roles', value: null },
@@ -473,6 +599,69 @@ async function updateUserRole() {
 watch(roleFilter, () => {
   loadData()
 })
+
+// Request History helpers
+function getStatusClass(status: string) {
+  switch (status?.toLowerCase()) {
+    case 'approved': return 'status-approved'
+    case 'pending':  return 'status-pending'
+    case 'declined': return 'status-declined'
+    case 'returned': return 'status-returned'
+    default:         return 'status-pending'
+  }
+}
+
+function getStatusIcon(status: string) {
+  switch (status?.toLowerCase()) {
+    case 'approved': return 'pi pi-check-circle'
+    case 'pending':  return 'pi pi-clock'
+    case 'declined': return 'pi pi-times-circle'
+    case 'returned': return 'pi pi-undo'
+    default:         return 'pi pi-clock'
+  }
+}
+
+function handleImageError(event: Event) {
+  (event.target as HTMLImageElement).src = '/placeholder-image.png'
+}
+
+function toggleRequestExpansion(id: string) {
+  expandedRequestId.value = expandedRequestId.value === id ? null : id
+}
+
+async function showRequests(userData: any) {
+  selectedUserForRequests.value = userData
+  requestsForUser.value = []
+  expandedRequestId.value = null
+  showRequestsDialog.value = true
+  loadingRequests.value = true
+
+  try {
+    const response = await $fetch(`/api/requests/${encodeURIComponent(userData.email)}`, {
+      method: 'GET',
+      headers: token.value ? { Authorization: `Bearer ${token.value}` } : {}
+    }) as { success: boolean; data: any[] }
+
+    if (response?.success && Array.isArray(response.data)) {
+      requestsForUser.value = response.data.sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )
+    } else {
+      requestsForUser.value = []
+    }
+  } catch (error: any) {
+    console.error('Error loading user requests:', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error?.data?.statusMessage || error?.message || 'Failed to load request history',
+      life: 5000
+    })
+    requestsForUser.value = []
+  } finally {
+    loadingRequests.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -688,6 +877,10 @@ watch(roleFilter, () => {
 .date-info i {
   color: #667eea;
 }
+.view-btn {
+  color: #667eea;
+}
+
 
 /* Selected User Card */
 .selected-user-card {
@@ -1068,6 +1261,238 @@ watch(roleFilter, () => {
 
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* ── Request History Dialog ── */
+.requests-history-dialog :deep(.p-dialog-content) {
+  padding: 0;
+  max-height: 65vh;
+  overflow: hidden;
+}
+
+/* Scrollable card list */
+.rh-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  max-height: 65vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.rh-cards-list::-webkit-scrollbar { width: 6px; }
+.rh-cards-list::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+.rh-cards-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.rh-cards-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Individual card — horizontal layout mirroring Cart.vue */
+.rh-card {
+  display: flex;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.rh-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border-color: #667eea;
+}
+
+.rh-card--expanded {
+  border-color: #667eea;
+  background: #f8fafc;
+}
+
+/* Image strip on the left */
+.rh-image-container {
+  position: relative;
+  width: 120px;
+  flex-shrink: 0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rh-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.75rem;
+  transition: transform 0.3s ease;
+}
+
+.rh-card:hover .rh-image { transform: scale(1.05); }
+
+.rh-status-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: white;
+  text-transform: capitalize;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.rh-status-badge.status-approved { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.rh-status-badge.status-pending  { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.rh-status-badge.status-declined { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+.rh-status-badge.status-returned { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+
+/* Right side info */
+.rh-info {
+  flex: 1;
+  padding: 1rem 1.1rem;
+  min-width: 0;
+}
+
+.rh-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+}
+
+.rh-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rh-chevron {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.rh-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rh-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.rh-detail-icon {
+  color: #667eea;
+  font-size: 0.8rem;
+  width: 1rem;
+}
+
+.rh-detail-label {
+  font-weight: 500;
+  min-width: 62px;
+  color: #475569;
+}
+
+.rh-detail-value {
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Expanded section */
+.rh-expanded {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  animation: rh-slide-down 0.25s ease-out;
+}
+
+@keyframes rh-slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.rh-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  background: #f1f5f9;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+}
+
+.rh-detail-row .rh-detail-label {
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.rh-detail-row .rh-detail-value {
+  color: #334155;
+  text-align: right;
+  word-break: break-all;
+}
+
+.rh-mono {
+  font-family: monospace;
+  font-size: 0.72rem;
+  background: white;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+/* Loading / empty states inside dialog */
+.rh-loading,
+.rh-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.rh-empty-icon {
+  font-size: 3rem;
+  color: #667eea;
+  opacity: 0.4;
+}
+
+/* Dialog footer */
+.rh-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.rh-count {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
 }
 
 /* Responsive Design */

@@ -31,13 +31,16 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Verify email matches (case-insensitive)
+    if(currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
+      
+     // Verify email matches (case-insensitive)
     if (requestedEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
       throw createError({
         statusCode: 403,
         statusMessage: 'Forbidden - You can only view your own requests'
       })
     }
+  }
 
     // Find the user to get their ObjectId
     const user = await User.findOne({ email: requestedEmail.toLowerCase() })
