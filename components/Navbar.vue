@@ -104,7 +104,7 @@ const cartItems = ref([])
 
 // Check if user is admin
 const isAdmin = computed(() => {
-  return user.value?.role === 'admin'
+  return user.value?.role === 'admin' || user.value?.role === 'superadmin'
 })
 
 // Admin navigation links

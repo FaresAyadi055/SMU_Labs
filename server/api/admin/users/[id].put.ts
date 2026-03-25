@@ -3,14 +3,14 @@ import mongoose from 'mongoose'
 import User from '~/server/models/Users'
 import Log from '~/server/models/Logs'
 import connectDB from '~/server/utils/db'
-import { isAdmin } from '~/server/utils/auth'
+import { isSuperAdmin } from '~/server/utils/auth'
 
 type UserRole = 'superadmin' | 'admin' | 'instructor' | 'student'
 
 export default defineEventHandler(async (event) => {
   try {
     await connectDB()
-    const currentUser = isAdmin(event)
+    const currentUser = isSuperAdmin(event)
 
     const id = getRouterParam(event, 'id')
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {

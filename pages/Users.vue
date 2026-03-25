@@ -154,7 +154,7 @@
                     class="selected-user-role"
                   />
                 </div>
-                <Button
+                <Button  v-if="userRole === 'superadmin'"
                   label="Change role"
                   icon="pi pi-pencil"
                   size="small"
@@ -365,7 +365,7 @@ const router = useRouter()
 const toast = useToast()
 
 // State
-const user = ref<any>(null)
+const user = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 const users = ref<any[]>([])
 const loading = ref(false)
 const selectedUser = ref<any | null>(null)
@@ -381,6 +381,9 @@ const editForm = ref<{ id: string | null; email: string; role: string | null }>(
 })
 
 const token = ref('')
+
+// Computed properties
+const userRole = computed(() => user.value?.role || 'student')
 
 // Request History
 const showRequestsDialog = ref(false)

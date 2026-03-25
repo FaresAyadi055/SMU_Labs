@@ -23,7 +23,7 @@ export function requireRole(event: H3Event, allowedRoles: UserRole[]) {
   return user
 }
 
-// Check if user is admin or superadmin (common check)
+// Check if user is admin or superadmin 
 export function isAdmin(event: H3Event) {
   return requireRole(event, ['admin', 'superadmin'])
 }
@@ -36,4 +36,7 @@ export function isInstructor(event: H3Event) {
 // Get current user (with fallback for public endpoints)
 export function getCurrentUser(event: H3Event) {
   return event.context.user || null
+}
+export function isSuperAdmin(event: H3Event) {
+  return requireRole(event, ['superadmin'])
 }

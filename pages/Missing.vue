@@ -400,7 +400,7 @@ onMounted(() => {
 // Check if user is admin
 const checkAdminAccess = () => {
   const userRole = user.value?.role
-  if (userRole !== 'admin') {
+  if (userRole !== 'admin' && userRole !== 'superadmin') {
     toast.add({
       severity: 'error',
       summary: 'Access Denied',
