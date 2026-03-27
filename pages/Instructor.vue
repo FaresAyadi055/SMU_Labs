@@ -1,12 +1,12 @@
 <template>
-  <div class="technician-view">
+  <div class="instructor-view">
     <div class="main-container">
       <div class="content-wrapper">
         <div class="header-section">
           <div class="header-content">
             <div class="header-text">
-              <h1 class="page-title">Dashboard</h1>
-              <p class="page-subtitle">Review and approve pending requests by user</p>
+              <h1 class="page-title">Instructor Dashboard</h1>
+              <p class="page-subtitle">Review and verify pending requests from your classes</p>
             </div>
             <Button 
               label="Refresh" 
@@ -26,7 +26,7 @@
               <div class="sidebar-header">
                 <h3 class="sidebar-title">
                   <i class="pi pi-users" style="margin-right: 0.5rem;"></i>
-                  Users pending requests
+                  Students with pending requests
                 </h3>
                 <Button
                   v-if="sortedPendingUsers.length > 0"
@@ -59,7 +59,7 @@
                 </template>
                 <p v-else-if="!loading" class="empty-list">
                   <i class="pi pi-inbox" style="margin-right: 0.5rem;"></i>
-                  No pending requests
+                  No pending requests in your classes
                 </p>
                 <div v-else class="loading-state">
                   <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem;"></i>
@@ -73,38 +73,38 @@
           <main class="main-content">
             <div class="card main-card">
               <template v-if="selectedUser && selectedUser.requests">
-          <div class="cart-header">
-            <div class="cart-title-section">
-              <h2>
-                <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
-                Cart — {{ selectedUser.email }}
-              </h2>
-              <Badge 
-                :value="selectedUser.requests.length + ' items'" 
-                severity="info"
-                class="item-count-badge"
-              />
-            </div>
-            <div class="action-buttons-container">
-              <Button
-                v-if="hasDraftChanges"
-                label="Cancel"
-                icon="pi pi-times"
-                severity="secondary"
-                class="cancel-button"
-                @click="cancelChanges"
-              />
-              <Button
-                label="Confirm Cart"
-                icon="pi pi-check"
-                severity="success"
-                :loading="submitting"
-                :disabled="!hasDraftChanges"
-                class="confirm-button"
-                @click="confirmCart"  
-              />
-            </div>
-          </div>
+                <div class="cart-header">
+                  <div class="cart-title-section">
+                    <h2>
+                      <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
+                      Cart — {{ selectedUser.email }}
+                    </h2>
+                    <Badge 
+                      :value="selectedUser.requests.length + ' items'" 
+                      severity="info"
+                      class="item-count-badge"
+                    />
+                  </div>
+                  <div class="action-buttons-container">
+                    <Button
+                      v-if="hasDraftChanges"
+                      label="Cancel"
+                      icon="pi pi-times"
+                      severity="secondary"
+                      class="cancel-button"
+                      @click="cancelChanges"
+                    />
+                    <Button
+                      label="Verify Cart"
+                      icon="pi pi-check"
+                      severity="success"
+                      :loading="submitting"
+                      :disabled="!hasDraftChanges"
+                      class="confirm-button"
+                      @click="confirmCart"  
+                    />
+                  </div>
+                </div>
                 <DataTable
                   :value="selectedUser.requests"
                   :loading="false"
@@ -139,7 +139,7 @@
                       </div>
                     </template>
                   </Column>
-                    <Column field="component.date" header="Created at">
+                  <Column field="component.date" header="Created at">
                     <template #body="{ data }">
                       <div class="component-info">
                         <span class="component-date">{{ formatDate(data.createdAt) || '—' }}</span>
@@ -190,58 +190,58 @@
                       />
                     </template>
                   </Column>
-                <Column header="Action" style="min-width: 280px">
-                  <template #body="{ data }">
-                    <div v-if="data.status === 'declined'" class="declined-label">
-                      <Tag value="Declined" severity="danger" icon="pi pi-ban" />
-                    </div>
-                    <div v-else class="action-cell">
-                      <div class="action-controls">
-                        <div class="qty-input-wrapper">
-                          <label class="qty-label">Qty:</label>
-                          <InputNumber
-                            :model-value="draftQty(data.id)"
-                            :min="0"
-                            :max="Math.min(data.quantityRequested, data.component?.quantityInStock ?? 0)"
-                            show-buttons
-                            class="qty-input"
-                            :class="{ 
-                              'has-value': draftQty(data.id) > 0,
-                              'disabled': getDecision(data.id) === 'decline'
-                            }"
-                            :disabled="getDecision(data.id) === 'decline'"
-                            button-layout="horizontal"
-                            increment-button-class="qty-btn"
-                            decrement-button-class="qty-btn"
-                            @update:model-value="(v: number) => setDraftQty(data.id, v ?? 0)"
-                          />
-                        </div>
-                        <div class="action-buttons">
-                          <Button
-                            label="Approve"
-                            icon="pi pi-check"
-                            severity="success"
-                            size="small"
-                            class="action-btn approve-btn"
-                            :class="{ 'selected-action': getDecision(data.id) === 'approve' }"
-                            :disabled="getDecision(data.id) === 'decline' || (getDecision(data.id) === 'approve' && draftQty(data.id) < data.quantityRequested)"
-                            @click="setApprove(data)"
-                          />
-                          <Button
-                            label="Decline"
-                            icon="pi pi-times"
-                            severity="secondary"
-                            size="small"
-                            class="action-btn decline-btn"
-                            :class="{ 'selected-action': getDecision(data.id) === 'decline' }"
-                            :disabled="getDecision(data.id) === 'approve' && draftQty(data.id) > 0"
-                            @click="setDecline(data)"
-                          />
+                  <Column header="Action" style="min-width: 280px">
+                    <template #body="{ data }">
+                      <div v-if="data.status === 'declined'" class="declined-label">
+                        <Tag value="Declined" severity="danger" icon="pi pi-ban" />
+                      </div>
+                      <div v-else class="action-cell">
+                        <div class="action-controls">
+                          <div class="qty-input-wrapper">
+                            <label class="qty-label">Qty:</label>
+                            <InputNumber
+                              :model-value="draftQty(data.id)"
+                              :min="0"
+                              :max="Math.min(data.quantityRequested, data.component?.quantityInStock ?? 0)"
+                              show-buttons
+                              class="qty-input"
+                              :class="{ 
+                                'has-value': draftQty(data.id) > 0,
+                                'disabled': getDecision(data.id) === 'decline'
+                              }"
+                              :disabled="getDecision(data.id) === 'decline'"
+                              button-layout="horizontal"
+                              increment-button-class="qty-btn"
+                              decrement-button-class="qty-btn"
+                              @update:model-value="(v: number) => setDraftQty(data.id, v ?? 0)"
+                            />
+                          </div>
+                          <div class="action-buttons">
+                            <Button
+                              label="Verify"
+                              icon="pi pi-check"
+                              severity="success"
+                              size="small"
+                              class="action-btn verify-btn"
+                              :class="{ 'selected-action': getDecision(data.id) === 'verify' }"
+                              :disabled="getDecision(data.id) === 'decline' || (getDecision(data.id) === 'verify' && draftQty(data.id) < data.quantityRequested)"
+                              @click="setVerify(data)"
+                            />
+                            <Button
+                              label="Decline"
+                              icon="pi pi-times"
+                              severity="secondary"
+                              size="small"
+                              class="action-btn decline-btn"
+                              :class="{ 'selected-action': getDecision(data.id) === 'decline' }"
+                              :disabled="getDecision(data.id) === 'verify' && draftQty(data.id) > 0"
+                              @click="setDecline(data)"
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </template>
-                </Column>
+                    </template>
+                  </Column>
                 </DataTable>
               </template>
               <div v-else-if="loading" class="empty-state">
@@ -254,8 +254,8 @@
               <div v-else class="empty-state">
                 <div class="empty-state-content">
                   <i class="pi pi-inbox empty-icon" />
-                  <h3>No User Selected</h3>
-                  <p>Select a user from the list to view their pending cart</p>
+                  <h3>No Student Selected</h3>
+                  <p>Select a student from the list to view their pending cart</p>
                 </div>
               </div>
             </div>
@@ -288,7 +288,7 @@ const loading = ref(false)
 const refreshing = ref(false) // New ref for refresh button loading state
 const submitting = ref(false)
 const draftQuantities = ref<Record<string, number>>({})
-const isReversed = ref(true) // Set to true for reversed by default
+const isReversed = ref(true)
 
 const cartStore = useTechnicianCartStore()
 
@@ -305,12 +305,12 @@ onMounted(() => {
       user.value = {}
     }
     
-    // Check authorization
+    // Check authorization - only instructors and admins
     if (!['admin', 'superadmin', 'instructor'].includes(user.value?.role)) {
       toast.add({ 
         severity: 'error', 
         summary: 'Access denied', 
-        detail: 'Technician or admin only', 
+        detail: 'Instructor or admin only', 
         life: 3000 
       })
       router.push('/home')
@@ -344,40 +344,67 @@ async function handleRefresh() {
   }
 }
 
-// For Nuxt server routes, use relative paths
 async function loadPendingUsers() {
+  console.debug('🚀 Starting loadPendingUsers...')
   loading.value = true
+  
   try {
-    // Use relative path for Nuxt server API
-    // This will hit: /api/admin/pending-users
-    const response = await $fetch('/api/admin/pending-users', {
+    // Debug token presence
+    console.debug('🔑 Auth Check:', { 
+      hasToken: !!token.value, 
+      userRole: user.value?.role 
+    })
+
+    const response = await $fetch('/api/instructor/pending-users', {
       method: 'GET',
       headers: token.value ? {
         Authorization: `Bearer ${token.value}`
       } : {}
     })
-    
-    // Handle the response
+
+    console.debug('📥 API Response received:', response)
+
     const result = response as { 
       success: boolean; 
-      data: any[] 
+      data: any[];
+      instructorInfo?: {
+        assignedClasses: string[];
+        classCount: number;
+      }
     }
-    
+
     if (result?.success && Array.isArray(result.data)) {
+      console.log(`✅ Successfully loaded ${result.data.length} pending users`)
       pendingUsers.value = result.data
+      
+      if (result.instructorInfo && user.value?.role === 'instructor') {
+        console.debug('🏫 Instructor Classes:', result.instructorInfo.assignedClasses)
+        toast.add({ 
+          severity: 'info', 
+          summary: 'Your Classes', 
+          detail: `Showing requests from ${result.instructorInfo.classCount} class(es)`,
+          life: 3000 
+        })
+      }
       
       if (selectedUser.value) {
         const found = result.data.find((u: any) => u.id === selectedUser.value.id)
+        console.debug('👤 Selected user sync:', found ? 'Found' : 'Not found in new data')
         selectedUser.value = found || null
       }
     } else {
+      console.warn('⚠️ API returned success but data format is unexpected:', result)
       pendingUsers.value = []
     }
   } catch (error: any) {
-    console.error('Error loading pending users:', error)
+    console.error('❌ Error loading pending users:', {
+      status: error?.status || error?.statusCode,
+      message: error?.message,
+      data: error?.data
+    })
     
-    // Handle unauthorized
     if (error?.status === 401 || error?.statusCode === 401) {
+      console.warn('Redirecting to login due to 401 Unauthorized')
       router.push('/login')
       return
     }
@@ -392,47 +419,39 @@ async function loadPendingUsers() {
     pendingUsers.value = []
   } finally {
     loading.value = false
+    console.debug('🏁 loadPendingUsers finished. Loading state:', loading.value)
   }
 }
 
-// Computed property for sorted users
 const sortedPendingUsers = computed(() => {
+  console.debug('🔄 Recalculating sortedPendingUsers. Count:', pendingUsers.value.length)
   if (!pendingUsers.value.length) return []
-  
-  // Create a copy of the array and sort
   const sorted = [...pendingUsers.value]
-  
-  if (isReversed.value) {
-    // Reverse order
-    return sorted.reverse()
-  } else {
-    // Original order (by email or whatever the API returns)
-    return sorted
-  }
+  return isReversed.value ? sorted.reverse() : sorted
 })
 
-// Toggle order function
 function toggleOrder() {
   isReversed.value = !isReversed.value
 }
+
 function formatDate(d: string | Date | null) {
   if (!d) return '—'
   const date = new Date(d)
   return date.toLocaleString()
 }
+
 function selectUser(u: any) {
   selectedUser.value = u
 }
 
-// Watch for selected user changes
 watch(selectedUser, (u) => {
   draftQuantities.value = {}
   
   if (u?.requests && Array.isArray(u.requests)) {
     u.requests.forEach((r: any) => {
       const d = cartStore.getDraft(r.id)
-      if (d?.decision === 'approve') {
-        draftQuantities.value[r.id] = d.approvedQuantity
+      if (d?.decision === 'returned') {
+        draftQuantities.value[r.id] = d.verifiedQuantity
       } else {
         const max = Math.min(r.quantityRequested, r.component?.quantityInStock ?? 0)
         draftQuantities.value[r.id] = max
@@ -449,12 +468,12 @@ function setDraftQty(requestId: string, value: number) {
   draftQuantities.value[requestId] = value
   cartStore.setDraft(requestId, {
     requestId,
-    decision: 'approve',
-    approvedQuantity: value,
+    decision: 'verify',
+    verifiedQuantity: value,
   })
 }
 
-function setApprove(data: any) {
+function setVerify(data: any) {
   const qty = Math.min(
     data.quantityRequested,
     data.component?.quantityInStock ?? 0,
@@ -462,8 +481,8 @@ function setApprove(data: any) {
   draftQuantities.value[data.id] = qty
   cartStore.setDraft(data.id, {
     requestId: data.id,
-    decision: 'approve',
-    approvedQuantity: qty,
+    decision: 'verify',
+    verifiedQuantity: qty,
   })
 }
 
@@ -472,7 +491,7 @@ function setDecline(data: any) {
   cartStore.setDraft(data.id, {
     requestId: data.id,
     decision: 'decline',
-    approvedQuantity: 0,
+    verifiedQuantity: 0,
   })
 }
 
@@ -481,21 +500,21 @@ const hasDraftChanges = computed(() => {
   
   return selectedUser.value.requests.some((r: any) => {
     const d = cartStore.getDraft(r.id)
-    return d && (d.decision === 'decline' || (d.decision === 'approve' && d.approvedQuantity > 0))
+    return d && (d.decision === 'decline' || (d.decision === 'verify' && d.verifiedQuantity > 0))
   })
 })
 
 async function confirmCart() {
   if (!selectedUser.value?.requests?.length) return
   
-  const items: { requestId: string; approvedQuantity: number; decision: 'approve' | 'decline' }[] = []
+  const items: { requestId: string; verifiedQuantity: number; decision: 'verify' | 'decline' }[] = []
   
   for (const r of selectedUser.value.requests) {
     const d = cartStore.getDraft(r.id)
     if (d?.decision === 'decline') {
-      items.push({ requestId: r.id, approvedQuantity: 0, decision: 'decline' })
-    } else if (d?.decision === 'approve' && d.approvedQuantity > 0) {
-      items.push({ requestId: r.id, approvedQuantity: d.approvedQuantity, decision: 'approve' })
+      items.push({ requestId: r.id, verifiedQuantity: 0, decision: 'decline' })
+    } else if (d?.decision === 'verify' && d.verifiedQuantity > 0) {
+      items.push({ requestId: r.id, verifiedQuantity: d.verifiedQuantity, decision: 'verify' })
     }
   }
   
@@ -503,7 +522,7 @@ async function confirmCart() {
     toast.add({ 
       severity: 'warn', 
       summary: 'No actions', 
-      detail: 'Set Approve or Decline for at least one item', 
+      detail: 'Set Verify or Decline for at least one item', 
       life: 3000 
     })
     return
@@ -512,9 +531,8 @@ async function confirmCart() {
   submitting.value = true
   
   try {
-    // Use relative path for Nuxt server API
-    // This will hit: /api/admin/process-cart
-    await $fetch('/api/admin/process-cart', {
+    // Use instructor-specific process endpoint
+    await $fetch('/api/instructor/process-cart', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -526,7 +544,7 @@ async function confirmCart() {
     toast.add({ 
       severity: 'success', 
       summary: 'Cart processed', 
-      detail: `${items.length} item(s) updated`, 
+      detail: `${items.length} item(s) verified/declined`, 
       life: 3000 
     })
     
@@ -551,22 +569,18 @@ function getDecision(requestId: string) {
   const draft = cartStore.getDraft(requestId)
   return draft?.decision || null
 }
+
 function cancelChanges() {
   if (!selectedUser.value?.requests?.length) return
   
-  // Get all request IDs for the current user
   const requestIds = selectedUser.value.requests.map((r: any) => r.id)
-  
-  // Clear drafts for this user from the store
   cartStore.clearDraftsForUser(requestIds)
   
-  // Reset draft quantities to default (max available)
   selectedUser.value.requests.forEach((r: any) => {
     const maxQty = Math.min(r.quantityRequested, r.component?.quantityInStock ?? 0)
     draftQuantities.value[r.id] = maxQty
   })
   
-  // Show feedback toast
   toast.add({ 
     severity: 'info', 
     summary: 'Cancelled', 
@@ -575,8 +589,9 @@ function cancelChanges() {
   })
 }
 </script>
+
 <style scoped>  
-.technician-view {
+.instructor-view {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
@@ -718,7 +733,7 @@ function cancelChanges() {
 }
 
 .user-row.active .user-email,
-.user-row.active .user-id {
+.user-row.active .user-date {
   color: white;
 }
 
@@ -816,11 +831,6 @@ function cancelChanges() {
 .item-count-badge {
   font-size: 0.9rem;
   padding: 0.25rem 0.75rem;
-}
-
-.action-buttons-container {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .confirm-button {
@@ -1010,14 +1020,14 @@ function cancelChanges() {
   transition: all 0.2s;
 }
 
-.action-btn.approve-btn {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+.action-btn.verify-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
 }
 
-.action-btn.approve-btn:hover:not(:disabled) {
+.action-btn.verify-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .action-btn.decline-btn {
@@ -1071,6 +1081,37 @@ function cancelChanges() {
   font-size: 1rem;
 }
 
+/* Action Buttons Container */
+.action-buttons-container {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancel-button {
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+  background-color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.cancel-button {
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Responsive - Consolidated Media Queries */
 @media (max-width: 1200px) {
   .action-controls {
@@ -1105,7 +1146,7 @@ function cancelChanges() {
     width: 100%;
   }
   
-  .technician-view {
+  .instructor-view {
     padding: 1rem;
   }
   
@@ -1148,54 +1189,4 @@ function cancelChanges() {
     flex: 1;
   }
 }
-
-.cart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.cart-title-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.action-buttons-container {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.cancel-button {
-  transition: all 0.2s ease;
-}
-
-.cancel-button:hover {
-  background-color: #fee2e2 !important;
-  border-color: #ef4444 !important;
-  color: #ef4444 !important;
-}
-
-.confirm-button {
-  min-width: 140px;
-}
-
-.cancel-button {
-  animation: slideIn 0.2s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 </style>

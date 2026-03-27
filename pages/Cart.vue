@@ -73,7 +73,7 @@
                 <!-- Status Badge -->
                 <div class="status-badge" :class="getStatusClass(request.status)">
                   <i :class="getStatusIcon(request.status)"></i>
-                  {{ request.status || 'pending' }}
+                  {{ request.status === 'verified' ? 'pending' : request.status || 'pending' }}
                 </div>
               </div>
 
@@ -125,7 +125,7 @@
                   </div>
 
                   <!-- Action Buttons for Pending Requests -->
-                  <div v-if="request.status?.toLowerCase() === 'pending'" class="action-section">
+                  <div v-if="request.status === 'pending' || request.status === 'verified'" class="action-buttons">
                     <Button 
                       label="Cancel Request"
                       icon="pi pi-trash"
@@ -222,7 +222,7 @@ const tabs = [
 const userEmail = computed(() => user.value?.email || '')
 
 const pendingRequests = computed(() => 
-  requests.value.filter(req => req.status?.toLowerCase() === 'pending')
+  requests.value.filter(req => req.status?.toLowerCase() === 'pending' || req.status?.toLowerCase() === 'verified')
 )
 const approvedRequests = computed(() => 
   requests.value.filter(req => req.status?.toLowerCase() === 'approved')
@@ -339,7 +339,7 @@ const handleImageError = (event) => {
 }
 
 const openDeleteDialog = (request) => {
-  if (request.status?.toLowerCase() !== 'pending') {
+  if (request.status?.toLowerCase() !== 'pending' && request.status?.toLowerCase() !== 'verified') {
     toast.add({
       severity: 'info',
       summary: 'Cannot Cancel',

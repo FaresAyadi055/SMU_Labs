@@ -9,9 +9,11 @@ export type ActionType =
   | 'REQUEST_APPROVE'
   | 'REQUEST_DECLINE'
   | 'REQUEST_RETURN'
+  | 'REQUEST_VERIFY'
   | 'USER_LOGIN'
   | 'USER_CREATE'
   | 'USER_UPDATE'
+  | 'USER_CLASSES_UPDATE'
   | 'USER_DELETE';
 
 // Define the structure for different action metadata
@@ -61,7 +63,7 @@ export interface ILog extends Document {
   
   // For grouping related actions
   sessionId?: string;
-  transactionId?: string; // This should be a string, not an object
+  transactionId?: string; 
   
   createdAt: Date;
   updatedAt: Date;
@@ -79,9 +81,11 @@ const logSchema = new Schema<ILog>({
       'REQUEST_DECLINE',
       'REQUEST_RETURN',
       'REQUEST_CANCEL',
+      'REQUEST_VERIFY',
       'USER_LOGIN',
       'USER_CREATE',
       'USER_UPDATE',
+      'USER_CLASSES_UPDATE',
       'USER_DELETE'
     ],
     required: true,
@@ -122,7 +126,6 @@ const logSchema = new Schema<ILog>({
     default: {}
   },
   
-  // 🔥 FIX: These should be strings, not objects
   sessionId: {
     type: String,
     default: null

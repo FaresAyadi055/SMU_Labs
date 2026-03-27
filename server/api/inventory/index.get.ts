@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
     // Otherwise return limited fields for students/instructors
     let projection = {}
     
-    if (user && (user.role === 'superadmin' || user.role === 'admin')) {
+    if (user && (user.role === 'superadmin' || user.role === 'admin' || user.role === 'instructor')) {
       // Admin gets all fields
       projection = {} // Empty object means all fields
     } else {

@@ -95,7 +95,7 @@ export default defineEventHandler(async (event) => {
       component_id: model_id,
       quantity_requested: quantity,
       class: class_name,
-      status: 'pending'
+      status: currentUser.role === 'instructor' || currentUser.role === 'superadmin'? 'verified' : 'pending'
     })
 
     // Save to database

@@ -7,6 +7,7 @@ export interface IRequest extends Document {
     quantity_requested: number;
     class: string;
     status: string;
+    instructor_approval: boolean;
 }
 
 const requestSchema = new Schema<IRequest>({
@@ -35,7 +36,7 @@ const requestSchema = new Schema<IRequest>({
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'declined','returned'],
+    enum: ['pending','verified', 'approved', 'declined','returned'],
     required: true,
     default: 'pending'
   }

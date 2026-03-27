@@ -19,7 +19,7 @@
         <div class="card action-card">
           <div class="action-bar">
             <!-- Search with Column Filter (Admin only) -->
-            <div class="search-wrapper" :class="{ 'with-filter': userRole === 'admin' || userRole ==='superadmin' }">
+            <div class="search-wrapper" :class="{ 'with-filter': userRole === 'admin' || userRole ==='superadmin' || userRole === 'instructor' }">
               <div class="search-container">
                 <IconField class="search-input">
                   <InputIcon class="pi pi-search" />
@@ -33,7 +33,7 @@
                 
                 <!-- Column Filter Dropdown (Admin only) -->
                 <Select 
-                  v-if="userRole === 'admin' || userRole ==='superadmin'"
+                  v-if="userRole === 'admin' || userRole ==='superadmin' || userRole === 'instructor'"
                   v-model="selectedSearchColumn"
                   :options="searchableColumns"
                   optionLabel="label"
@@ -77,7 +77,7 @@
                 severity="primary"  
               />
               <Button 
-                v-if="userRole === 'admin' || userRole ==='superadmin'"   
+                v-if="userRole === 'admin' || userRole ==='superadmin' || userRole === 'instructor'"   
                 label="Export CSV"
                 icon="pi pi-file-export" 
                 @click="exportCSV(filteredItems, 'inventory_export.csv')"
@@ -179,7 +179,7 @@
                     </div>
                     
                     <!-- Student Actions -->
-                    <div v-if="userRole === 'student'" class="student-actions">
+                    <div v-if="userRole === 'student' || userRole === 'instructor'" class="student-actions">
                       <Button 
                         label="Request Item" 
                         icon="pi pi-shopping-cart" 
@@ -268,7 +268,7 @@
             </div>
 
             <!-- Stats Summary Container (Admin only - now clickable for filtering) -->
-            <div v-if="userRole === 'admin' || userRole ==='superadmin' && filteredItems.length > 0" class="summary-container">
+            <div v-if="userRole === 'admin' || userRole ==='superadmin' || userRole === 'instructor' && filteredItems.length > 0" class="summary-container">
               <div class="summary-header">
                 <h3>Inventory Summary</h3>
                 <Button 
@@ -888,7 +888,7 @@ const filteredItems = computed(() => {
   // Apply search filter
   if (searchQuery.value.trim()) {
     const searchTerm = searchQuery.value.toLowerCase().trim()
-    const searchColumn = userRole.value === 'admin' || userRole.value === 'superadmin' ? selectedSearchColumn.value : 'all'
+    const searchColumn = userRole.value === 'admin' || userRole.value === 'superadmin' || userRole.value === 'instructor' ? selectedSearchColumn.value : 'all'
     
     items = items.filter(item => {
       if (searchColumn === 'all') {

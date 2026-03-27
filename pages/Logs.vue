@@ -408,6 +408,7 @@ const dialogTitle = computed(() => {
 const actionOptions = [
   { label: 'All actions', value: null },
   { label: 'Request approve', value: 'REQUEST_APPROVE' },
+  {label: 'Request verify', value: 'REQUEST_VERIFY'},
   { label: 'Request decline', value: 'REQUEST_DECLINE' },
   { label: 'Request return', value: 'REQUEST_RETURN' },
   { label: 'Inventory update', value: 'INVENTORY_UPDATE' },
@@ -547,6 +548,7 @@ function formatAction(action: string) {
 
 function actionSeverity(action: string) {
   if (action?.includes('APPROVE') || action?.includes('RETURN')) return 'success'
+  if (action?.includes('VERIFY')) return 'success'
   if (action?.includes('DECLINE') || action?.includes('DELETE')) return 'danger'
   if (action?.includes('CREATE')) return 'info'
   if (action?.includes('UPDATE')) return 'warning'

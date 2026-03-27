@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if request is pending
-    if (request.status !== 'pending') {
+    if (request.status !== 'pending' && request.status !== 'verified') {
       throw createError({
         statusCode: 400,
         statusMessage: `Only pending requests can be cancelled. Current status: ${request.status}`

@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      if (request.status !== 'pending') {
+      if (request.status !== 'pending' && request.status !== 'verified') {
         throw createError({
           statusCode: 400,
           statusMessage: `Request ${item.requestId} is not pending`,

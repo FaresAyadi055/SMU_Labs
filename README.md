@@ -1,10 +1,10 @@
 # FabLab Inventory Manager
 
-A modern inventory management system for maker spaces, built with Nuxt 3, Vue 3, and PrimeVue.
+A modern inventory management system for SMU, built with Nuxt 3, Vue 3, and PrimeVue.
 
 ## Overview
 
-FabLab Inventory Manager is a full-stack application designed to help maker spaces efficiently manage their equipment and inventory. Users can browse available items, request equipment, track requests, and admins can manage inventory, handle requests, and monitor system logs.
+FabLab Inventory Manager is a full-stack application designed to help SMU efficiently manage their equipment and inventory. Users can browse available items, request equipment, track requests, and admins can manage inventory, handle requests, and monitor system logs.
 
 ## Features
 
@@ -559,7 +559,7 @@ List users (admin/superadmin only), with optional role filter.
 ```
 
 #### `PUT /api/admin/users/:id`
-Update a user’s role (admin/superadmin only, logged).
+Update a user’s role (superadmin only, logged).
 
 **Body**
 ```json

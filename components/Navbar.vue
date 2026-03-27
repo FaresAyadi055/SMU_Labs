@@ -30,6 +30,23 @@
             </NuxtLink>
           </li>
         </ul>
+                <ul class="nav-links">
+          <li
+            v-for="link in instructorLinks"
+            :key="link.path"
+            class="nav-item"
+            v-if="isInstructor"
+          >
+            <NuxtLink
+              :to="link.path"
+              class="nav-link"
+              active-class="active"
+            >
+              <i :class="`${link.icon} mr-2`"></i>
+              <span>{{'‎ ' + link.name }}</span>
+            </NuxtLink>
+          </li>
+        </ul>
       </div>
 
       <!-- Right side: Cart + Profile + Hamburger -->
@@ -141,6 +158,23 @@
             </NuxtLink>
           </li>
         </ul>
+        <ul class="mobile-nav-links" v-if="isInstructor">
+          <li
+            v-for="link in instructorLinks"
+            :key="link.path"
+            class="mobile-nav-item"
+          >
+            <NuxtLink
+              :to="link.path"
+              class="mobile-nav-link"
+              active-class="active"
+              @click="closeMobileMenu"
+            >
+              <i :class="link.icon"></i>
+              <span>{{ link.name }}</span>
+            </NuxtLink>
+          </li>
+        </ul>
 
         <!-- Mobile Logout -->
         <div class="mobile-footer">
@@ -186,6 +220,13 @@ const adminLinks = [
   { path: '/returns', name: 'Returns', icon: 'pi pi-cart-arrow-down' },
   { path: '/PurchaseList', name: 'Purchase List', icon: 'pi pi-list-check' },
   { path: '/Users', name: 'Users', icon: 'pi pi-user' },
+]
+const isInstructor = computed(() => {
+  return user.value?.role === 'instructor'
+})
+const instructorLinks = [
+  { path: '/Instructor', name: 'Requests', icon: 'pi pi-inbox' },
+   { path: '/Students', name: 'Students', icon: 'pi pi-user' },
 ]
 
 // Mobile menu toggle

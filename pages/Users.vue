@@ -154,13 +154,24 @@
                     class="selected-user-role"
                   />
                 </div>
-                <Button  v-if="userRole === 'superadmin'"
-                  label="Change role"
-                  icon="pi pi-pencil"
-                  size="small"
-                  @click="openEditDialog"
-                  class="change-role-btn "
-                />
+                <div class="selected-actions" v-if="userRole === 'superadmin'">
+                  <Button
+                    label="Change role"
+                    icon="pi pi-pencil"
+                    size="small"
+                    @click="openEditDialog"
+                    class="change-role-btn"
+                  />
+                  <Button
+                    label="Assign classes"
+                    icon="pi pi-book"
+                    size="small"
+                    @click="openAssignClassesDialog"
+                    :disabled="selectedUser.role !== 'instructor'"
+                    v-tooltip.top="selectedUser.role !== 'instructor' ? 'Only available for instructors' : 'Manage assigned classes'"
+                    class="change-role-btn assign-classes-btn"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -240,6 +251,96 @@
         />
       </template>
     </Dialog>
+
+  <!-- Assign Classes Dialog -->
+  <Dialog
+    v-model:visible="showAssignClassesDialog"
+    :style="{ width: '500px' }"
+    header="Assign Classes to Instructor"
+    :modal="true"
+    class="custom-dialog"
+  >
+    <div class="dialog-form">
+      <!-- Loading overlay -->
+      <div v-if="loadingClasses" class="classes-loading">
+        <ProgressSpinner style="width: 32px; height: 32px" strokeWidth="4" />
+        <span>Loading classes…</span>
+      </div>
+
+      <template v-else>
+        <div class="form-field">
+          <label>Instructor</label>
+          <InputText :value="assignClassesForm.email" disabled class="form-input readonly" />
+        </div>
+
+        <!-- Class picker -->
+        <div class="form-field">
+          <label>Add a class</label>
+          <div class="class-picker-row">
+            <Select
+              v-model="selectedPrefix"
+              :options="classPrefixes"
+              placeholder="Year / Branch"
+              class="class-picker-select"
+            />
+            <Select
+              v-model="selectedNumber"
+              :options="classNumbers"
+              placeholder="Group"
+              class="class-picker-number"
+            />
+            <Button
+              icon="pi pi-plus"
+              @click="addClassTag"
+              :disabled="!selectedPrefix || !selectedNumber"
+              class="add-class-btn primary-gradient"
+              v-tooltip.top="'Add class'"
+              rounded
+            />
+          </div>
+        </div>
+
+        <!-- Assigned classes bubbles -->
+        <div class="form-field">
+          <label>Assigned classes <span class="tag-count">({{ assignClassesForm.classes.length }})</span></label>
+          <div class="class-tags-area">
+            <div v-if="assignClassesForm.classes.length === 0" class="no-classes-placeholder">
+              <i class="pi pi-info-circle"></i> No classes assigned yet
+            </div>
+            <span
+              v-for="cls in assignClassesForm.classes"
+              :key="cls"
+              class="class-tag"
+            >
+              <i class="pi pi-book tag-icon"></i>
+              {{ cls }}
+              <button class="tag-remove" @click="removeClassTag(cls)" type="button">
+                <i class="pi pi-times"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <template #footer>
+      <Button
+        label="Cancel"
+        icon="pi pi-times"
+        @click="showAssignClassesDialog = false"
+        class="dialog-btn cancel-btn"
+        text
+      />
+      <Button
+        label="Save classes"
+        icon="pi pi-check"
+        @click="saveAssignedClasses"
+        :loading="savingClasses"
+        :disabled="loadingClasses"
+        class="dialog-btn confirm-btn primary-gradient"
+      />
+    </template>
+  </Dialog>
 
     <!-- Request History Dialog -->
     <Dialog
@@ -379,6 +480,26 @@ const editForm = ref<{ id: string | null; email: string; role: string | null }>(
   email: '',
   role: null,
 })
+
+// Assign Classes
+const showAssignClassesDialog = ref(false)
+const savingClasses = ref(false)
+const loadingClasses = ref(false)
+const assignClassesForm = ref<{ id: string | null; email: string; classes: string[] }>({
+  id: null,
+  email: '',
+  classes: [],
+})
+const classPrefixes = ref([
+  'Freshman', 'Sophomore RE', 'Sophomore CSE',
+  'Junior RE', 'Junior CSE',
+  'Senior RE', 'Senior CSE',
+  'Final Year RE', 'Final Year CSE',
+  'L1', 'L2', 'L3',
+])
+const classNumbers = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+const selectedPrefix = ref<string | null>(null)
+const selectedNumber = ref<number | null>(null)
 
 const token = ref('')
 
@@ -602,6 +723,92 @@ async function updateUserRole() {
 watch(roleFilter, () => {
   loadData()
 })
+
+async function openAssignClassesDialog() {
+  if (!selectedUser.value || selectedUser.value.role !== 'instructor') return
+  selectedPrefix.value = null
+  selectedNumber.value = null
+  assignClassesForm.value = {
+    id: selectedUser.value.id,
+    email: selectedUser.value.email,
+    classes: [],
+  }
+  showAssignClassesDialog.value = true
+  loadingClasses.value = true
+
+  try {
+    const response = await $fetch(`/api/admin/users/classes/${selectedUser.value.id}`, {
+      method: 'GET',
+      headers: token.value ? { Authorization: `Bearer ${token.value}` } : {},
+    }) as { success: boolean; data: { assignedClasses: string[] } }
+
+    if (response?.success) {
+      assignClassesForm.value.classes = response.data.assignedClasses ?? []
+    }
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error?.data?.statusMessage || error?.message || 'Failed to load assigned classes',
+      life: 5000,
+    })
+  } finally {
+    loadingClasses.value = false
+  }
+}
+
+function addClassTag() {
+  if (!selectedPrefix.value || !selectedNumber.value) return
+  const cls = `${selectedPrefix.value} G${selectedNumber.value}`
+  if (!assignClassesForm.value.classes.includes(cls)) {
+    assignClassesForm.value.classes.push(cls)
+  }
+  selectedPrefix.value = null
+  selectedNumber.value = null
+}
+
+function removeClassTag(cls: string) {
+  assignClassesForm.value.classes = assignClassesForm.value.classes.filter((c) => c !== cls)
+}
+
+async function saveAssignedClasses() {
+  if (!assignClassesForm.value.id) return
+  savingClasses.value = true
+  try {
+    const response = await $fetch(`/api/admin/users/classes/${assignClassesForm.value.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token.value ? { Authorization: `Bearer ${token.value}` } : {}),
+      },
+      body: { assignedClasses: assignClassesForm.value.classes },
+    }) as { success: boolean; data: any }
+
+    if (response?.success && response.data) {
+      const idx = users.value.findIndex((u) => u.id === response.data.id)
+      if (idx !== -1) users.value[idx] = response.data
+      selectedUser.value = response.data
+      toast.add({
+        severity: 'success',
+        summary: 'Classes updated',
+        detail: `${response.data.assignedClasses?.length ?? 0} class(es) assigned to ${response.data.email}`,
+        life: 3000,
+      })
+      showAssignClassesDialog.value = false
+    } else {
+      throw new Error('Failed to save classes')
+    }
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Save failed',
+      detail: error?.data?.statusMessage || error?.message || 'Failed to assign classes',
+      life: 5000,
+    })
+  } finally {
+    savingClasses.value = false
+  }
+}
 
 // Request History helpers
 function getStatusClass(status: string) {
@@ -958,6 +1165,126 @@ async function showRequests(userData: any) {
 .change-role-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.assign-classes-btn {
+  color: #764ba2;
+  margin-left: 0.5rem;
+}
+
+.selected-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ── Assign Classes Dialog ── */
+.classes-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+.class-picker-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.class-picker-select {
+  flex: 2;
+}
+
+.class-picker-number {
+  flex: 1;
+  min-width: 90px;
+}
+
+.add-class-btn {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
+  border: none;
+}
+
+.tag-count {
+  font-weight: 400;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.class-tags-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.no-classes-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.class-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.55rem;
+  background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(118,75,162,0.12) 100%);
+  border: 1px solid rgba(102,126,234,0.3);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #4c1d95;
+  transition: all 0.15s;
+}
+
+.class-tag:hover {
+  background: linear-gradient(135deg, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.2) 100%);
+}
+
+.tag-icon {
+  font-size: 0.72rem;
+  color: #667eea;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  color: #94a3b8;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.tag-remove:hover {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+
+.tag-remove .pi {
+  font-size: 0.6rem;
 }
 
 /* Sidebar Section */
