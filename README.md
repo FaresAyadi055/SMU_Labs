@@ -21,9 +21,8 @@ FabLab Inventory Manager is a full-stack application designed to help SMU effici
 
 - **Frontend**: Vue 3, Nuxt 3, PrimeVue 4, Pinia
 - **Styling**: Scoped CSS with PrimeIcons
-- **HTTP Client**: Axios
-- **Backend**: Node.js (Express), MySQL
-- **Authentication**: JWT (JSON Web Tokens)
+- **Backend**: Nuxt Nitro
+- **Authentication**: JWT (JSON Web Tokens) / magic-sdk
 - **Package Manager**: pnpm
 
 ## Project Structure
@@ -40,9 +39,11 @@ FabLab Inventory Manager is a full-stack application designed to help SMU effici
 │       ├── cart.vue       # Request cart & management
 │       ├── admin.vue      # Admin dashboard
 │       ├── requests.vue   # Request tracking
-│       ├── missing.vue    # Missing items management
 │       ├── logs.vue       # System logs
 │       └── purchase-list.vue # Purchase order management
+│       └── Users.vue   # user management for admins 
+│       └── Students.vue # student management for Instructors
+│       └── Instructor.vue # request Cart validation for Instructors
 ├── stores/                # Pinia state management
 │   └── auth.ts            # Authentication state & actions
 ├── utils/                 # Utility functions
@@ -80,7 +81,7 @@ Create a `.env` file in the project root:
 
 ```env
 # API Configuration
-VITE_API_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:4000/api
 
 # Database Configuration
 MONGO_URI=mongodb+srv:.....
@@ -89,11 +90,14 @@ MONGO_URI=mongodb+srv:.....
 JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRE=7d
 
+# magic sdk API key
 MAGIC_PUBLISHABLE_KEY=...
 MAGIC_SECRET_KEY=....
 
+# Vite Configuration 
 VITE_APP_NAME=FabLab Inventory
 VITE_DEBUG_MODE=false
+NODE_ENV=production
 VITE_MAGIC_ENABLED=true
 
 
@@ -107,7 +111,7 @@ NODE_ENV=development
 ### Start Development Server
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 The application will be available at `http://localhost:3000`
@@ -184,7 +188,7 @@ Returns a paginated list of components.
       "model": "2.4 tft lcd shield",
       "description": "arduino lcd shield",
       "quantity": 1,
-      "location": 2,
+      "location": 2, # for all roles except "student"
       "link": "https://...",
       "createdAt": "2026-02-27T13:40:21.355Z",
       "updatedAt": "2026-02-27T13:40:21.355Z"
