@@ -406,8 +406,8 @@ const logout = async () => {
 /* ── Base navbar ─────────────────────────────────── */
 .navbar {
   background: white;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 0.0625rem solid #e5e7eb;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -418,7 +418,7 @@ const logout = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 4rem;
   max-width: 100%;
   margin: 0 auto;
 }

@@ -1619,8 +1619,8 @@ definePageMeta({
   margin-bottom: 2rem;
   padding: 1rem;
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
 }
 
 .action-bar {
@@ -1732,9 +1732,16 @@ definePageMeta({
 /* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+/* Force 5 columns on desktop/laptop if zoomed to 80% */
+@media screen and (min-width: 1500px) {
+  .product-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 .product-card {
@@ -2212,8 +2219,8 @@ definePageMeta({
 
 .form-input :deep(.p-inputtext) {
   width: 100%;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  border: 0.0625rem solid #e5e7eb;
   padding: 0.75rem;
   transition: all 0.2s;
 }
