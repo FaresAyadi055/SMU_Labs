@@ -2,9 +2,17 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import User from '~/server/models/Users'
 import connectDB from '~/server/utils/db'
+import { rateLimit } from '~/server/utils/rateLimit'
 
 export default defineEventHandler(async (event) => {
   try {
+    // Apply rate limit: 10 requests per 15 minutes per IP
+    await rateLimit(event, {
+      windowMs: 15 * 60 * 1000,
+      maxRequests: 10,
+      keyPrefix: 'login'
+    })
+
     const body = await readBody(event)
     const { email } = body
 

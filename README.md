@@ -47,7 +47,7 @@ FabLab Inventory Manager is a full-stack application designed to help SMU effici
 ├── stores/                # Pinia state management
 │   └── auth.ts            # Authentication state & actions
 ├── utils/                 # Utility functions
-│   └── api.ts             # Axios instance with interceptors
+│   └── exportCSV.ts       # to download data
 ├── middleware/            # Route middleware
 │   └── auth.ts            # Authentication guard
 ├── server/
