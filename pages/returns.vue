@@ -22,6 +22,24 @@
                 />
               </IconField>
             </div>
+            <div class="class-filter-wrapper">
+              <Dropdown
+                v-model="selectedClass"
+                :options="classOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Filter by Class"
+                class="class-filter-dropdown"
+                showClear
+              >
+                <template #option="{ option }">
+                  <div class="class-option">
+                    <i class="pi pi-tag class-option-icon"></i>
+                    <span>{{ option.label }}</span>
+                  </div>
+                </template>
+              </Dropdown>
+            </div>
             <div class="action-buttons-group">
               <Button 
                 label="Search" 
@@ -232,6 +250,7 @@ const router = useRouter()
 
 const loans = ref<any[]>([])
 const search = ref('')
+const selectedClass = ref<string | null>(null)
 const loading = ref(false)
 const selectedLoans = ref<any[]>([])
 const dataTable = ref()
@@ -330,7 +349,15 @@ async function loadActiveLoans() {
   }
 }
 
-const filteredLoans = computed(() => loans.value)
+const classOptions = computed(() => {
+  const classes = [...new Set(loans.value.map(l => l.class).filter(Boolean))]
+  return classes.sort().map(c => ({ label: c, value: c }))
+})
+
+const filteredLoans = computed(() => {
+  if (!selectedClass.value) return loans.value
+  return loans.value.filter(loan => loan.class === selectedClass.value)
+})
 
 function formatDate(d: string | null) {
   if (!d) return '—'
@@ -574,6 +601,42 @@ async function executeReturn() {
 .search-wrapper {
   flex: 1;
   min-width: 300px;
+}
+
+.class-filter-wrapper {
+  min-width: 200px;
+}
+
+.class-filter-dropdown {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.class-filter-dropdown :deep(.p-dropdown) {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.class-filter-dropdown :deep(.p-dropdown:hover),
+.class-filter-dropdown :deep(.p-dropdown.p-focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.class-filter-dropdown :deep(.p-dropdown-label) {
+  padding: 0.75rem 1rem;
+}
+
+.class-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.class-option-icon {
+  color: #667eea;
+  font-size: 0.85rem;
 }
 
 .search-input {
@@ -952,6 +1015,10 @@ async function executeReturn() {
   }
   
   .search-wrapper {
+    min-width: 100%;
+  }
+  
+  .class-filter-wrapper {
     min-width: 100%;
   }
   
