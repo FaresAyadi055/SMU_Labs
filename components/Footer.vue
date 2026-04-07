@@ -16,7 +16,7 @@
         <span class="font-bold block mb-2">Contact Us:</span>
         <a href="mailto:fablab@smu.tn" class="contact-link">
           <i class="pi pi-envelope"></i>
-          <span>makerspace@smu.tn</span>
+          <span>fab.lab@medtech.tn</span>
         </a>
       </div>
 
