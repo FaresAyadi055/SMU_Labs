@@ -10,7 +10,7 @@ const CLASS_PREFIXES = [
   'Junior RE', 'Junior CSE',
   'Senior RE', 'Senior CSE',
   'Final Year RE', 'Final Year CSE',
-  'L1', 'L2', 'L3',
+  'Licence','HEC'
 ]
 
 const CLASS_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
