@@ -361,7 +361,7 @@ const vTooltip = Tooltip
 
 const router = useRouter()
 const toast = useToast()
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+
 
 // State
 const user = ref(JSON.parse(localStorage.getItem('user') || '{}'))

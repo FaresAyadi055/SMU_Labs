@@ -356,7 +356,6 @@ const logout = async () => {
   closeMobileMenu()
   try {
     const token = localStorage.getItem('token')
-    const apiUrl = config.public.API_URL || 'http://localhost:4000/api'
 
     if (typeof window !== 'undefined' && window.magic?.user?.logout) {
       try { await window.magic.user.logout() }

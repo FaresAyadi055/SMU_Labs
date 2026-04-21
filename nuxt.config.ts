@@ -39,7 +39,6 @@ export default defineNuxtConfig({
     MONGO_URI: process.env.MONGO_URI || '',
 
     public: {
-      API_URL: process.env.VITE_API_URL || 'http://localhost:4000/api',
       MAGIC_ENABLED: process.env.VITE_MAGIC_ENABLED || 'true',
       MAGIC_PUBLISHABLE_KEY: process.env.MAGIC_PUBLISHABLE_KEY || ''
     }
