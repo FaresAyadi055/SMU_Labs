@@ -16,7 +16,7 @@ export default defineNuxtConfig({
         preset: Lara,
         options: {
           prefix: 'p',
-          darkModeSelector: '.p-dark',
+          darkModeSelector: 'system',
           cssLayer: false
         }
       }
@@ -28,7 +28,7 @@ export default defineNuxtConfig({
       include: ['Tooltip']
     },
     components: {
-      include: ['Button', 'Avatar', 'Toast', 'InputText', 'InputNumber', 'Textarea', 'Select', 'Dialog', 'Badge', 'ProgressSpinner', 'Tag', 'DataTable', 'Column', 'Image']
+      include: ['Button', 'Avatar', 'Toast', 'InputText', 'InputNumber', 'Textarea', 'Select', 'Dialog', 'Badge', 'ProgressSpinner', 'Tag', 'DataTable', 'Column', 'Image', 'Checkbox', 'ToggleSwitch']
     }
   },
   

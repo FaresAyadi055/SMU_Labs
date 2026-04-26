@@ -82,7 +82,8 @@
             <Avatar
               :label="userInitial"
               shape="circle"
-              class="user-avatar"
+              class="user-avatar clickable"
+              @click="showProfileModal = true"
             />
             <div class="user-details">
               <span class="user-name">{{ userName }}</span>
@@ -190,6 +191,52 @@
     <Transition name="fade">
       <div v-if="isMobileMenuOpen" class="mobile-backdrop" @click="closeMobileMenu" />
     </Transition>
+
+    <!-- Profile Modal -->
+    <Dialog
+      v-model:visible="showProfileModal"
+      modal
+      header="User Profile"
+      :style="{ width: '25rem' }"
+      :closable="true"
+    >
+      <div class="profile-modal-content">
+        <div class="profile-info">
+          <Avatar
+            :label="userInitial"
+            shape="circle"
+            size="large"
+            class="profile-avatar"
+          />
+          <div class="profile-details">
+            <span class="profile-name">{{ userName }}</span>
+            <span class="profile-email">{{ userEmail }}</span>
+            <span class="profile-role">{{ user?.role || 'User' }}</span>
+          </div>
+        </div>
+
+        <div class="theme-settings">
+          <h4>Theme Settings</h4>
+          
+          <div class="theme-option">
+            <ToggleSwitch
+              v-model="isDarkMode"
+              :disabled="useSystemTheme"
+            />
+            <label>{{ isDarkMode ? 'Dark Mode' : 'Light Mode' }}</label>
+          </div>
+
+          <div class="theme-option system-theme">
+            <Checkbox
+              v-model="useSystemTheme"
+              inputId="useSystemTheme"
+              :binary="true"
+            />
+            <label for="useSystemTheme">Use System Theme</label>
+          </div>
+        </div>
+      </div>
+    </Dialog>
   </nav>
 </template>
 
@@ -207,6 +254,9 @@ const hasNewItems = ref(false)
 const user = ref({})
 const cartItems = ref([])
 const isMobileMenuOpen = ref(false)
+const showProfileModal = ref(false)
+const isDarkMode = ref(false)
+const useSystemTheme = ref(false)
 
 // Check if user is admin
 const isAdmin = computed(() => {
@@ -325,6 +375,10 @@ onMounted(() => {
   }
 
   loadCartData()
+  loadThemePreference()
+
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.addEventListener('change', handleSystemThemeChange)
 
   nextTick(() => {
     if (route?.path === '/cart') clearCartNotification()
@@ -337,6 +391,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('cart-updated', handleCartUpdate)
   window.removeEventListener('clear-cart-notification', clearCartNotification)
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.removeEventListener('change', handleSystemThemeChange)
   if (typeof document !== 'undefined') {
     document.body.style.overflow = ''
   }
@@ -399,6 +455,70 @@ const logout = async () => {
     isLoggingOut.value = false
   }
 }
+
+const applyTheme = (dark) => {
+  if (typeof document === 'undefined') return
+  if (dark) {
+    document.body.classList.add('p-dark')
+  } else {
+    document.body.classList.remove('p-dark')
+  }
+}
+
+const loadThemePreference = () => {
+  if (typeof localStorage === 'undefined') return
+  const saved = localStorage.getItem('themePreference')
+  const system = localStorage.getItem('useSystemTheme')
+  if (system === 'true') {
+    useSystemTheme.value = true
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    isDarkMode.value = isDark
+  } else if (saved) {
+    isDarkMode.value = saved === 'dark'
+    useSystemTheme.value = false
+  } else {
+    isDarkMode.value = false
+    useSystemTheme.value = false
+  }
+  applyTheme(isDarkMode.value)
+}
+
+const saveThemePreference = () => {
+  if (typeof localStorage === 'undefined') return
+  if (useSystemTheme.value) {
+    localStorage.setItem('useSystemTheme', 'true')
+    localStorage.removeItem('themePreference')
+  } else {
+    localStorage.setItem('useSystemTheme', 'false')
+    localStorage.setItem('themePreference', isDarkMode.value ? 'dark' : 'light')
+  }
+}
+
+const handleSystemThemeChange = (e) => {
+  if (useSystemTheme.value) {
+    isDarkMode.value = e.matches
+    applyTheme(isDarkMode.value)
+  }
+}
+
+watch(useSystemTheme, (newVal) => {
+  if (newVal) {
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    isDarkMode.value = isDark
+    applyTheme(isDarkMode.value)
+  } else {
+    isDarkMode.value = false
+    applyTheme(false)
+  }
+  saveThemePreference()
+})
+
+watch(isDarkMode, () => {
+  if (!useSystemTheme.value) {
+    applyTheme(isDarkMode.value)
+    saveThemePreference()
+  }
+})
 </script>
 
 <style scoped>
@@ -576,8 +696,11 @@ const logout = async () => {
 .user-avatar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-weight: 600;
-  cursor: pointer;
   flex-shrink: 0;
+}
+
+.user-avatar.clickable {
+  cursor: pointer;
 }
 
 .user-details {
@@ -866,5 +989,361 @@ const logout = async () => {
 
   /* Show hamburger */
   .hamburger-btn { display: flex; }
+}
+
+/* ── Profile Modal ────────────────────────────────── */
+.profile-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.profile-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-weight: 600;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.profile-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.profile-email {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.profile-role {
+  font-size: 0.75rem;
+  color: #3b82f6;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.theme-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.theme-settings h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.theme-option label {
+  font-size: 0.875rem;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.theme-option.system-theme {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ── Dark Mode - Global page styles (excluding navbar) ─────────────── */
+:global(body.p-dark) .navbar {
+  background: white !important;
+  border-bottom-color: #e5e7eb !important;
+}
+
+:global(body.p-dark) .navbar .brand-name {
+  color: #111827 !important;
+}
+
+:global(body.p-dark) .navbar .brand-subtitle {
+  color: #6b7280 !important;
+}
+
+:global(body.p-dark) .navbar .nav-link {
+  color: #4b5563 !important;
+}
+
+:global(body.p-dark) .navbar .user-name {
+  color: #111827 !important;
+}
+
+:global(body.p-dark) .navbar .user-email {
+  color: #6b7280 !important;
+}
+
+:global(body.p-dark) {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+:global(body.p-dark) #__nuxt {
+  background-color: #111827;
+}
+
+:global(body.p-dark) main {
+  background-color: #111827 !important;
+}
+
+:global(body.p-dark) .p-dialog {
+  background: #1f2937;
+}
+
+:global(body.p-dark) .p-dialog-header {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .p-dialog-content {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .p-checkbox-box {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+:global(body.p-dark) .p-toggle-switch {
+  background: #374151;
+}
+
+:global(body.p-dark) .mobile-drawer {
+  background: #111827;
+  border-top-color: #374151;
+}
+
+:global(body.p-dark) .mobile-user-section {
+  background: #1f2937;
+}
+
+:global(body.p-dark) .mobile-user-details .user-name {
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .mobile-user-details .user-email {
+  color: #d1d5db;
+}
+
+:global(body.p-dark) .mobile-nav-link {
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .mobile-nav-link:hover {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .mobile-nav-link.active {
+  background-color: #1e3a5f;
+  color: #93c5fd;
+}
+
+:global(body.p-dark) .mobile-nav-link.active i {
+  color: #93c5fd;
+}
+
+:global(body.p-dark) .mobile-footer {
+  border-top-color: #374151;
+}
+
+:global(body.p-dark) .mobile-logout-btn {
+  color: #d1d5db;
+}
+
+:global(body.p-dark) .mobile-logout-btn:hover:not(:disabled) {
+  background-color: #450a0a;
+  color: #f87171;
+}
+
+:global(body.p-dark) .profile-info {
+  background: #1f2937;
+}
+
+:global(body.p-dark) .profile-name {
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .profile-email {
+  color: #d1d5db;
+}
+
+:global(body.p-dark) .theme-settings h4 {
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .theme-option label {
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .theme-option.system-theme {
+  border-top-color: #374151;
+}
+
+:global(body.p-dark) .admin-badge {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+:global(body.p-dark) .cart-badge {
+  background-color: #dc2626;
+  border-color: #1f2937;
+}
+
+/* Global page elements in dark mode */
+:global(body.p-dark) .card,
+:global(body.p-dark) .surface-card {
+  background: #1f2937 !important;
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .p-datatable .p-datatable-thead > tr > th {
+  background: #1f2937;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+:global(body.p-dark) .p-datatable .p-datatable-tbody > tr {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .p-datatable .p-datatable-tbody > tr > td {
+  border-color: #374151;
+}
+
+:global(body.p-dark) .p-datatable .p-datatable-tbody > tr:hover {
+  background: #1f2937 !important;
+}
+
+:global(body.p-dark) .p-inputtext,
+:global(body.p-dark) .p-inputnumber-input,
+:global(body.p-dark) .p-textarea {
+  background: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+:global(body.p-dark) .p-inputtext:enabled:focus,
+:global(body.p-dark) .p-inputnumber-input:enabled:focus,
+:global(body.p-dark) .p-textarea:enabled:focus {
+  border-color: #60a5fa;
+}
+
+:global(body.p-dark) .p-dropdown {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+:global(body.p-dark) .p-dropdown-label {
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .p-dropdown-panel {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+:global(body.p-dark) .p-dropdown-items .p-dropdown-item {
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .p-dropdown-items .p-dropdown-item:hover {
+  background: #374151;
+}
+
+:global(body.p-dark) .p-button {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+:global(body.p-dark) .p-button.p-button-secondary {
+  background: #4b5563;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .p-button.p-button-text {
+  color: #60a5fa;
+}
+
+:global(body.p-dark) .p-tag {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .p-badge {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+:global(body.p-dark) .p-toast {
+  background: #1f2937;
+}
+
+:global(body.p-dark) .p-toast-message {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+:global(body.p-dark) .p-toast-message-success {
+  background: #064e3b;
+  color: #d1fae5;
+}
+
+:global(body.p-dark) .p-toast-message-error {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+:global(body.p-dark) .p-toast-message-info {
+  background: #1e3a5f;
+  color: #bfdbfe;
+}
+
+:global(body.p-dark) .p-progressbar {
+  background: #374151;
+}
+
+:global(body.p-dark) .p-progressbar-value {
+  background: #60a5fa;
+}
+
+:global(body.p-dark) .footer {
+  background: #111827;
+  color: #9ca3af;
+  border-top-color: #374151;
+}
+
+:global(body.p-dark) .login-page {
+  background: #111827;
+}
+
+:global(body.p-dark) .login-card {
+  background: #1f2937;
+  color: #f9fafb;
 }
 </style>

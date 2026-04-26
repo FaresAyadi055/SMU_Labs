@@ -1578,10 +1578,9 @@ definePageMeta({
 }
 
 .main-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-container);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
   padding: 1.5rem;
 }
 
@@ -1594,7 +1593,7 @@ definePageMeta({
 .header-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -1609,7 +1608,7 @@ definePageMeta({
 }
 
 .page-subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1.1rem;
 }
@@ -1653,7 +1652,7 @@ definePageMeta({
 .search-input :deep(.p-inputtext) {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   transition: all 0.2s;
 }
@@ -1673,7 +1672,7 @@ definePageMeta({
 
 .column-filter-dropdown :deep(.p-dropdown) {
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
   height: 42px;
 }
 
@@ -1724,9 +1723,9 @@ definePageMeta({
 }
 
 .refresh-btn {
-  background: white;
-  color: #333;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 /* Product Grid */
@@ -1745,7 +1744,7 @@ definePageMeta({
 }
 
 .product-card {
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -1763,14 +1762,14 @@ definePageMeta({
 .product-card.selected,
 .product-card.expanded {
   border-color: #667eea;
-  background: #f8fafc;
+  background: var(--surface-ground);
 }
 
 .product-image-container {
   position: relative;
   height: 200px;
   overflow: hidden;
-  background: #f8fafc;
+  background: var(--surface-ground);
 }
 
 .product-image {
@@ -1817,13 +1816,13 @@ definePageMeta({
 .product-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .product-description {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
   line-height: 1.5;
 }
@@ -1840,7 +1839,7 @@ definePageMeta({
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .detail-item i {
@@ -1852,7 +1851,7 @@ definePageMeta({
 .expanded-content {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-default);
   animation: slideDown 0.3s ease-out;
 }
 
@@ -1911,7 +1910,7 @@ definePageMeta({
 }
 
 .additional-details {
-  background: #f1f5f9;
+  background: var(--surface-card);
   padding: 1rem;
   border-radius: 8px;
 }
@@ -1928,12 +1927,12 @@ definePageMeta({
 }
 
 .detail-label {
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .detail-value {
-  color: #334155;
+  color: var(--text-primary);
 }
 
 .detail-link {
@@ -1954,14 +1953,14 @@ definePageMeta({
   gap: 1rem;
   margin-top: 2rem;
   padding: 1.5rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .pagination-info {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .pagination-controls {
@@ -1995,14 +1994,14 @@ definePageMeta({
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .page-number:hover:not(.active):not(.ellipsis) {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--surface-card);
+  color: var(--text-primary);
 }
 
 .page-number.active {
@@ -2012,7 +2011,7 @@ definePageMeta({
 
 .page-number.ellipsis {
   cursor: default;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .items-per-page {
@@ -2020,7 +2019,7 @@ definePageMeta({
   align-items: center;
   gap: 0.75rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .page-select {
@@ -2029,14 +2028,14 @@ definePageMeta({
 
 .page-select :deep(.p-dropdown) {
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
 }
 
 /* Summary Container */
 .summary-container {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -2047,18 +2046,18 @@ definePageMeta({
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-default);
 }
 
 .summary-header h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .clear-filter-btn {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .clear-filter-btn:hover {
@@ -2078,7 +2077,7 @@ definePageMeta({
   flex: 1;
   min-width: 120px;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--surface-ground);
   border-radius: 8px;
   transition: all 0.2s;
 }
@@ -2122,7 +2121,7 @@ definePageMeta({
 
 .stat-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -2130,7 +2129,7 @@ definePageMeta({
 .empty-state {
   text-align: center;
   padding: 4rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -2149,12 +2148,12 @@ definePageMeta({
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -2162,14 +2161,14 @@ definePageMeta({
 .loading-state {
   text-align: center;
   padding: 4rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .loading-state p {
   margin-top: 1rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
@@ -2209,7 +2208,7 @@ definePageMeta({
 
 .form-field label {
   font-weight: 500;
-  color: #334155;
+  color: var(--text-primary);
   font-size: 0.875rem;
 }
 
@@ -2231,8 +2230,8 @@ definePageMeta({
 }
 
 .form-input.readonly :deep(.p-inputtext) {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--surface-card);
+  color: var(--text-secondary);
 }
 
 .class-selectors {
@@ -2247,7 +2246,7 @@ definePageMeta({
 .class-select :deep(.p-dropdown) {
   width: 100%;
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
 }
 
 .request-item-preview {
@@ -2255,7 +2254,7 @@ definePageMeta({
   gap: 1rem;
   align-items: center;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--surface-ground);
   border-radius: 8px;
   margin-bottom: 0.5rem;
 }
@@ -2265,7 +2264,7 @@ definePageMeta({
   height: 60px;
   object-fit: contain;
   border-radius: 8px;
-  background: white;
+  background: var(--surface-0);
   padding: 0.25rem;
 }
 
@@ -2275,7 +2274,7 @@ definePageMeta({
 
 .request-item-info h4 {
   margin: 0 0 0.5rem 0;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 1rem;
 }
 
@@ -2287,13 +2286,13 @@ definePageMeta({
 
 .stock-text {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Confirmation Dialog */
 .confirm-dialog :deep(.p-dialog-header) {
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--surface-ground);
+  color: var(--text-primary);
   padding: 1.5rem;
 }
 
@@ -2396,11 +2395,11 @@ definePageMeta({
 }
 
 .dialog-btn.cancel-btn {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .dialog-btn.cancel-btn:hover {
-  background: #f1f5f9;
+  background: var(--surface-card);
 }
 
 .success-gradient {
@@ -2548,4 +2547,11 @@ definePageMeta({
     font-size: 1.25rem;
   }
 }
+
+/* ── Dark mode structural overrides ────────────────── */
+/* Text colours are handled automatically via CSS variables above.  */
+/* Only overrides that can't use variables are listed here.          */
+:global(body.p-dark) .refresh-btn            { border-color: var(--border-default); }
+:global(body.p-dark) .expanded-content       { border-top-color: var(--border-default); }
+:global(body.p-dark) .summary-header         { border-bottom-color: var(--border-default); }
 </style>
