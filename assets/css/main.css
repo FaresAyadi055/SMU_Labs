@@ -554,3 +554,190 @@ body.p-dark .user-list .user-row,
 body.p-dark .sidebar-card .user-row {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15)) !important;
 }
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT MODE – Dropdown panels, lists, scrollbars & selected rows
+═══════════════════════════════════════════════════════════════ */
+
+/* Dropdown panel background and border */
+body:not(.p-dark) .p-dropdown-panel,
+body:not(.p-dark) .p-select-overlay {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Dropdown items - base styles */
+body:not(.p-dark) .p-dropdown-items .p-dropdown-item,
+body:not(.p-dark) .p-select-options .p-select-option {
+  color: #1e293b !important;
+  background: #ffffff !important;
+  padding: 0.75rem 1rem !important;
+  margin: 0 !important;
+}
+
+/* Dropdown item hover */
+body:not(.p-dark) .p-dropdown-items .p-dropdown-item:hover,
+body:not(.p-dark) .p-select-options .p-select-option:hover {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+/* Selected/highlighted row in dropdown */
+body:not(.p-dark) .p-dropdown-items .p-dropdown-item.p-highlight,
+body:not(.p-dark) .p-select-options .p-select-option.p-highlight {
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+}
+
+/* Selected row hover */
+body:not(.p-dark) .p-dropdown-items .p-dropdown-item.p-highlight:hover,
+body:not(.p-dark) .p-select-options .p-select-option.p-highlight:hover {
+  background: #e0e7ff !important;
+  color: #4338ca !important;
+}
+
+/* Focused item */
+body:not(.p-dark) .p-dropdown-items .p-dropdown-item:focus,
+body:not(.p-dark) .p-select-options .p-select-option:focus {
+  box-shadow: inset 0 0 0 0.15rem #667eea !important;
+  background: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+/* Ensure all text inside dropdown items is visible */
+body:not(.p-dark) .p-dropdown-item span,
+body:not(.p-dark) .p-select-option span,
+body:not(.p-dark) .p-dropdown-item .p-dropdown-item-label,
+body:not(.p-dark) .p-select-option .p-select-option-label {
+  color: #1e293b !important;
+}
+
+/* Group labels */
+body:not(.p-dark) .p-dropdown-items .p-dropdown-item-group {
+  color: #64748b !important;
+  background: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 1rem !important;
+}
+
+/* Empty message */
+body:not(.p-dark) .p-dropdown-panel .p-dropdown-empty-message,
+body:not(.p-dark) .p-select-overlay .p-select-empty-message {
+  color: #64748b !important;
+  background: #ffffff !important;
+  padding: 0.75rem 1rem !important;
+}
+
+/* ── WebKit scrollbar (Chrome, Edge, Safari) ── */
+body:not(.p-dark) .p-dropdown-panel::-webkit-scrollbar,
+body:not(.p-dark) .p-select-overlay::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: #f1f5f9;
+}
+
+body:not(.p-dark) .p-dropdown-panel::-webkit-scrollbar-track,
+body:not(.p-dark) .p-select-overlay::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+body:not(.p-dark) .p-dropdown-panel::-webkit-scrollbar-thumb,
+body:not(.p-dark) .p-select-overlay::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: none;
+}
+
+body:not(.p-dark) .p-dropdown-panel::-webkit-scrollbar-thumb:hover,
+body:not(.p-dark) .p-select-overlay::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+body:not(.p-dark) .p-dropdown-panel::-webkit-scrollbar-corner,
+body:not(.p-dark) .p-select-overlay::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
+
+/* ── Firefox scrollbar ── */
+body:not(.p-dark) .p-dropdown-panel,
+body:not(.p-dark) .p-select-overlay {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE – Dropdown panels, lists, scrollbars & selected rows
+═══════════════════════════════════════════════════════════════ */
+
+/* Dark mode - keep your existing dark styles but ensure they work */
+body.p-dark .p-dropdown-panel,
+body.p-dark .p-select-overlay {
+  background: var(--surface-section) !important;
+  border-color: #374151 !important;
+}
+
+body.p-dark .p-dropdown-items .p-dropdown-item,
+body.p-dark .p-select-options .p-select-option {
+  color: #e5e7eb !important;
+  background: var(--surface-section) !important;
+}
+
+body.p-dark .p-dropdown-items .p-dropdown-item:hover,
+body.p-dark .p-select-options .p-select-option:hover {
+  background: var(--surface-overlay) !important;
+  color: #f9fafb !important;
+}
+
+body.p-dark .p-dropdown-items .p-dropdown-item.p-highlight,
+body.p-dark .p-select-options .p-select-option.p-highlight {
+  background: #1e3a5f !important;
+  color: #60a5fa !important;
+}
+
+/* Dark mode scrollbar */
+body.p-dark .p-dropdown-panel::-webkit-scrollbar,
+body.p-dark .p-select-overlay::-webkit-scrollbar {
+  background: #1e293b;
+}
+
+body.p-dark .p-dropdown-panel::-webkit-scrollbar-track,
+body.p-dark .p-select-overlay::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+body.p-dark .p-dropdown-panel::-webkit-scrollbar-thumb,
+body.p-dark .p-select-overlay::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+body.p-dark .p-dropdown-panel::-webkit-scrollbar-thumb:hover,
+body.p-dark .p-select-overlay::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Firefox dark mode scrollbar */
+body.p-dark .p-dropdown-panel,
+body.p-dark .p-select-overlay {
+  scrollbar-color: #475569 #1e293b;
+}
+/* Ultimate override - force PrimeVue dropdown items */
+body:not(.p-dark) .p-dropdown-panel .p-ripple.p-element,
+body:not(.p-dark) .p-dropdown-panel li,
+body:not(.p-dark) .p-select-overlay .p-ripple.p-element,
+body:not(.p-dark) .p-select-overlay li {
+  background-color: #ffffff !important;
+}
+
+body:not(.p-dark) .p-dropdown-panel .p-ripple.p-element:hover,
+body:not(.p-dark) .p-dropdown-panel li:hover,
+body:not(.p-dark) .p-select-overlay .p-ripple.p-element:hover,
+body:not(.p-dark) .p-select-overlay li:hover {
+  background-color: #f1f5f9 !important;
+}
+
+body:not(.p-dark) .p-dropdown-panel .p-highlight,
+body:not(.p-dark) .p-select-overlay .p-highlight {
+  background-color: #eef2ff !important;
+}
