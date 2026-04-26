@@ -44,8 +44,11 @@ export default defineNuxtConfig({
     }
   },
   
-  // Global CSS
-  css: ['~/assets/css/main.css'],
+  // Global CSS - Only import primeicons (icons) and your custom CSS
+  css: [
+    'primeicons/primeicons.css',  // Icons only - this still exists
+    '~/assets/css/main.css'       // Your custom theme
+  ],
   
   // App configuration
   app: {
@@ -71,13 +74,13 @@ export default defineNuxtConfig({
   // Nitro configuration
   nitro: {
     preset: 'vercel',
-     publicAssets: [
-    {
-      baseURL: '/',
-      dir: 'public',
-      maxAge: 60 * 60 * 24 * 365
-    }
-  ],
+    publicAssets: [
+      {
+        baseURL: '/',
+        dir: 'public',
+        maxAge: 60 * 60 * 24 * 365
+      }
+    ],
     externals: {
       inline: ['@magic-sdk/admin']
     },
