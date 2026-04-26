@@ -22,6 +22,20 @@
   --surface-active:  rgb(247, 249, 250); /* active row highlights              */
 }
 
+/* Light mode – PrimeVue inputs */
+.p-inputtext,
+.p-inputnumber-input,
+.p-textarea         { background: #ffffff; color: #1e293b; border-color: #e2e8f0; }
+
+.p-inputtext:enabled:focus,
+.p-inputnumber-input:enabled:focus,
+.p-textarea:enabled:focus { border-color: #667eea; }
+
+.p-dropdown,
+.p-select           { background: #ffffff; border-color: #e2e8f0; }
+.p-dropdown-label,
+.p-select-label     { color: #1e293b; }
+
 /* ── 2. Surface colour tokens (dark mode) ──────────────────── */
 body.p-dark {
   --text-primary:   #f1f5f9;
@@ -33,12 +47,12 @@ body.p-dark {
   --surface-0:       rgb(18,  18,  18);
   --surface-container: rgb(22, 30, 36);
   --surface-ground:  rgb(22, 30, 36);
-  --surface-section: rgb(24,  23,  32);
-  --surface-card:    rgb(18,  18,  18);
-  --surface-overlay: rgb(20,  20,  28);
-  --surface-border:  rgb(20,  22,  28);
-  --surface-hover:   rgb(22,  22,  30);
-  --surface-active:  rgb(22,  26,  28);
+  --surface-section: rgb(24, 23, 32);
+  --surface-card:    rgb(18, 18, 18);
+  --surface-overlay: rgb(20, 20, 28);
+  --surface-border:  rgb(20, 22, 28);
+  --surface-hover:   rgb(22, 22, 30);
+  --surface-active:  rgb(22, 26, 28);
 
   background-color: var(--surface-ground);
   color: #f9fafb;

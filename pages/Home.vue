@@ -1000,12 +1000,6 @@ const loadData = async () => {
     if (response.ok && data.success) {
       inventoryItems.value = data.data.sort((a, b) => (a.id || 0) - (b.id || 0))
       
-      toast.add({
-        severity: 'success',
-        summary: 'Data Loaded',
-        detail: `Loaded ${data.data.length} inventory items`,
-        life: 3000
-      })
     } else {
       throw new Error(data.message || 'Failed to load data')
     }
