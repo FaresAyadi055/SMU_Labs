@@ -715,6 +715,10 @@ const getPurchaseSeverity = (needed: number) => {
   color: white;
 }
 
+body.p-dark .custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
+  color: #1e293b !important;
+}
+
 .custom-table :deep(.p-paginator .p-paginator-first),
 .custom-table :deep(.p-paginator .p-paginator-prev),
 .custom-table :deep(.p-paginator .p-paginator-next),
@@ -855,17 +859,6 @@ body.p-dark .refresh-btn {
   color: var(--text-primary);
 }
 
-/* Paginator dark mode fixes */
-body.p-dark .custom-table :deep(.p-datatable-paginator-bottom) {
-  border-top-color: #374151 !important;
-}
-
-body.p-dark .custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-}
-
 /* Responsive Design */
 @media (max-width: 1200px) {
   .stats-grid {
@@ -997,5 +990,24 @@ body.p-dark .custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-pag
   .description-text {
     max-width: 120px;
   }
+}
+/* Fix paginator page numbers visibility */
+.custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+  color: #1e293b !important; /* dark gray for light mode */
+}
+
+body.p-dark .custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+  color: #128060 !important; /* light gray for dark mode */
+}
+
+/* Keep highlighted page with white text on purple background */
+.custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
+  color: #ffffff !important;
+  background: #667eea !important;
+}
+
+/* Ensure paginator background does not interfere */
+.custom-table :deep(.p-paginator) {
+  background: transparent;
 }
 </style>
