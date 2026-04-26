@@ -36,6 +36,264 @@
 .p-dropdown-label,
 .p-select-label     { color: #1e293b; }
 
+/* Light mode – ToggleSwitch and Checkbox */
+body:not(.p-dark) .p-toggle-switch .p-toggle-switch-slider,
+body:not(.p-dark) .p-inputSwitch .p-inputSwitch-slider {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+body:not(.p-dark) .p-toggle-switch,
+body:not(.p-dark) .p-inputSwitch { background: #e2e8f0 !important; }
+
+body:not(.p-dark) .p-toggle-switch.p-toggle-switch-checked,
+body:not(.p-dark) .p-inputSwitch.p-inputSwitch-checked { background: #667eea !important; }
+
+/* Light mode – DataTable */
+body:not(.p-dark) .p-datatable .p-datatable-thead > tr > th {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+  border-color: #e2e8f0 !important;
+}
+
+body:not(.p-dark) .p-datatable .p-datatable-tbody > tr {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+
+body:not(.p-dark) .p-datatable .p-datatable-tbody > tr > td {
+  border-color: #e2e8f0 !important;
+}
+
+body:not(.p-dark) .p-datatable .p-datatable-tbody > tr:hover {
+  background: #f1f5f9 !important;
+}
+
+body:not(.p-dark) .p-datatable .p-datatable-emptymessage > td {
+  background: #ffffff !important;
+  color: #64748b !important;
+}
+
+/* Light mode – Badge, Tag, Button secondary */
+body:not(.p-dark) .p-badge,
+body:not(.p-dark) .p-tag {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+/* Status colors for light mode - preserve original colors */
+body:not(.p-dark) .p-tag.p-tag-success,
+body:not(.p-dark) .p-badge.p-badge-success {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+}
+
+body:not(.p-dark) .p-tag.p-tag-info,
+body:not(.p-dark) .p-badge.p-badge-info {
+  background: #dbeafe !important;
+  color: #2563eb !important;
+}
+
+body:not(.p-dark) .p-tag.p-tag-warning,
+body:not(.p-dark) .p-badge.p-badge-warning {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+}
+
+body:not(.p-dark) .p-tag.p-tag-danger,
+body:not(.p-dark) .p-badge.p-badge-danger {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+/* Pending requests counter badge - green for both modes */
+body:not(.p-dark) .pending-badge,
+.p-dark .pending-badge,
+body:not(.p-dark) .p-badge.pending-badge,
+body.p-dark .p-badge.pending-badge {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+}
+
+body:not(.p-dark) .p-tag.p-tag-info,
+body:not(.p-dark) .p-badge.p-badge-info {
+  background: #dbeafe !important;
+  color: #2563eb !important;
+}
+
+body:not(.p-dark) .p-tag.p-tag-warning,
+body:not(.p-dark) .p-badge.p-badge-warning {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+}
+
+body:not(.p-dark) .p-tag.p-tag-danger,
+body:not(.p-dark) .p-badge.p-badge-danger {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+/* Secondary button (refresh, cancel actions) */
+body:not(.p-dark) .p-button.p-button-secondary:not(.p-button-danger) {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+body:not(.p-dark) .p-button.p-button-secondary:not(.p-button-danger):enabled:hover {
+  background: #e2e8f0 !important;
+  border-color: #667eea !important;
+}
+
+/* Decline button - red background */
+body:not(.p-dark) .decline-btn,
+body:not(.p-dark) .p-button.decline-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .decline-btn:enabled:hover,
+body:not(.p-dark) .p-button.decline-btn:enabled:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
+}
+
+/* Danger button */
+body:not(.p-dark) .p-button.p-button-danger,
+body:not(.p-dark) .p-button-danger {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .p-button.p-button-danger:enabled:hover,
+body:not(.p-dark) .p-button-danger:enabled:hover {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+/* Success button (approve) - green */
+body:not(.p-dark) .p-button.p-button-success,
+body:not(.p-dark) .p-button-success {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .p-button.p-button-success:enabled:hover,
+body:not(.p-dark) .p-button-success:enabled:hover {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+}
+
+/* Approve button - green gradient */
+body:not(.p-dark) .approve-btn,
+body:not(.p-dark) .p-button.approve-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .approve-btn:enabled:hover,
+body:not(.p-dark) .p-button.approve-btn:enabled:hover {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+}
+
+/* Confirm button - custom gradient */
+body:not(.p-dark) .confirm-button,
+body:not(.p-dark) .p-button.confirm-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .confirm-button:enabled:hover,
+body:not(.p-dark) .p-button.confirm-button:enabled:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6a4190 100%) !important;
+}
+
+body:not(.p-dark) .p-button.p-button-danger:enabled:hover,
+body:not(.p-dark) .p-button-danger:enabled:hover {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+/* Success button */
+body:not(.p-dark) .p-button.p-button-success,
+body:not(.p-dark) .p-button-success {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .p-button.p-button-success:enabled:hover,
+body:not(.p-dark) .p-button-success:enabled:hover {
+  background: #5a67d8 !important;
+  border-color: #5a67d8 !important;
+}
+
+/* Light mode – InputNumber buttons */
+body:not(.p-dark) .p-inputnumber-button,
+body:not(.p-dark) .p-inputnumber-button-up,
+body:not(.p-dark) .p-inputnumber-button-down {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+body:not(.p-dark) .p-inputnumber-button:enabled:hover,
+body:not(.p-dark) .p-inputnumber-button-up:enabled:hover,
+body:not(.p-dark) .p-inputnumber-button-down:enabled:hover {
+  background: #f1f5f9 !important;
+  border-color: #667eea !important;
+  color: #667eea !important;
+}
+
+/* Light mode – Paginator */
+body:not(.p-dark) .p-paginator {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+body:not(.p-dark) .p-paginator .p-paginator-page,
+body:not(.p-dark) .p-paginator .p-paginator-first,
+body:not(.p-dark) .p-paginator .p-paginator-prev,
+body:not(.p-dark) .p-paginator .p-paginator-next,
+body:not(.p-dark) .p-paginator .p-paginator-last {
+  color: #1e293b !important;
+}
+
+body:not(.p-dark) .p-paginator .p-paginator-page.p-highlight {
+  background: #667eea !important;
+  color: #ffffff !important;
+}
+
+body:not(.p-dark) .p-checkbox .p-checkbox-box { 
+  background: #ffffff !important; 
+  border-color: #e2e8f0 !important; 
+}
+
+body:not(.p-dark) .p-checkbox.p-checkbox-checked .p-checkbox-box { 
+  background: #667eea !important; 
+  border-color: #667eea !important; 
+}
+
+body:not(.p-dark) .p-checkbox .p-checkbox-box .p-checkbox-icon,
+body:not(.p-dark) .p-checkbox-box .p-checkbox-icon,
+body:not(.p-dark) .p-checkbox-box-checked .p-checkbox-icon { 
+  color: #ffffff !important; 
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+body:not(.p-dark) .p-checkbox-icon.pi.pi-check {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex !important;
+}
+
 /* ── 2. Surface colour tokens (dark mode) ──────────────────── */
 body.p-dark {
   --text-primary:   #f1f5f9;
@@ -78,6 +336,11 @@ body.p-dark .p-dialog,
 body.p-dark .p-dialog-header,
 body.p-dark .p-dialog-content   { background: var(--surface-section); color: #f9fafb; }
 
+/* Light mode – Dialog defaults (override PrimeVue dark defaults) */
+body:not(.p-dark) .p-dialog,
+body:not(.p-dark) .p-dialog-header,
+body:not(.p-dark) .p-dialog-content   { background: rgb(255, 255, 255); color: #1e293b; }
+
 body.p-dark .p-datatable .p-datatable-thead > tr > th {
   background: var(--surface-section);
   color: #e5e7eb;
@@ -118,6 +381,146 @@ body.p-dark .p-toast-message-info    { background: #1e3a5f; color: #bfdbfe; }
 body.p-dark .p-progressbar       { background: var(--surface-overlay); }
 body.p-dark .p-progressbar-value { background: #60a5fa; }
 
+/* Dark mode – Badge, Tag, Button with status colors */
+body.p-dark .p-tag.p-tag-success,
+body.p-dark .p-badge.p-badge-success {
+  background: #064e3b !important;
+  color: #d1fae5 !important;
+}
+
+body.p-dark .p-tag.p-tag-info,
+body.p-dark .p-badge.p-badge-info {
+  background: #1e3a5f !important;
+  color: #bfdbfe !important;
+}
+
+body.p-dark .p-tag.p-tag-warning,
+body.p-dark .p-badge.p-badge-warning {
+  background: #78350f !important;
+  color: #fef3c7 !important;
+}
+
+body.p-dark .p-tag.p-tag-danger,
+body.p-dark .p-badge.p-badge-danger {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+}
+
+body.p-dark .p-button.p-button-secondary:not(.p-button-danger) {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+body.p-dark .p-button.p-button-secondary:not(.p-button-danger):enabled:hover {
+  background: #4b5563 !important;
+  border-color: #60a5fa !important;
+}
+
+/* Dark mode danger button */
+body.p-dark .p-button.p-button-danger,
+body.p-dark .p-button-danger {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* Dark mode decline button - red background */
+body.p-dark .decline-btn,
+body.p-dark .p-button.decline-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+body.p-dark .decline-btn:enabled:hover,
+body.p-dark .p-button.decline-btn:enabled:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
+}
+
+body.p-dark .p-button.p-button-danger:enabled:hover,
+body.p-dark .p-button-danger:enabled:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+/* Dark mode success button - revert to green */
+body.p-dark .p-button.p-button-success,
+body.p-dark .p-button-success {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+}
+
+body.p-dark .p-button.p-button-success:enabled:hover,
+body.p-dark .p-button-success:enabled:hover {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+}
+
+/* Dark mode approve button - green gradient */
+body.p-dark .approve-btn,
+body.p-dark .p-button.approve-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+body.p-dark .approve-btn:enabled:hover,
+body.p-dark .p-button.approve-btn:enabled:hover {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+}
+
+/* Dark mode confirm button - custom gradient */
+body.p-dark .confirm-button,
+body.p-dark .p-button.confirm-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+body.p-dark .confirm-button:enabled:hover,
+body.p-dark .p-button.confirm-button:enabled:hover {
+  background: linear-gradient(135deg, #818cf8 0%, #9b6bb8 100%) !important;
+}
+
+body.p-dark .p-button.p-button-danger:enabled:hover,
+body.p-dark .p-button-danger:enabled:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+/* Dark mode success button */
+body.p-dark .p-button.p-button-success,
+body.p-dark .p-button-success {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+body.p-dark .p-button.p-button-success:enabled:hover,
+body.p-dark .p-button-success:enabled:hover {
+  background: #818cf8 !important;
+  border-color: #818cf8 !important;
+}
+
+/* Dark mode – InputNumber buttons */
+body.p-dark .p-inputnumber-button,
+body.p-dark .p-inputnumber-button-up,
+body.p-dark .p-inputnumber-button-down {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+body.p-dark .p-inputnumber-button:enabled:hover,
+body.p-dark .p-inputnumber-button-up:enabled:hover,
+body.p-dark .p-inputnumber-button-down:enabled:hover {
+  background: #4b5563 !important;
+  border-color: #60a5fa !important;
+  color: #60a5fa !important;
+}
+
 /* ── 6. Dark mode – generic page/app classes ───────────────── */
 body.p-dark .card,
 body.p-dark .surface-card        { background: var(--surface-card) !important; color: #f9fafb; }
@@ -131,4 +534,23 @@ body.p-dark .main-container     { background: rgb(22, 30, 36); }
 body.p-dark .stat-item.active-filter {
   border-color: #667eea;
   background: rgb(30, 38, 48);
+}
+
+/* Override ANY background on user-row to always show gradient */
+.user-row,
+.sidebar .user-row,
+button.user-row,
+div.user-row,
+.user-list .user-row,
+.sidebar-card .user-row {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08)) !important;
+}
+
+body.p-dark .user-row,
+body.p-dark .sidebar .user-row,
+body.p-dark button.user-row,
+body.p-dark div.user-row,
+body.p-dark .user-list .user-row,
+body.p-dark .sidebar-card .user-row {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15)) !important;
 }

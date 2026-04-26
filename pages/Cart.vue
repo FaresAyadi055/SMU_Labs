@@ -510,11 +510,6 @@ onUnmounted(() => {
   padding: 0.25rem 0.5rem;
 }
 
-.tab-button.active-tab .tab-badge :deep(.p-badge) {
-  background: white;
-  color: #667eea;
-}
-
 /* Product Grid */
 .product-grid {
   display: grid;
@@ -860,6 +855,141 @@ onUnmounted(() => {
 .dialog-btn.delete-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* ─── Light Theme Specific: Green Badges & White Button Text ─── */
+/* Make all tab badges green with white text in light mode */
+.tab-button .tab-badge :deep(.p-badge) {
+  background: #10b981 !important;
+  color: white !important;
+}
+
+/* Active tab badge: white background with green text for contrast */
+.tab-button.active-tab .tab-badge :deep(.p-badge) {
+  background: white !important;
+  color: #10b981 !important;
+}
+
+/* Ensure empty state button text is white in light mode */
+.empty-state-btn,
+.empty-state-btn :deep(.p-button-label) {
+  color: white !important;
+}
+
+/* ─── Dark Mode Overrides ───────────────────────────────────── */
+body.p-dark .main-container {
+  background: var(--surface-container);
+}
+
+body.p-dark .header-section,
+body.p-dark .tabs-card,
+body.p-dark .loading-state,
+body.p-dark .empty-state,
+body.p-dark .product-card {
+  background: var(--surface-card);
+}
+
+body.p-dark .page-subtitle,
+body.p-dark .empty-state p,
+body.p-dark .loading-state p,
+body.p-dark .detail-item,
+body.p-dark .detail-row .detail-label {
+  color: var(--text-secondary);
+}
+
+body.p-dark .product-title,
+body.p-dark .empty-state h3,
+body.p-dark .confirmation-message h4,
+body.p-dark .detail-value,
+body.p-dark .detail-row .detail-value {
+  color: var(--text-primary);
+}
+
+body.p-dark .product-card.expanded {
+  background: var(--surface-overlay);
+}
+
+body.p-dark .product-image-container {
+  background: var(--surface-section);
+}
+
+body.p-dark .additional-details {
+  background: var(--surface-section);
+}
+
+body.p-dark .request-id {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+
+body.p-dark .detail-icon {
+  color: #818cf8;
+}
+
+body.p-dark .tab-button {
+  background: var(--surface-section);
+  color: var(--text-secondary);
+}
+
+body.p-dark .tab-button:hover {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+
+body.p-dark .tab-button.active-tab {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+/* Dark mode badge overrides - keep dark theme consistent */
+body.p-dark .tab-button .tab-badge :deep(.p-badge) {
+  background: var(--surface-overlay) !important;
+  color: var(--text-secondary) !important;
+}
+
+body.p-dark .tab-button.active-tab .tab-badge :deep(.p-badge) {
+  background: white !important;
+  color: #667eea !important;
+}
+
+body.p-dark .empty-icon {
+  color: #818cf8;
+}
+
+body.p-dark .custom-dialog :deep(.p-dialog-content) {
+  background: var(--surface-card);
+}
+
+body.p-dark .confirmation-message p {
+  color: var(--text-secondary);
+}
+
+body.p-dark .dialog-btn.cancel-btn {
+  color: var(--text-secondary);
+}
+
+body.p-dark .dialog-btn.cancel-btn:hover {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+}
+
+body.p-dark .product-card {
+  border-color: var(--border-default);
+}
+
+body.p-dark .product-card:hover,
+body.p-dark .product-card.expanded {
+  border-color: #667eea;
+}
+
+body.p-dark .expanded-content {
+  border-top-color: var(--border-default);
+}
+
+/* Ensure empty state button text in dark mode is also white */
+body.p-dark .empty-state-btn,
+body.p-dark .empty-state-btn :deep(.p-button-label) {
+  color: white !important;
 }
 
 /* Responsive Design */

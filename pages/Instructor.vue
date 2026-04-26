@@ -598,7 +598,7 @@ function cancelChanges() {
 }
 
 .main-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-container);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -613,7 +613,7 @@ function cancelChanges() {
 .header-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -640,7 +640,7 @@ function cancelChanges() {
 }
 
 .page-subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1.1rem;
 }
@@ -679,7 +679,7 @@ function cancelChanges() {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -712,29 +712,26 @@ function cancelChanges() {
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background: #fff;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08)) !important;
   cursor: pointer;
   text-align: left;
   width: 100%;
   transition: all 0.2s ease;
 }
 
+.user-row.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .user-row:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-  border-color: #667eea;
-}
-
-.user-row.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: transparent;
-}
-
-.user-row.active .user-email,
-.user-row.active .user-date {
-  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  filter: brightness(1.02);
+  border-color: rgba(102, 126, 234, 0.4);
 }
 
 .user-info {
@@ -746,16 +743,21 @@ function cancelChanges() {
 .user-email {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 180px;
 }
 
+.user-row.active .user-email,
+.user-row.active .user-date {
+  color: white;
+}
+
 .user-date {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .pending-badge {
@@ -765,12 +767,12 @@ function cancelChanges() {
 
 .empty-list,
 .loading-state {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   margin: 1rem 0 0 0;
   text-align: center;
   padding: 2rem;
-  background: #f9fafb;
+  background: var(--surface-section);
   border-radius: 12px;
 }
 
@@ -806,7 +808,7 @@ function cancelChanges() {
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .cart-title-section {
@@ -819,7 +821,7 @@ function cancelChanges() {
 .cart-header h2 {
   margin: 0;
   font-size: 1.3rem;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -833,9 +835,14 @@ function cancelChanges() {
   padding: 0.25rem 0.75rem;
 }
 
+.action-buttons-container {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .confirm-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: transform 0.2s;
@@ -848,11 +855,11 @@ function cancelChanges() {
 
 /* Table Styles */
 .custom-table :deep(.p-datatable-thead > tr > th) {
-  background: #f8f9fa;
-  color: #333;
+  background: var(--surface-section);
+  color: var(--text-primary);
   font-weight: 600;
   padding: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr) {
@@ -860,19 +867,19 @@ function cancelChanges() {
 }
 
 .custom-table :deep(.p-datatable-tbody > tr:hover) {
-  background: #f8f9fa;
+  background: var(--surface-overlay);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr > td) {
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-default);
 }
 
 /* Image Styles */
 .image-container {
   width: 48px;
   height: 48px;
-  background: #f8f9fa;
+  background: var(--surface-section);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -892,7 +899,7 @@ function cancelChanges() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: var(--text-muted);
   font-size: 1.2rem;
 }
 
@@ -905,12 +912,12 @@ function cancelChanges() {
 
 .component-model {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .component-manufacturer {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* Quantity Badges - Consolidated */
@@ -962,7 +969,7 @@ function cancelChanges() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f8f9fa;
+  background: var(--surface-section);
   padding: 0.5rem;
   border-radius: 8px;
   width: fit-content;
@@ -970,7 +977,7 @@ function cancelChanges() {
 
 .qty-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   min-width: 30px;
 }
@@ -983,7 +990,7 @@ function cancelChanges() {
   width: 60px !important;
   text-align: center;
   font-weight: 600;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 0.5rem;
 }
@@ -1000,13 +1007,13 @@ function cancelChanges() {
 }
 
 .qty-btn {
-  background: white !important;
-  border: 1px solid #e5e7eb !important;
-  color: #333 !important;
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
 }
 
 .qty-btn:hover {
-  background: #f8f9fa !important;
+  background: var(--surface-overlay) !important;
   border-color: #667eea !important;
 }
 
@@ -1021,8 +1028,8 @@ function cancelChanges() {
 }
 
 .action-btn.verify-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
 }
 
 .action-btn.verify-btn:hover:not(:disabled) {
@@ -1031,9 +1038,9 @@ function cancelChanges() {
 }
 
 .action-btn.decline-btn {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  border: none;
-  color: white;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: none !important;
+  color: white !important;
 }
 
 .action-btn.decline-btn:hover:not(:disabled) {
@@ -1055,7 +1062,7 @@ function cancelChanges() {
 .empty-state {
   text-align: center;
   padding: 4rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .empty-state-content {
@@ -1072,21 +1079,16 @@ function cancelChanges() {
 
 .empty-state h3 {
   font-size: 1.3rem;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #999;
+  color: var(--text-muted);
   font-size: 1rem;
 }
 
-/* Action Buttons Container */
-.action-buttons-container {
-  display: flex;
-  gap: 0.75rem;
-}
-
+/* Cancel button animation */
 .cancel-button {
   transition: all 0.2s ease;
 }
@@ -1110,6 +1112,28 @@ function cancelChanges() {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* ─── Dark Mode Overrides ───────────────────────────────────── */
+body.p-dark .user-row {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15)) !important;
+  border-color: rgba(55, 65, 81, 0.5);
+}
+
+body.p-dark .user-row.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.p-dark .user-row.active .user-email,
+body.p-dark .user-row.active .user-date {
+  color: white;
+}
+
+body.p-dark .user-row:hover:not(.active) {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25)) !important;
+  border-color: rgba(102, 126, 234, 0.5);
 }
 
 /* Responsive - Consolidated Media Queries */

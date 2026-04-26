@@ -269,7 +269,7 @@ definePageMeta({
   justify-content: center;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: calc(100vh); 
+  min-height: calc(100vh);
   flex: 1;
 }
 
@@ -358,6 +358,7 @@ definePageMeta({
   font-size: 0.875rem;
   margin-top: 0.5rem;
   line-height: 1.4;
+  color: #f87171;
 }
 
 .text-surface-500 {
@@ -365,6 +366,85 @@ definePageMeta({
   margin-top: 0.5rem;
   line-height: 1.4;
   color: #6b7280;
+}
+
+/* ─── Dark Mode Improvements ───────────────────────────────────── */
+body.p-dark .login-card {
+  background: rgb(22, 30, 36);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(55, 65, 81, 0.5);
+}
+
+body.p-dark .text-center h1 {
+  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.p-dark .text-center p,
+body.p-dark .text-surface-500 {
+  color: var(--text-secondary);
+}
+
+body.p-dark .field label {
+  color: var(--text-primary);
+}
+
+body.p-dark :deep(.p-inputtext) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+body.p-dark :deep(.p-inputtext:enabled:focus) {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+}
+
+body.p-dark :deep(.p-inputtext::placeholder) {
+  color: var(--text-muted);
+}
+
+body.p-dark .text-red-500 {
+  color: #fca5a5;
+}
+
+body.p-dark :deep(.p-button) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+}
+
+body.p-dark :deep(.p-button:enabled:hover) {
+  background: linear-gradient(135deg, #7c8cf5 0%, #8b5cb8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Dark mode auth check spinner */
+body.p-dark .auth-check i {
+  color: #a78bfa;
+}
+
+body.p-dark .auth-check p {
+  color: var(--text-secondary);
+}
+
+/* Dark mode animation - subtle glow on card */
+body.p-dark .login-card {
+  animation: fadeInDark 0.5s ease-out;
+}
+
+@keyframes fadeInDark {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 640px) {

@@ -645,7 +645,7 @@ function formatJSON(obj: any) {
 }
 
 .main-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-container);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -660,7 +660,7 @@ function formatJSON(obj: any) {
 .header-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -675,7 +675,7 @@ function formatJSON(obj: any) {
 }
 
 .page-subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1.1rem;
 }
@@ -720,7 +720,7 @@ function formatJSON(obj: any) {
 .filter-input :deep(.p-inputtext) {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   transition: all 0.2s;
 }
@@ -732,7 +732,7 @@ function formatJSON(obj: any) {
 
 .filter-input :deep(.pi-search) {
   left: 1rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .filter-select {
@@ -742,7 +742,7 @@ function formatJSON(obj: any) {
 .filter-select :deep(.p-dropdown) {
   width: 100%;
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
   height: 47px;
 }
 
@@ -771,9 +771,9 @@ function formatJSON(obj: any) {
 }
 
 .refresh-btn {
-  background: white;
-  color: #333;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 /* Table Card */
@@ -786,11 +786,11 @@ function formatJSON(obj: any) {
 
 /* Custom Table Styles */
 .custom-table :deep(.p-datatable-thead > tr > th) {
-  background: #f8f9fa;
-  color: #333;
+  background: var(--surface-section);
+  color: var(--text-primary);
   font-weight: 600;
   padding: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr) {
@@ -798,12 +798,12 @@ function formatJSON(obj: any) {
 }
 
 .custom-table :deep(.p-datatable-tbody > tr:hover) {
-  background: #f8f9fa;
+  background: var(--surface-overlay);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr > td) {
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-default);
 }
 
 /* Action Tag */
@@ -836,7 +836,7 @@ function formatJSON(obj: any) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -855,7 +855,7 @@ function formatJSON(obj: any) {
 
 .metadata-text {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -898,12 +898,12 @@ function formatJSON(obj: any) {
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1rem;
 }
@@ -959,7 +959,7 @@ function formatJSON(obj: any) {
 
 /* Metadata Section */
 .metadata-section {
-  background: #f8f9fa;
+  background: var(--surface-section);
   padding: 1.25rem;
   border-radius: 12px;
 }
@@ -982,20 +982,20 @@ function formatJSON(obj: any) {
 
 .metadata-label {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .metadata-value {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
   word-break: break-word;
 }
 
 .metadata-value.user-agent {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
   font-family: monospace;
 }
 
@@ -1013,23 +1013,23 @@ function formatJSON(obj: any) {
 /* Section Titles */
 .section-title {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .subsection-title {
   margin: 0 0 0.75rem 0;
-  color: #555;
+  color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 600;
 }
 
 /* Component Details */
 .component-details {
-  background: #f8f9fa;
+  background: var(--surface-section);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -1042,7 +1042,7 @@ function formatJSON(obj: any) {
 }
 
 .detail-card {
-  background: white;
+  background: var(--surface-0);
   padding: 0.75rem;
   border-radius: 6px;
   border-left: 3px solid #667eea;
@@ -1051,7 +1051,7 @@ function formatJSON(obj: any) {
 .detail-label {
   display: block;
   font-size: 0.75rem;
-  color: #666;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
@@ -1059,7 +1059,7 @@ function formatJSON(obj: any) {
 
 .detail-value {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
   word-break: break-word;
 }
 
@@ -1072,7 +1072,7 @@ function formatJSON(obj: any) {
 }
 
 .change-card {
-  background: #f8f9fa;
+  background: var(--surface-section);
   padding: 1rem;
   border-radius: 8px;
   border-left: 3px solid #2196f3;
@@ -1103,7 +1103,7 @@ function formatJSON(obj: any) {
   flex: 1;
   min-width: 150px;
   padding: 0.75rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 6px;
 }
 
@@ -1118,7 +1118,7 @@ function formatJSON(obj: any) {
 .value-label {
   display: block;
   font-size: 0.7rem;
-  color: #666;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
@@ -1152,7 +1152,7 @@ function formatJSON(obj: any) {
 }
 
 .state-card {
-  background: white;
+  background: var(--surface-0);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -1175,8 +1175,8 @@ function formatJSON(obj: any) {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--surface-section);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .state-header i {
@@ -1185,7 +1185,7 @@ function formatJSON(obj: any) {
 
 .state-header h4 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -1194,7 +1194,7 @@ function formatJSON(obj: any) {
   margin: 0;
   padding: 1rem;
   font-size: 0.85rem;
-  background: #f8f9fa;
+  background: var(--surface-section);
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -1204,7 +1204,7 @@ function formatJSON(obj: any) {
 
 /* Quantity Highlight */
 .quantity-highlight {
-  background: #f8f9fa;
+  background: var(--surface-section);
   padding: 1rem;
   border-radius: 8px;
   margin-top: 1rem;
@@ -1216,7 +1216,7 @@ function formatJSON(obj: any) {
   justify-content: center;
   gap: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 8px;
 }
 
@@ -1235,7 +1235,7 @@ function formatJSON(obj: any) {
 .quantity-label {
   display: block;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 0.25rem;
 }
 
@@ -1286,17 +1286,17 @@ function formatJSON(obj: any) {
 }
 
 .dialog-btn.cancel-btn {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .dialog-btn.cancel-btn:hover {
-  background: #f1f5f9;
+  background: var(--surface-overlay);
 }
 
 /* Divider */
 .divider {
   margin: 0.5rem 0;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
 }
 
 /* Scrollbar Styling */
@@ -1310,21 +1310,21 @@ function formatJSON(obj: any) {
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-track,
 .state-content::-webkit-scrollbar-track,
 .custom-dialog :deep(.p-dialog-content)::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--surface-overlay);
   border-radius: 4px;
 }
 
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb,
 .state-content::-webkit-scrollbar-thumb,
 .custom-dialog :deep(.p-dialog-content)::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--text-muted);
   border-radius: 4px;
 }
 
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb:hover,
 .state-content::-webkit-scrollbar-thumb:hover,
 .custom-dialog :deep(.p-dialog-content)::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-secondary);
 }
 
 /* Responsive Design */

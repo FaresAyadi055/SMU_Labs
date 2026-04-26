@@ -51,72 +51,80 @@
 
       <!-- Right side: Cart + Profile + Hamburger -->
       <div class="navbar-right">
-        <!-- Cart Button with Badge -->
-        <div class="cart-container">
-          <Button
-            icon="pi pi-shopping-cart"
-            severity="info"
-            text
-            rounded
-            @click="goToCart"
-            class="cart-btn"
-            v-tooltip="'View Cart & Requests'"
-          />
-          <span
-            v-if="cartCount > 0"
-            class="cart-badge"
-            :class="{ 'pulse-animation': hasNewItems }"
-          >
-            {{ cartCount > 99 ? '99+' : cartCount }}
-          </span>
-        </div>
+  <!-- Cart Button with Badge -->
+  <div class="cart-container">
+    <Button
+      icon="pi pi-shopping-cart"
+      severity="info"
+      text
+      rounded
+      @click="goToCart"
+      class="cart-btn"
+      v-tooltip="'View Cart & Requests'"
+    />
+    <span
+      v-if="cartCount > 0"
+      class="cart-badge"
+      :class="{ 'pulse-animation': hasNewItems }"
+    >
+      {{ cartCount > 99 ? '99+' : cartCount }}
+    </span>
+  </div>
 
-        <!-- User Profile Section (desktop) -->
-        <div class="navbar-profile">
-          <span v-if="isAdmin" class="admin-badge">
-            <i class="pi pi-shield"></i>
-            <span class="admin-badge-text">Admin</span>
-          </span>
+  <!-- Mobile-only avatar (visible only on small screens) -->
+  <Avatar
+    :label="userInitial"
+    shape="circle"
+    class="mobile-avatar clickable"
+    @click="showProfileModal = true"
+  />
 
-          <div class="user-info">
-            <Avatar
-              :label="userInitial"
-              shape="circle"
-              class="user-avatar clickable"
-              @click="showProfileModal = true"
-            />
-            <div class="user-details">
-              <span class="user-name">{{ userName }}</span>
-              <span class="user-email">{{ userEmail }}</span>
-            </div>
-          </div>
+  <!-- User Profile Section (desktop) -->
+  <div class="navbar-profile">
+    <span v-if="isAdmin" class="admin-badge">
+      <i class="pi pi-shield"></i>
+      <span class="admin-badge-text">Admin</span>
+    </span>
 
-          <Button
-            icon="pi pi-sign-out"
-            severity="secondary"
-            text
-            rounded
-            @click="logout"
-            class="logout-btn"
-            v-tooltip="'Logout'"
-            :loading="isLoggingOut"
-          />
-        </div>
-
-        <!-- Hamburger Button (mobile only) -->
-        <button
-          class="hamburger-btn"
-          @click="toggleMobileMenu"
-          :aria-expanded="isMobileMenuOpen"
-          aria-label="Toggle navigation menu"
-        >
-          <span class="hamburger-icon" :class="{ 'is-open': isMobileMenuOpen }">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
+    <div class="user-info">
+      <Avatar
+        :label="userInitial"
+        shape="circle"
+        class="user-avatar clickable"
+        @click="showProfileModal = true"
+      />
+      <div class="user-details">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-email">{{ userEmail }}</span>
       </div>
+    </div>
+
+    <Button
+      icon="pi pi-sign-out"
+      severity="secondary"
+      text
+      rounded
+      @click="logout"
+      class="logout-btn"
+      v-tooltip="'Logout'"
+      :loading="isLoggingOut"
+    />
+  </div>
+
+  <!-- Hamburger Button (mobile only) -->
+  <button
+    class="hamburger-btn"
+    @click="toggleMobileMenu"
+    :aria-expanded="isMobileMenuOpen"
+    aria-label="Toggle navigation menu"
+  >
+    <span class="hamburger-icon" :class="{ 'is-open': isMobileMenuOpen }">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </button>
+</div>
     </div>
 
     <!-- Mobile Drawer -->
@@ -524,8 +532,8 @@ watch(isDarkMode, () => {
 <style scoped>
 /* ── Base navbar ─────────────────────────────────── */
 .navbar {
-  background: white;
-  border-bottom: 0.0625rem solid #e5e7eb;
+  background: var(--surface-0);
+  border-bottom: 0.0625rem solid var(--border-default);
   box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -561,7 +569,7 @@ watch(isDarkMode, () => {
 }
 
 .logo-link:hover {
-  background-color: #f9fafb;
+  background-color: var(--surface-overlay);
 }
 
 .navbar-logo {
@@ -572,14 +580,14 @@ watch(isDarkMode, () => {
 .brand-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.025em;
 }
 
 .brand-subtitle {
   font-size: 1rem;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-left: 0.25rem;
 }
 
@@ -607,7 +615,7 @@ watch(isDarkMode, () => {
   align-items: center;
   padding: 0.5rem 1.25rem;
   text-decoration: none;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-weight: 500;
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -615,12 +623,12 @@ watch(isDarkMode, () => {
 }
 
 .nav-link:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: var(--surface-overlay);
+  color: var(--text-heading);
 }
 
 .nav-link.active {
-  background-color: #eff6ff;
+  background-color: var(--surface-active);
   color: #1d4ed8;
   font-weight: 600;
 }
@@ -690,7 +698,7 @@ watch(isDarkMode, () => {
 }
 
 .user-info:hover {
-  background-color: #f9fafb;
+  background-color: var(--surface-overlay);
 }
 
 .user-avatar {
@@ -711,13 +719,13 @@ watch(isDarkMode, () => {
 .user-name {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-heading);
   line-height: 1.25;
 }
 
 .user-email {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.25;
 }
 
@@ -773,7 +781,7 @@ watch(isDarkMode, () => {
 }
 
 .hamburger-btn:hover {
-  background-color: #f3f4f6;
+  background-color: var(--surface-overlay);
 }
 
 .hamburger-icon {
@@ -806,10 +814,19 @@ watch(isDarkMode, () => {
   transform: translateY(-7px) rotate(-45deg);
 }
 
+/* ── Mobile avatar (visible only on small screens) ─ */
+.mobile-avatar {
+  display: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* ── Mobile drawer ───────────────────────────────── */
 .mobile-drawer {
-  background: white;
-  border-top: 1px solid #e5e7eb;
+  background: var(--surface-0);
+  border-top: 1px solid var(--border-default);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   padding: 0.75rem 1rem 1rem;
   display: flex;
@@ -820,7 +837,7 @@ watch(isDarkMode, () => {
 /* Mobile user section */
 .mobile-user-section {
   padding: 0.75rem;
-  background: #f9fafb;
+  background: var(--surface-section);
   border-radius: 10px;
   margin-bottom: 0.25rem;
 }
@@ -871,7 +888,7 @@ watch(isDarkMode, () => {
   width: 100%;
   padding: 0.75rem 1rem;
   text-decoration: none;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-weight: 500;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -879,12 +896,12 @@ watch(isDarkMode, () => {
 }
 
 .mobile-nav-link:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: var(--surface-overlay);
+  color: var(--text-heading);
 }
 
 .mobile-nav-link.active {
-  background-color: #eff6ff;
+  background-color: var(--surface-active);
   color: #1d4ed8;
   font-weight: 600;
 }
@@ -904,7 +921,7 @@ watch(isDarkMode, () => {
 .mobile-footer {
   margin-top: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-default);
 }
 
 .mobile-logout-btn {
@@ -916,7 +933,7 @@ watch(isDarkMode, () => {
   background: none;
   border: none;
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -979,7 +996,7 @@ watch(isDarkMode, () => {
   .admin-badge { padding: 0.35rem; }
 }
 
-/* Mobile: switch to hamburger layout */
+/* Mobile: switch to hamburger layout and show mobile avatar */
 @media (max-width: 768px) {
   .navbar { padding: 0 1rem; }
 
@@ -987,8 +1004,9 @@ watch(isDarkMode, () => {
   .navbar-menu { display: none; }
   .navbar-profile { display: none; }
 
-  /* Show hamburger */
+  /* Show hamburger and mobile avatar */
   .hamburger-btn { display: flex; }
+  .mobile-avatar { display: inline-flex; }
 }
 
 /* ── Profile Modal ────────────────────────────────── */
@@ -1004,7 +1022,7 @@ watch(isDarkMode, () => {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--surface-section);
   border-radius: 12px;
 }
 
@@ -1023,12 +1041,12 @@ watch(isDarkMode, () => {
 .profile-name {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-heading);
 }
 
 .profile-email {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .profile-role {
@@ -1048,7 +1066,7 @@ watch(isDarkMode, () => {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -1060,119 +1078,85 @@ watch(isDarkMode, () => {
 
 .theme-option label {
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .theme-option.system-theme {
   margin-top: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-default);
 }
 
-/* ── Dark Mode - Global page styles (excluding navbar) ─────────────── */
-:global(body.p-dark) .navbar {
-  background: white !important;
-  border-bottom-color: #e5e7eb !important;
+/* ── Fix: ToggleSwitch (light mode) ───────────────── */
+:global(body:not(.p-dark)) .p-inputSwitch .p-inputSwitch-slider {
+  background: #cbd5e1 !important;
+  box-shadow: none !important;
 }
 
-:global(body.p-dark) .navbar .brand-name {
-  color: #111827 !important;
+:global(body:not(.p-dark)) .p-inputSwitch.p-inputSwitch-checked {
+  background: #667eea !important;
 }
 
-:global(body.p-dark) .navbar .brand-subtitle {
-  color: #6b7280 !important;
+:global(body:not(.p-dark)) .p-inputSwitch.p-inputSwitch-checked .p-inputSwitch-slider {
+  background: #ffffff !important;
 }
 
-:global(body.p-dark) .navbar .nav-link {
-  color: #4b5563 !important;
+/* ── Fix: Checkbox checkmark always visible ───────── */
+:deep(.p-checkbox .p-checkbox-box.p-checkbox-checked .p-checkbox-icon) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: white !important;
+  display: inline-flex !important;
 }
 
-:global(body.p-dark) .navbar .user-name {
-  color: #111827 !important;
+:deep(.p-checkbox .p-checkbox-box.p-checkbox-checked) {
+  background-color: #667eea !important;
+  border-color: #667eea !important;
 }
 
-:global(body.p-dark) .navbar .user-email {
-  color: #6b7280 !important;
+/* Dark mode overrides for checkbox */
+:global(body.p-dark) :deep(.p-checkbox .p-checkbox-box.p-checkbox-checked) {
+  background-color: #60a5fa !important;
+  border-color: #60a5fa !important;
 }
 
-:global(body.p-dark) {
-  background-color: #111827;
-  color: #f9fafb;
+:global(body.p-dark) :deep(.p-checkbox .p-checkbox-box.p-checkbox-checked .p-checkbox-icon) {
+  color: white !important;
 }
 
-:global(body.p-dark) #__nuxt {
-  background-color: #111827;
-}
-
-:global(body.p-dark) main {
-  background-color: #111827 !important;
-}
-
-:global(body.p-dark) .p-dialog {
-  background: #1f2937;
-}
-
-:global(body.p-dark) .p-dialog-header {
-  background: #1f2937;
-  color: #f9fafb;
-}
-
-:global(body.p-dark) .p-dialog-content {
-  background: #1f2937;
-  color: #e5e7eb;
-}
-
-:global(body.p-dark) .p-checkbox-box {
-  background: #374151;
-  border-color: #4b5563;
-}
-
-:global(body.p-dark) .p-toggle-switch {
-  background: #374151;
-}
-
-:global(body.p-dark) .mobile-drawer {
-  background: #111827;
-  border-top-color: #374151;
-}
-
-:global(body.p-dark) .mobile-user-section {
-  background: #1f2937;
-}
-
+/* ── Dark Mode overrides for Navbar-specific styles ─ */
 :global(body.p-dark) .mobile-user-details .user-name {
-  color: #f9fafb;
+  color: var(--text-heading);
 }
 
 :global(body.p-dark) .mobile-user-details .user-email {
-  color: #d1d5db;
+  color: var(--text-secondary);
 }
 
 :global(body.p-dark) .mobile-nav-link {
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 :global(body.p-dark) .mobile-nav-link:hover {
-  background-color: #1f2937;
-  color: #f9fafb;
+  background-color: var(--surface-overlay);
+  color: var(--text-heading);
 }
 
 :global(body.p-dark) .mobile-nav-link.active {
-  background-color: #1e3a5f;
-  color: #93c5fd;
+  background-color: var(--surface-active);
 }
 
 :global(body.p-dark) .mobile-nav-link.active i {
-  color: #93c5fd;
+  color: #60a5fa;
 }
 
 :global(body.p-dark) .mobile-footer {
-  border-top-color: #374151;
+  border-top-color: var(--border-default);
 }
 
 :global(body.p-dark) .mobile-logout-btn {
-  color: #d1d5db;
+  color: var(--text-secondary);
 }
 
 :global(body.p-dark) .mobile-logout-btn:hover:not(:disabled) {
@@ -1181,31 +1165,31 @@ watch(isDarkMode, () => {
 }
 
 :global(body.p-dark) .profile-info {
-  background: #1f2937;
+  background: var(--surface-section);
 }
 
 :global(body.p-dark) .profile-name {
-  color: #f9fafb;
+  color: var(--text-heading);
 }
 
 :global(body.p-dark) .profile-email {
-  color: #d1d5db;
+  color: var(--text-secondary);
+}
+
+:global(body.p-dark) .profile-role {
+  color: #3b82f6;
 }
 
 :global(body.p-dark) .theme-settings h4 {
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 :global(body.p-dark) .theme-option label {
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 :global(body.p-dark) .theme-option.system-theme {
-  border-top-color: #374151;
-}
-
-:global(body.p-dark) .admin-badge {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  border-top-color: var(--border-default);
 }
 
 :global(body.p-dark) .cart-badge {
@@ -1213,137 +1197,8 @@ watch(isDarkMode, () => {
   border-color: #1f2937;
 }
 
-/* Global page elements in dark mode */
-:global(body.p-dark) .card,
-:global(body.p-dark) .surface-card {
-  background: #1f2937 !important;
-  color: #f9fafb;
-}
-
-:global(body.p-dark) .p-datatable .p-datatable-thead > tr > th {
-  background: #1f2937;
-  color: #e5e7eb;
-  border-color: #374151;
-}
-
-:global(body.p-dark) .p-datatable .p-datatable-tbody > tr {
-  background: #111827;
-  color: #e5e7eb;
-}
-
-:global(body.p-dark) .p-datatable .p-datatable-tbody > tr > td {
-  border-color: #374151;
-}
-
-:global(body.p-dark) .p-datatable .p-datatable-tbody > tr:hover {
-  background: #1f2937 !important;
-}
-
-:global(body.p-dark) .p-inputtext,
-:global(body.p-dark) .p-inputnumber-input,
-:global(body.p-dark) .p-textarea {
-  background: #374151;
-  color: #f9fafb;
-  border-color: #4b5563;
-}
-
-:global(body.p-dark) .p-inputtext:enabled:focus,
-:global(body.p-dark) .p-inputnumber-input:enabled:focus,
-:global(body.p-dark) .p-textarea:enabled:focus {
-  border-color: #60a5fa;
-}
-
-:global(body.p-dark) .p-dropdown {
-  background: #374151;
-  border-color: #4b5563;
-}
-
-:global(body.p-dark) .p-dropdown-label {
-  color: #f9fafb;
-}
-
-:global(body.p-dark) .p-dropdown-panel {
-  background: #1f2937;
-  border-color: #374151;
-}
-
-:global(body.p-dark) .p-dropdown-items .p-dropdown-item {
-  color: #e5e7eb;
-}
-
-:global(body.p-dark) .p-dropdown-items .p-dropdown-item:hover {
-  background: #374151;
-}
-
-:global(body.p-dark) .p-button {
-  background: #3b82f6;
-  border-color: #3b82f6;
-}
-
-:global(body.p-dark) .p-button.p-button-secondary {
-  background: #4b5563;
-  border-color: #4b5563;
-  color: #f9fafb;
-}
-
-:global(body.p-dark) .p-button.p-button-text {
-  color: #60a5fa;
-}
-
-:global(body.p-dark) .p-tag {
-  background: #374151;
-  color: #e5e7eb;
-}
-
-:global(body.p-dark) .p-badge {
-  background: #374151;
-  color: #e5e7eb;
-}
-
-:global(body.p-dark) .p-toast {
-  background: #1f2937;
-}
-
-:global(body.p-dark) .p-toast-message {
-  background: #1f2937;
-  color: #f9fafb;
-}
-
-:global(body.p-dark) .p-toast-message-success {
-  background: #064e3b;
-  color: #d1fae5;
-}
-
-:global(body.p-dark) .p-toast-message-error {
-  background: #7f1d1d;
-  color: #fecaca;
-}
-
-:global(body.p-dark) .p-toast-message-info {
-  background: #1e3a5f;
-  color: #bfdbfe;
-}
-
-:global(body.p-dark) .p-progressbar {
-  background: #374151;
-}
-
-:global(body.p-dark) .p-progressbar-value {
-  background: #60a5fa;
-}
-
-:global(body.p-dark) .footer {
-  background: #111827;
-  color: #9ca3af;
-  border-top-color: #374151;
-}
-
-:global(body.p-dark) .login-page {
-  background: #111827;
-}
-
-:global(body.p-dark) .login-card {
-  background: #1f2937;
-  color: #f9fafb;
+/* Mobile avatar dark mode */
+:global(body.p-dark) .mobile-avatar {
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
 }
 </style>

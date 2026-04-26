@@ -569,7 +569,7 @@ function toggleRequestExpansion(id: string) {
 }
 
 .main-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-container);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -584,7 +584,7 @@ function toggleRequestExpansion(id: string) {
 .header-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -599,7 +599,7 @@ function toggleRequestExpansion(id: string) {
 }
 
 .page-subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1.1rem;
 }
@@ -611,6 +611,7 @@ function toggleRequestExpansion(id: string) {
   border: none;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--surface-0);
 }
 
 .action-bar {
@@ -633,9 +634,11 @@ function toggleRequestExpansion(id: string) {
 .search-input :deep(.p-inputtext) {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   transition: all 0.2s;
+  background: var(--surface-0);
+  color: var(--text-primary);
 }
 
 .search-input :deep(.p-inputtext:focus) {
@@ -645,7 +648,7 @@ function toggleRequestExpansion(id: string) {
 
 .search-input :deep(.pi-search) {
   left: 1rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .filter-group {
@@ -661,8 +664,9 @@ function toggleRequestExpansion(id: string) {
 
 .class-filter-dropdown :deep(.p-dropdown) {
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   transition: all 0.2s;
+  background: var(--surface-0);
 }
 
 .class-filter-dropdown :deep(.p-dropdown:not(.p-disabled):hover) {
@@ -676,6 +680,7 @@ function toggleRequestExpansion(id: string) {
 
 .class-filter-dropdown :deep(.p-dropdown-label) {
   padding: 0.75rem 1rem;
+  color: var(--text-primary);
 }
 
 .filter-value {
@@ -690,7 +695,7 @@ function toggleRequestExpansion(id: string) {
 }
 
 .filter-value span {
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .filter-option {
@@ -729,9 +734,9 @@ function toggleRequestExpansion(id: string) {
 }
 
 .refresh-btn {
-  background: white;
-  color: #333;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 /* Main Content Area */
@@ -751,34 +756,37 @@ function toggleRequestExpansion(id: string) {
   border: none;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--surface-0);
 }
 
 /* Custom Table Styles */
 .custom-table :deep(.p-datatable-thead > tr > th) {
-  background: #f8f9fa;
-  color: #333;
+  background: var(--surface-section);
+  color: var(--text-primary);
   font-weight: 600;
   padding: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr) {
   transition: background-color 0.2s;
   cursor: pointer;
+  background: var(--surface-0);
+  color: var(--text-primary);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr:hover) {
-  background: #f8f9fa;
+  background: var(--surface-overlay);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr.p-highlight) {
   background: rgba(102, 126, 234, 0.1);
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr > td) {
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-default);
 }
 
 /* User Info */
@@ -796,7 +804,7 @@ function toggleRequestExpansion(id: string) {
 
 .user-email {
   font-weight: 500;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 /* Badges */
@@ -810,12 +818,17 @@ function toggleRequestExpansion(id: string) {
   padding: 0.25rem 0.75rem;
 }
 
+.you-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+}
+
 /* Date Info */
 .date-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -901,6 +914,7 @@ function toggleRequestExpansion(id: string) {
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  background: var(--surface-0);
 }
 
 .sidebar-header {
@@ -938,7 +952,7 @@ function toggleRequestExpansion(id: string) {
 }
 
 .stat-row:hover {
-  background: #f8f9fa;
+  background: var(--surface-overlay);
 }
 
 .stat-row.active-filter {
@@ -963,7 +977,7 @@ function toggleRequestExpansion(id: string) {
 }
 
 .stat-label {
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
@@ -975,14 +989,14 @@ function toggleRequestExpansion(id: string) {
 
 .stat-number {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   min-width: 2rem;
   text-align: right;
 }
 
 .stat-percentage {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   min-width: 3rem;
   text-align: right;
 }
@@ -997,7 +1011,7 @@ function toggleRequestExpansion(id: string) {
 
 .total-label {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 1rem;
 }
 
@@ -1012,7 +1026,7 @@ function toggleRequestExpansion(id: string) {
 .filter-indicator {
   margin-top: 1rem;
   padding: 0.75rem;
-  background: #f8fafc;
+  background: var(--surface-section);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -1027,13 +1041,13 @@ function toggleRequestExpansion(id: string) {
 
 .filter-indicator span {
   flex: 1;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .clear-filter-btn {
   width: 24px;
   height: 24px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .clear-filter-btn:hover {
@@ -1045,10 +1059,16 @@ function toggleRequestExpansion(id: string) {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.85rem;
   justify-content: center;
   padding: 1rem;
+}
+
+/* Divider */
+.divider {
+  margin: 1rem 0;
+  border-color: var(--border-default);
 }
 
 /* Empty State */
@@ -1071,23 +1091,17 @@ function toggleRequestExpansion(id: string) {
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1rem;
 }
 
-/* Divider */
-.divider {
-  margin: 1rem 0;
-  border-color: #e5e7eb;
-}
-
-/* Request History Dialog Styles (copied from original) */
+/* Request History Dialog Styles */
 .requests-history-dialog :deep(.p-dialog-content) {
   padding: 0;
   max-height: 65vh;
@@ -1102,17 +1116,17 @@ function toggleRequestExpansion(id: string) {
   max-height: 65vh;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-color: var(--text-muted) var(--surface-overlay);
 }
 
 .rh-cards-list::-webkit-scrollbar { width: 6px; }
-.rh-cards-list::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-.rh-cards-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.rh-cards-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.rh-cards-list::-webkit-scrollbar-track { background: var(--surface-overlay); border-radius: 4px; }
+.rh-cards-list::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+.rh-cards-list::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
 .rh-card {
   display: flex;
-  background: white;
+  background: var(--surface-0);
   border-radius: 14px;
   overflow: hidden;
   border: 2px solid transparent;
@@ -1130,14 +1144,14 @@ function toggleRequestExpansion(id: string) {
 
 .rh-card--expanded {
   border-color: #667eea;
-  background: #f8fafc;
+  background: var(--surface-section);
 }
 
 .rh-image-container {
   position: relative;
   width: 120px;
   flex-shrink: 0;
-  background: #f8fafc;
+  background: var(--surface-section);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1191,7 +1205,7 @@ function toggleRequestExpansion(id: string) {
 .rh-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -1199,7 +1213,7 @@ function toggleRequestExpansion(id: string) {
 }
 
 .rh-chevron {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.85rem;
   flex-shrink: 0;
   transition: transform 0.2s;
@@ -1216,7 +1230,7 @@ function toggleRequestExpansion(id: string) {
   align-items: center;
   gap: 0.45rem;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .rh-detail-icon {
@@ -1228,18 +1242,18 @@ function toggleRequestExpansion(id: string) {
 .rh-detail-label {
   font-weight: 500;
   min-width: 62px;
-  color: #475569;
+  color: var(--text-primary);
 }
 
 .rh-detail-value {
-  color: #334155;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .rh-expanded {
   margin-top: 0.875rem;
   padding-top: 0.875rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-default);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -1257,19 +1271,19 @@ function toggleRequestExpansion(id: string) {
   align-items: flex-start;
   gap: 0.75rem;
   font-size: 0.82rem;
-  background: #f1f5f9;
+  background: var(--surface-section);
   padding: 0.35rem 0.6rem;
   border-radius: 6px;
 }
 
 .rh-detail-row .rh-detail-label {
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .rh-detail-row .rh-detail-value {
-  color: #334155;
+  color: var(--text-primary);
   text-align: right;
   word-break: break-all;
 }
@@ -1277,7 +1291,7 @@ function toggleRequestExpansion(id: string) {
 .rh-mono {
   font-family: monospace;
   font-size: 0.72rem;
-  background: white;
+  background: var(--surface-0);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
 }
@@ -1290,7 +1304,7 @@ function toggleRequestExpansion(id: string) {
   justify-content: center;
   padding: 3rem 2rem;
   gap: 1rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .rh-empty-icon {
@@ -1308,7 +1322,7 @@ function toggleRequestExpansion(id: string) {
 
 .rh-count {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -1415,9 +1429,5 @@ function toggleRequestExpansion(id: string) {
   .empty-state h3 {
     font-size: 1.25rem;
   }
-}
-.you-badge {
-  font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
 }
 </style>

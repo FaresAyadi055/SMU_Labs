@@ -361,7 +361,9 @@ const getPurchaseSeverity = (needed: number) => {
   return 'success'
 }
 </script>
+
 <style scoped>
+/* Light mode (default) */
 .purchase-list-view {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -369,10 +371,9 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 .main-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-container);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
   padding: 1.5rem;
 }
 
@@ -384,7 +385,7 @@ const getPurchaseSeverity = (needed: number) => {
 .header-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -399,21 +400,18 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 .page-subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1.1rem;
 }
 
 /* Toolbar Card */
-.search-wrapper :deep(.p-inputicon) {
-  color: #667eea !important;
-}
-
 .toolbar-card {
   margin-bottom: 2rem;
   padding: 1.25rem;
   border: none;
   border-radius: 12px;
+  background: var(--surface-0);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -437,9 +435,11 @@ const getPurchaseSeverity = (needed: number) => {
 .search-input :deep(.p-inputtext) {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   transition: all 0.2s;
+  background: var(--surface-0);
+  color: var(--text-primary);
 }
 
 .search-input :deep(.p-inputtext:focus) {
@@ -449,7 +449,7 @@ const getPurchaseSeverity = (needed: number) => {
 
 .search-input :deep(.pi-search) {
   left: 1rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .action-buttons-group {
@@ -482,9 +482,9 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 .refresh-btn {
-  background: white;
-  color: #333;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 .export-btn {
@@ -501,7 +501,7 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface-0);
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
@@ -552,12 +552,12 @@ const getPurchaseSeverity = (needed: number) => {
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-heading);
   line-height: 1.2;
 }
 
 .stat-label {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -567,16 +567,17 @@ const getPurchaseSeverity = (needed: number) => {
   padding: 1.5rem;
   border: none;
   border-radius: 16px;
+  background: var(--surface-0);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom Table Styles */
 .custom-table :deep(.p-datatable-thead > tr > th) {
-  background: #f8f9fa;
-  color: #333;
+  background: var(--surface-section);
+  color: var(--text-primary);
   font-weight: 600;
   padding: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr) {
@@ -585,12 +586,12 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 .custom-table :deep(.p-datatable-tbody > tr:hover) {
-  background: #f8f9fa;
+  background: var(--surface-hover);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr > td) {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
 }
 
@@ -598,13 +599,13 @@ const getPurchaseSeverity = (needed: number) => {
 .image-container {
   width: 70px;
   height: 70px;
-  background: #f8f9fa;
+  background: var(--surface-ground);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
 }
 
 .product-image {
@@ -624,7 +625,7 @@ const getPurchaseSeverity = (needed: number) => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: #999;
+  color: var(--text-muted);
   font-size: 2rem;
 }
 
@@ -641,14 +642,14 @@ const getPurchaseSeverity = (needed: number) => {
 
 .component-name {
   font-weight: 500;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .component-id {
   font-family: monospace;
   font-size: 0.75rem;
-  color: #94a3b8;
-  background: #f1f5f9;
+  color: var(--text-muted);
+  background: var(--surface-overlay);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   width: fit-content;
@@ -661,20 +662,16 @@ const getPurchaseSeverity = (needed: number) => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--text-secondary);
   line-height: 1.4;
   max-width: 300px;
 }
 
 /* Badge Styles */
-.location-badge {
-  font-size: 0.85rem;
-  padding: 0.25rem 0.75rem;
-}
-
 .location-badge :deep(.p-badge) {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .stock-indicator,
@@ -686,33 +683,15 @@ const getPurchaseSeverity = (needed: number) => {
   flex-wrap: wrap;
 }
 
-.stock-badge,
-.requested-badge,
-.purchase-badge {
-  font-size: 0.9rem !important;
-  padding: 0.35rem 1rem !important;
-  min-width: 60px;
-  text-align: center;
-  font-weight: 600;
-}
-
 .stock-warning {
   font-size: 0.75rem;
-  color: #ef4444;
+  color: var(--p-red-500);
   font-weight: 500;
-}
-
-.pending-count {
-  font-size: 0.75rem;
-  color: #64748b;
-  background: #f1f5f9;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
 }
 
 .purchase-urgent {
   font-size: 0.75rem;
-  color: #ef4444;
+  color: var(--p-red-500);
   font-weight: 500;
 }
 
@@ -728,6 +707,7 @@ const getPurchaseSeverity = (needed: number) => {
   min-width: 2.5rem;
   height: 2.5rem;
   transition: all 0.2s;
+  color: var(--text-primary);
 }
 
 .custom-table :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
@@ -743,6 +723,7 @@ const getPurchaseSeverity = (needed: number) => {
   min-width: 2.5rem;
   height: 2.5rem;
   transition: all 0.2s;
+  color: var(--text-primary);
 }
 
 .custom-table :deep(.p-paginator .p-paginator-first:hover),
@@ -755,7 +736,8 @@ const getPurchaseSeverity = (needed: number) => {
 
 .custom-table :deep(.p-paginator .p-dropdown) {
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: var(--border-default);
+  background: var(--surface-0);
 }
 
 .custom-table :deep(.p-paginator .p-dropdown:hover) {
@@ -782,19 +764,19 @@ const getPurchaseSeverity = (needed: number) => {
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1rem;
 }
 
 /* Loading State */
 .custom-table :deep(.p-datatable-loading-overlay) {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-overlay);
   backdrop-filter: blur(4px);
 }
 
@@ -810,17 +792,67 @@ const getPurchaseSeverity = (needed: number) => {
 }
 
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--surface-ground);
   border-radius: 4px;
 }
 
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-default);
   border-radius: 4px;
 }
 
 .custom-table :deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-muted);
+}
+
+/* Dark mode overrides */
+body.p-dark .purchase-list-view {
+  background: linear-gradient(135deg, #1e1b2e 0%, #2d1b3a 100%);
+}
+
+body.p-dark .main-container {
+  background: var(--surface-container);
+}
+
+body.p-dark .header-section {
+  background: var(--surface-0);
+}
+
+body.p-dark .toolbar-card {
+  background: var(--surface-0);
+}
+
+body.p-dark .stat-card {
+  background: var(--surface-0);
+}
+
+body.p-dark .table-card {
+  background: var(--surface-0);
+}
+
+body.p-dark .image-container {
+  background: var(--surface-ground);
+  border-color: var(--border-default);
+}
+
+body.p-dark .component-id {
+  background: var(--surface-overlay);
+}
+
+body.p-dark .location-badge :deep(.p-badge) {
+  background: var(--surface-card);
+}
+
+body.p-dark .search-input :deep(.p-inputtext) {
+  background: var(--surface-0);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+body.p-dark .refresh-btn {
+  background: var(--surface-0);
+  border-color: var(--border-default);
+  color: var(--text-primary);
 }
 
 /* Responsive Design */
@@ -955,4 +987,4 @@ const getPurchaseSeverity = (needed: number) => {
     max-width: 120px;
   }
 }
-</style>  
+</style>

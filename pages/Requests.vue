@@ -42,7 +42,7 @@
               </div>
               <div class="user-list">
                 <template v-if="sortedPendingUsers && sortedPendingUsers.length > 0">
-                  <button
+                  <div
                     v-for="u in sortedPendingUsers"
                     :key="u.id"
                     type="button"
@@ -55,7 +55,7 @@
                       <span class="user-date">{{formatDate(u.oldestPendingAt)}}</span>
                     </div>
                     <Badge :value="u.totalPending" severity="warning" class="pending-badge" />
-                  </button>
+                  </div>
                 </template>
                 <p v-else-if="!loading" class="empty-list">
                   <i class="pi pi-inbox" style="margin-right: 0.5rem;"></i>
@@ -97,7 +97,6 @@
               <Button
                 label="Confirm Cart"
                 icon="pi pi-check"
-                severity="success"
                 :loading="submitting"
                 :disabled="!hasDraftChanges"
                 class="confirm-button"
@@ -220,7 +219,6 @@
                           <Button
                             label="Approve"
                             icon="pi pi-check"
-                            severity="success"
                             size="small"
                             class="action-btn approve-btn"
                             :class="{ 'selected-action': getDecision(data.id) === 'approve' }"
@@ -230,7 +228,7 @@
                           <Button
                             label="Decline"
                             icon="pi pi-times"
-                            severity="secondary"
+                            severity="danger"
                             size="small"
                             class="action-btn decline-btn"
                             :class="{ 'selected-action': getDecision(data.id) === 'decline' }"
@@ -583,7 +581,7 @@ function cancelChanges() {
 }
 
 .main-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-container);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -598,7 +596,7 @@ function cancelChanges() {
 .header-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: white;
+  background: var(--surface-0);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -625,7 +623,7 @@ function cancelChanges() {
 }
 
 .page-subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
   font-size: 1.1rem;
 }
@@ -664,7 +662,7 @@ function cancelChanges() {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -697,9 +695,10 @@ function cancelChanges() {
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background: #fff;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+  background-color: transparent !important;
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -708,12 +707,15 @@ function cancelChanges() {
 
 .user-row:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%) !important;
+  background-color: transparent !important;
 }
 
 .user-row.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background-color: transparent !important;
   border-color: transparent;
 }
 
@@ -731,7 +733,7 @@ function cancelChanges() {
 .user-email {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -740,7 +742,7 @@ function cancelChanges() {
 
 .user-date {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .pending-badge {
@@ -750,12 +752,12 @@ function cancelChanges() {
 
 .empty-list,
 .loading-state {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   margin: 1rem 0 0 0;
   text-align: center;
   padding: 2rem;
-  background: #f9fafb;
+  background: var(--surface-section);
   border-radius: 12px;
 }
 
@@ -791,7 +793,7 @@ function cancelChanges() {
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .cart-title-section {
@@ -804,7 +806,7 @@ function cancelChanges() {
 .cart-header h2 {
   margin: 0;
   font-size: 1.3rem;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -824,8 +826,8 @@ function cancelChanges() {
 }
 
 .confirm-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: transform 0.2s;
@@ -838,11 +840,11 @@ function cancelChanges() {
 
 /* Table Styles */
 .custom-table :deep(.p-datatable-thead > tr > th) {
-  background: #f8f9fa;
-  color: #333;
+  background: var(--surface-section);
+  color: var(--text-primary);
   font-weight: 600;
   padding: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-default);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr) {
@@ -850,19 +852,19 @@ function cancelChanges() {
 }
 
 .custom-table :deep(.p-datatable-tbody > tr:hover) {
-  background: #f8f9fa;
+  background: var(--surface-overlay);
 }
 
 .custom-table :deep(.p-datatable-tbody > tr > td) {
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-default);
 }
 
 /* Image Styles */
 .image-container {
   width: 48px;
   height: 48px;
-  background: #f8f9fa;
+  background: var(--surface-section);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -882,7 +884,7 @@ function cancelChanges() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: var(--text-muted);
   font-size: 1.2rem;
 }
 
@@ -895,12 +897,12 @@ function cancelChanges() {
 
 .component-model {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .component-manufacturer {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* Quantity Badges - Consolidated */
@@ -952,7 +954,7 @@ function cancelChanges() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f8f9fa;
+  background: var(--surface-section);
   padding: 0.5rem;
   border-radius: 8px;
   width: fit-content;
@@ -960,7 +962,7 @@ function cancelChanges() {
 
 .qty-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   min-width: 30px;
 }
@@ -973,7 +975,7 @@ function cancelChanges() {
   width: 60px !important;
   text-align: center;
   font-weight: 600;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 0.5rem;
 }
@@ -990,13 +992,13 @@ function cancelChanges() {
 }
 
 .qty-btn {
-  background: white !important;
-  border: 1px solid #e5e7eb !important;
-  color: #333 !important;
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
 }
 
 .qty-btn:hover {
-  background: #f8f9fa !important;
+  background: var(--surface-overlay) !important;
   border-color: #667eea !important;
 }
 
@@ -1011,8 +1013,8 @@ function cancelChanges() {
 }
 
 .action-btn.approve-btn {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-  border: none;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  border: none !important;
 }
 
 .action-btn.approve-btn:hover:not(:disabled) {
@@ -1021,9 +1023,9 @@ function cancelChanges() {
 }
 
 .action-btn.decline-btn {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  border: none;
-  color: white;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: none !important;
+  color: white !important;
 }
 
 .action-btn.decline-btn:hover:not(:disabled) {
@@ -1045,7 +1047,7 @@ function cancelChanges() {
 .empty-state {
   text-align: center;
   padding: 4rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .empty-state-content {
@@ -1062,12 +1064,12 @@ function cancelChanges() {
 
 .empty-state h3 {
   font-size: 1.3rem;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #999;
+  color: var(--text-muted);
   font-size: 1rem;
 }
 
@@ -1147,44 +1149,6 @@ function cancelChanges() {
   .action-btn {
     flex: 1;
   }
-}
-
-.cart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.cart-title-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.action-buttons-container {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.cancel-button {
-  transition: all 0.2s ease;
-}
-
-.cancel-button:hover {
-  background-color: #fee2e2 !important;
-  border-color: #ef4444 !important;
-  color: #ef4444 !important;
-}
-
-.confirm-button {
-  min-width: 140px;
-}
-
-.cancel-button {
-  animation: slideIn 0.2s ease;
 }
 
 @keyframes slideIn {
